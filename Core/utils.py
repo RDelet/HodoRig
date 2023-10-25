@@ -1,9 +1,43 @@
 from typing import Union
 
+from maya import cmds
 from maya.api import OpenMaya
 
+from HodoRig.Core.decorator import QDDisableRefresh
 
+
+_dagMod = OpenMaya.MDagModifier()
+_dgMod = OpenMaya.MDGModifier()
 _msl = OpenMaya.MSelectionList()
+_nullObj = OpenMaya.MObject.kNullObj
+
+kDagNodeType = cmds.nodeType('dagNode', derived=True, isTypeName=True)
+
+node_caches: list = []
+
+
+def create(node_type: str, name: str = None, restriction: int = 0,
+           parent: Union[str, OpenMaya.MObject] = _nullObj) -> OpenMaya.MObject:
+    
+    if isinstance(parent, str):
+        parent = get_object(parent)
+
+    is_dag = node_type in kDagNodeType
+    if not is_dag and not is_valid(parent):
+        raise RuntimeError("Impossible to set parent on dependency node !")
+
+    modifier = _dagMod if node_type in kDagNodeType else _dgMod
+    if node_type == "objectSet":
+        new_node = OpenMaya.MFnSet().create(OpenMaya.MSelectionList(), restriction)
+    else:
+        new_node = modifier.createNode(node_type, parent)
+    modifier.renameNode(new_node, name if name else f"{node_type}1")
+    modifier.doIt()
+
+    if node_caches:
+        [cache.add(new_node) for cache in node_caches]
+
+    return new_node
 
 
 def check_object(obj: Union[str, OpenMaya.MObject]) -> OpenMaya.MObject:
@@ -23,6 +57,16 @@ def get_object(name: str) -> OpenMaya.MObject:
         return _msl.getDependNode(0)
     except RuntimeError:
         raise RuntimeError(f"Node {name} does not exist !")
+
+
+def get_handle(node: Union[str, OpenMaya.MObject, OpenMaya.MDagPath]) -> OpenMaya.MObjectHandle:
+    """!@Brief Get MObjectHandle of current node."""
+    if isinstance(node, str):
+        node = get_object(node)
+    elif isinstance(node, OpenMaya.MDagPath):
+        node = node.node()
+
+    return OpenMaya.MObjectHandle(node)
 
 
 def name(obj: Union[OpenMaya.MObject, OpenMaya.MDagPath, OpenMaya.MPlug],
@@ -48,6 +92,11 @@ def name(obj: Union[OpenMaya.MObject, OpenMaya.MDagPath, OpenMaya.MPlug],
         name = name.split(':')[-1]
     
     return name
+
+
+def node_hash(node: Union[str, OpenMaya.MObject, OpenMaya.MDagPath]) -> str:
+    handle = get_handle(node)
+    return "%x" % handle.hashCode()
 
 
 def rename(node: Union[str, OpenMaya.MObject], new_name: str, force: bool = False):

@@ -9,7 +9,7 @@ from HodoRig.Builders.builder import Builder
 class Node(Builder):
 
     def __init__(self, obj: Union[str, OpenMaya.MObject] = None):
-
+        super().__init__()
         self._object = utils.check_object(obj) if obj else None
         self._parent = None
         self._children = []
@@ -29,10 +29,14 @@ class Node(Builder):
     @property
     def name(self, full: bool = True, namespace: bool = True) -> str:
         return utils.name(self.object, full=full, namespace=namespace)
+    
+    @property
+    def hash(self) -> str:
+        return utils.node_hash(self.object)
 
     @classmethod
     def create(cls, *args, **kwargs):
-        return cls(cmds.createNode(*args, **kwargs))
+        return cls(utils.create(*args, **kwargs))
 
     def is_valid(self) -> bool:
         if not self._object:
