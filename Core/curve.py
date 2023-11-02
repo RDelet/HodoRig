@@ -20,18 +20,14 @@ def shape_to_dict(node: Union[str, OpenMaya.MObject], normalize: bool = True) ->
 
     mfn = OpenMaya.MFnNurbsCurve(node)
 
-    points = OpenMaya.MPointArray()
-    mfn.getCVs(points, OpenMaya.MSpace.kObject)
+    points = mfn.cvPositions(OpenMaya.MSpace.kObject)
     point.normalize(points)
-
-    knots = OpenMaya.MDoubleArray()
-    mfn.getKnots(knots)
 
     data[constants.kType] = kNodeType
     data[constants.kPoints] = point.array_to_list(points)
-    data[constants.kKnots] = [knots[i] for i in range(len(knots))]
-    data[constants.kForm] = mfn.form()
-    data[constants.kDegrees] = mfn.degree()
+    data[constants.kKnots] = list(mfn.knots())
+    data[constants.kForm] = mfn.form
+    data[constants.kDegrees] = mfn.degree
 
     return data
 

@@ -1,6 +1,6 @@
 from typing import Union
 
-from maya import OpenMaya
+from maya.api import OpenMaya
 
 from HodoRig.Core import constants
 from HodoRig.Core.logger import log
@@ -31,6 +31,7 @@ class Manip(Node):
         self._object = manip.object
 
         self._shape = Shape.load(shape, manip.name)
+        self._shape.parent = manip.object
         self._shape.build(shape_dir=shape_dir, scale=scale)
     
     def _post_build(self, *args, **kwargs):

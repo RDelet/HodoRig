@@ -10,3 +10,8 @@ def find_control(control_name: str, widget_cls: QtWidgets.QWidget = QtWidgets.QW
         return
     
     return wrapInstance(int(ptr), widget_cls)
+
+
+def main_window():
+    ptr = OpenMayaUI.MQtUtil.mainWindow()
+    return wrapInstance(int(ptr), QtWidgets.QWidget)

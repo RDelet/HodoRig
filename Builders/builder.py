@@ -71,18 +71,9 @@ class Builder(object):
         log.debug(traceback.format_exc())
 
     @classmethod
-    def build_path(cls, file_name: str) -> str:
-        file_name = f"{file_name}.{cls.kFileExtension}"
-        file_path = os.path.join(cls.kFiledirectory, file_name)
-        if not os.path.exists(file_path):
-            raise RuntimeError(f"File {file_name} does not exists in directory {cls.kFiledirectory} !")
-        
-        return file_path
-
-    @classmethod
-    def load(cls, file_name: str, *args, **kwargs):
+    def load(cls, file_path: str, *args, **kwargs):
         new_cls = cls(*args, **kwargs)
-        new_cls._file_path = new_cls.build_path(file_name)
+        new_cls._file_path = file_path
         new_cls._data = file.read_json(new_cls._file_path)
 
         return new_cls

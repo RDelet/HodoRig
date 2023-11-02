@@ -1,3 +1,4 @@
+import os
 from typing import Union
 
 from maya.api import OpenMaya
@@ -21,10 +22,18 @@ class Shape(Builder):
     kFiledirectory = constants.kShapeDir
     kFileExtension = constants.kShapeExtension
 
-    def __init__(self, parent: Union[str, OpenMaya.MObject]):
+    def __init__(self, parent: Union[str, OpenMaya.MObject] = None):
         super().__init__()
 
-        self._parent = utils.check_object(parent)
+        self._parent = utils.check_object(parent) if parent else None
+    
+    @property
+    def parent(self) -> OpenMaya.MObject:
+        return self._parent
+    
+    @parent.setter
+    def parent(self, value: OpenMaya.MObject):
+        self._parent = utils.check_object(value)
 
     def get_from_node(self, node: Union[str, OpenMaya.MObject], normalize: bool = True):
         """!@Brief Get all shapes from node."""
@@ -82,3 +91,12 @@ class Shape(Builder):
 
     def _post_build(self, *args, **kwargs):
         log.debug(f"{self.__class__.__name__} post build: {utils.name(self._parent)} !")
+    
+    @classmethod
+    def load(cls, file_name: str, *args, **kwargs):
+        file_path = os.path.join(constants.kShapeDir, f"{file_name}.{constants.kShapeExtension}")
+        return super().load(file_path)
+
+    def dump(self, file_name: str):
+        output_path = os.path.join(constants.kShapeDir, f"{file_name}.{constants.kShapeExtension}")
+        super().dump(output_path)

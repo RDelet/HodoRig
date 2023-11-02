@@ -23,8 +23,7 @@ def shape_to_dict(node: Union[str, OpenMaya.MObject], normalize: bool = True) ->
     mfn = OpenMaya.MFnMesh(node)
     mit = OpenMaya.MItMeshPolygon(node)
 
-    points = OpenMaya.MPointArray()
-    mfn.getPoints(points, OpenMaya.MSpace.kObject)
+    points = mfn.getPoints(OpenMaya.MSpace.kObject)
     point.normalize(points)
 
     poly_counts = list()

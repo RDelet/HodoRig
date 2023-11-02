@@ -8,11 +8,7 @@ def array_to_list(points: Union[OpenMaya.MVectorArray, OpenMaya.MPointArray]) ->
 
 
 def normalize(points: Union[OpenMaya.MVectorArray, OpenMaya.MPointArray]) -> list:
-
-    if isinstance(points, (OpenMaya.MVectorArray, OpenMaya.MPointArray)):
-        points = array_to_list(points)
     f_max = max([abs(item) for sublist in points for item in sublist])
-
     for i in range(len(points)):
         points[i] /= f_max
 

@@ -1,6 +1,7 @@
 from typing import List, Optional, Union
 
-from maya import cmds, OpenMaya
+from maya import cmds
+from maya.api import OpenMaya
 
 from HodoRig.Core import utils
 from HodoRig.Builders.builder import Builder
