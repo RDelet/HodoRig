@@ -3,7 +3,7 @@ from typing import Union
 from maya import cmds
 from maya.api import OpenMaya
 
-from HodoRig.Core.decorator import QDDisableRefresh
+from HodoRig.Core import apiUndo
 
 
 _dagMod = OpenMaya.MDagModifier()
@@ -33,6 +33,8 @@ def create(node_type: str, name: str = None, restriction: int = 0,
         new_node = modifier.createNode(node_type, parent)
     modifier.renameNode(new_node, name if name else f"{node_type}1")
     modifier.doIt()
+
+    apiUndo.commit(modifier.undoIt, modifier.doIt)
 
     if node_caches:
         [cache.add(new_node) for cache in node_caches]

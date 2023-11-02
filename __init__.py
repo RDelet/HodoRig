@@ -3,8 +3,11 @@ import traceback
 from PySide2 import QtWidgets
 
 from HodoRig.Core.logger import log
+from HodoRig.Core import apiUndo
 from HodoRig.Ui.mayaSyntaxHighLigther import MayaSyntaxHighLigther
 
+
+apiUndo.install()
 
 try:
     app = QtWidgets.QApplication.instance()
