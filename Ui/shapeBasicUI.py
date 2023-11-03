@@ -78,7 +78,7 @@ class ShapeBasicUI(QtWidgets.QDialog):
 
         new_shape = Shape()
         new_shape.get_from_node(selected[0])
-        new_shape.dump("Hodor")
+        new_shape.dump(file_name)
     
     def build_manip(self):
         manip_name = self._name.text()
