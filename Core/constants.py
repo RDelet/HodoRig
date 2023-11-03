@@ -7,6 +7,7 @@ kTemplateExtension = "hrt"
 
 kShapeDir = os.path.normpath(os.path.join(kModuleDir, "../Shapes"))
 kShapeExtension = "json"
+kIconExtension = "png"
 
 # Generic
 kMesh = "mesh"
