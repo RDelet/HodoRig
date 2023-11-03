@@ -2,12 +2,24 @@ import os
 
 from maya import cmds
 
-from PySide2 import QtWidgets
+from PySide2 import QtWidgets, QtGui
 
 from HodoRig.Ui import utils
 from HodoRig.Core import constants
 from HodoRig.Builders.shape import Shape
 from HodoRig.Nodes.manip import Manip
+
+
+class ShapeView(QtWidgets.QTreeView):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+    
+    def _update_content(self):
+        self.clear()
+        for shape in self._get_shape():
+            item = QtGui.QStandardItem(shape)
+            self.model.appendRow(item)
 
 
 class ShapeBasicUI(QtWidgets.QDialog):
@@ -39,6 +51,9 @@ class ShapeBasicUI(QtWidgets.QDialog):
         dump_selected = QtWidgets.QPushButton("Save Shape", self)
         self._layout.addWidget(dump_selected)
         dump_selected.clicked.connect(self.dump_shape)
+
+        # shape_view = ShapeView()
+        # self._layout.addWidget(shape_view)
     
     def _update_content(self):
         self._shapes.clear()
