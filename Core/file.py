@@ -6,8 +6,8 @@ from HodoRig.Core.logger import log
 
 
 def build_directory(path: str):
-    if os.path.isfile(path):
-        path, _ = os.path.split(path)
+    dir, file = os.path.split(path)
+    path = dir if '.' in file else path
 
     try:
         if not os.path.exists(path):
@@ -18,12 +18,8 @@ def build_directory(path: str):
 
 
 def dump_json(data, path: str):
-    if not os.path.isfile(path):
-        raise RuntimeError(f"Path {path} is not a file !")
-
-    build_directory(path)
-
     try:
+        build_directory(path)
         data_str = json.dumps(data)
         with open(path, "w") as handle:
             handle.write(data_str)
