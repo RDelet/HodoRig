@@ -30,6 +30,7 @@ class ShapeView(QtWidgets.QListWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setFixedWidth(120)
         self.update_content()
     
     @staticmethod
@@ -52,8 +53,11 @@ class ShapeNameWidget(QtWidgets.QWidget):
         self._layout.setContentsMargins(0, 0, 0, 0)
 
         self._reset = QtWidgets.QLineEdit("RESET", self)
+        self._reset.setFixedWidth(120)
         self._manip = QtWidgets.QLineEdit("MANIP", self)
+        self._manip.setFixedWidth(120)
         self._name = QtWidgets.QLineEdit("Hodor", self)
+        self._name.setFixedWidth(120)
         self._layout.addRow("Reset Prefix", self._reset)
         self._layout.addRow("Manip Prefix", self._manip)
         self._layout.addRow("Manip Name", self._name)
@@ -133,7 +137,7 @@ class ShapeBasicUI(QtWidgets.QDialog):
             else:
                 raise RuntimeError("No item selected !")
 
-        manip_name = self._name.text()
+        manip_name = self._shape_name.manip_name
         if not manip_name:
             raise RuntimeError("No name given !")
 
