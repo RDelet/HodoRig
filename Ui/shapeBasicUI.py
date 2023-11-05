@@ -34,13 +34,13 @@ class ShapeView(QtWidgets.QListWidget):
         self.update_content()
     
     @staticmethod
-    def _get_shape() -> list:
+    def get_shape() -> list:
         p = constants.kShapeDir
         return [ShapeItem(os.path.join(p, x)) for x in os.listdir(p)]
     
     def update_content(self):
         self.clear()
-        [self.addItem(item) for item in self._get_shape()]
+        [self.addItem(item) for item in self.get_shape()]
 
 
 class ShapeNameWidget(QtWidgets.QWidget):
@@ -76,8 +76,14 @@ class ShapeNameWidget(QtWidgets.QWidget):
 
 
 class ShapeBasicUI(QtWidgets.QDialog):
+
+    SINGLETON = None
     
     def __init__(self, parent=None):
+
+        if ShapeBasicUI.SINGLETON is not None:
+            ShapeBasicUI.SINGLETON.close()
+        ShapeBasicUI.SINGLETON = self
 
         if not parent:
             parent = utils.main_window()
@@ -89,6 +95,10 @@ class ShapeBasicUI(QtWidgets.QDialog):
     
         self._init_color()
         self._init_shapes()
+
+        self._save_shape = QtWidgets.QPushButton("Save Shape", self)
+        self._layout.addWidget(self._save_shape)
+        self._save_shape.clicked.connect(self.dump_shape)
        
     def _init_color(self):
         color_widget = ColorWidget()
@@ -114,11 +124,11 @@ class ShapeBasicUI(QtWidgets.QDialog):
         if len(selected) > 1:
             raise RuntimeError("select one node !")
             
-        file_name = self._name.text()
+        file_name = self._shape_name.manip_name
         if not file_name:
             raise RuntimeError("No name given !")
         
-        shapes = self._get_shape()
+        shapes = self._shape_view.get_shape()
         if file_name in shapes:
             raise RuntimeError(f"File {file_name}.{constants.kShapeExtension} already exists!")
 
@@ -126,7 +136,7 @@ class ShapeBasicUI(QtWidgets.QDialog):
         new_shape.get_from_node(selected[0])
         new_shape.dump(file_name)
 
-        self.update_content()
+        self._shape_view.update_content()
     
     def _build_manip(self, item=None):
 

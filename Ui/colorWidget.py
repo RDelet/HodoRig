@@ -12,6 +12,7 @@ class ColorButton(QtWidgets.QPushButton):
         
         self.color = color
         self.setStyleSheet("background-color: rgb({0}, {1}, {2});".format(*self.color.rgb))
+        self.setFixedSize(30, 30)
 
 
 class ColorWidget(QtWidgets.QWidget):
@@ -25,8 +26,9 @@ class ColorWidget(QtWidgets.QWidget):
         self.setLayout(layout)
         
         button_layout = None
+        count = 5
         for i, color in enumerate(constants.kColors):
-            if i % 5 == 0:
+            if i % count == 0:
                 button_layout = QtWidgets.QHBoxLayout()
                 button_layout.setContentsMargins(0, 0, 0, 0)
                 button_layout.setSpacing(2)
