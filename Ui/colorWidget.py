@@ -12,32 +12,37 @@ class ColorButton(QtWidgets.QPushButton):
         
         self.color = color
         self.setStyleSheet("background-color: rgb({0}, {1}, {2});".format(*self.color.rgb))
-        self.setFixedSize(30, 30)
 
 
 class ColorWidget(QtWidgets.QWidget):
     
-    def __init__(self, parent=None):
+    def __init__(self, button_size: int = 30, line_count: int = 5,
+                 parent: QtWidgets.QWidget = None):
         super().__init__(parent)
         
+        self._button_size = button_size
+        count = 5
+        self.setFixedHeight(self._button_size * (count - 1))
+
         layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(2, 2, 2, 2)
-        layout.setSpacing(5)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         self.setLayout(layout)
         
         button_layout = None
-        count = 5
+        
         for i, color in enumerate(constants.kColors):
             if i % count == 0:
                 button_layout = QtWidgets.QHBoxLayout()
                 button_layout.setContentsMargins(0, 0, 0, 0)
-                button_layout.setSpacing(2)
+                button_layout.setSpacing(0)
                 layout.addLayout(button_layout)
 
             button = ColorButton(self, color)
+            button.setFixedHeight(self._button_size)
             button.clicked.connect(self._set_color)
             button_layout.addWidget(button)
-    
+
     def _set_color(self):
         color = self.sender().color
         selected = cmds.ls(selection=True, long=True, type='transform')
