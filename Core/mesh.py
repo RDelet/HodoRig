@@ -1,3 +1,4 @@
+import dataclasses
 from dataclasses import dataclass, field
 from functools import partial
 from typing import Union
@@ -8,6 +9,29 @@ from HodoRig.Core import constants, point, utils
 
 
 kNodeType = constants.kMesh
+kWorld = OpenMaya.MSpace.kWorld
+kObject = OpenMaya.MSpace.kObject
+
+
+def get_points(node: Union[str, OpenMaya.MObject, OpenMaya.MDagPath],
+               world: bool = True, vertex_ids: list = None) -> OpenMaya.MPointArray:
+    """!@Brief Get mesh point."""
+    if isinstance(node, str):
+        node = utils.get_path(node)
+    if isinstance(node, OpenMaya.MObject) and world:
+        raise RuntimeError('Impossible to get world position with MObject !')
+
+    mfn = OpenMaya.MFnMesh(node)
+    output = mfn.getPoints(space)
+    space = kWorld if world else kObject
+
+    if vertex_ids:
+        points = OpenMaya.MPointArray()
+        for vertex_id in vertex_ids:
+            points.append(output[vertex_id])
+        output = points
+
+    return output
 
 
 def shape_to_dict(node: Union[str, OpenMaya.MObject], normalize: bool = True) -> dict:
@@ -23,26 +47,25 @@ def shape_to_dict(node: Union[str, OpenMaya.MObject], normalize: bool = True) ->
     mfn = OpenMaya.MFnMesh(node)
     mit = OpenMaya.MItMeshPolygon(node)
 
-    points = mfn.getPoints(OpenMaya.MSpace.kObject)
+    points = mfn.getPoints(kObject)
     point.normalize(points)
 
     poly_counts = list()
     poly_connects = list()
     while not mit.isDone():
-        vertices = OpenMaya.MIntArray()
-        mit.getVertices(vertices)
+        vertices = mit.getVertices()
         poly_counts.append(len(vertices))
         for i in range(len(vertices)):
             poly_connects.append(vertices[i])
         mit.next()
 
     data[constants.kType] = kNodeType
-    data[constants.kNumVertices] = mfn.numVertices()
-    data[constants.kNumPolygons] = mfn.numPolygons()
+    data[constants.kNumVertices] = mfn.numVertices
+    data[constants.kNumPolygons] = mfn.numPolygons
     data[constants.kPoints] = point.array_to_list(points)
     data[constants.kPolygonCounts] = poly_counts
     data[constants.kPolygonConnects] = poly_connects
-    data[constants.kUv] = get_uv(node)
+    data[constants.kUv] = [dataclasses.asdict(x) for x in get_uv(node)]
 
     return data
 
@@ -100,17 +123,14 @@ def get_uv(node: Union[str, OpenMaya.MObject]) -> list:
     if not node.hasFn(OpenMaya.MFn.kMesh):
         raise TypeError(f"fNode must be a mesh not {node.apiTypeStr()} !")
 
-    uv_names = list()
     mfn = OpenMaya.MFnMesh(node)
-    mfn.getUVSetNames(uv_names)
+    uv_names = mfn.getUVSetNames()
 
     data = []
     for name in uv_names:
         uv = UV(name)
         data.append(uv)
-        u = OpenMaya.MFloatArray()
-        v = OpenMaya.MFloatArray()
-        mfn.getUVs(u, v, name)
+        u, v = mfn.getUVs(name)
         uv.u = list(u)
         uv.v = list(v)
     
@@ -135,3 +155,19 @@ def set_uv(node: Union[str, OpenMaya.MObject], uv_data: list):
         u = OpenMaya.MFloatArray(uv.u)
         v = OpenMaya.MFloatArray(uv.v)
         mfn.setUVs(u, v, uv.name)
+
+
+def get_vertex_component(node: Union[str, OpenMaya.MObject],) -> OpenMaya.MObject:
+    """!@Brief Get mesh vertex at component object."""
+    if isinstance(node, str):
+        node = utils.get_object(node)
+
+    single_component = OpenMaya.MFnSingleIndexedComponent()
+    component = single_component.create(OpenMaya.MFn.kMeshVertComponent)
+
+    mit = OpenMaya.MItMeshVertex(node)
+    while not mit.isDone():
+        single_component.addElement(mit.index())
+        mit.next()
+
+    return component

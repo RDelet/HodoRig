@@ -4,7 +4,7 @@ from shiboken2 import wrapInstance
 from maya import OpenMayaUI
 
 
-def find_control(control_name: str, widget_cls: QtWidgets.QWidget = QtWidgets.QWidget) -> QtWidgets.QTextEdit:
+def find_control(control_name: str, widget_cls: QtWidgets.QWidget = QtWidgets.QWidget) -> QtWidgets.QWidget:
     ptr = OpenMayaUI.MQtUtil.findControl(control_name)
     if not ptr:
         return
@@ -12,6 +12,6 @@ def find_control(control_name: str, widget_cls: QtWidgets.QWidget = QtWidgets.QW
     return wrapInstance(int(ptr), widget_cls)
 
 
-def main_window():
+def main_window() -> QtWidgets.QWidget:
     ptr = OpenMayaUI.MQtUtil.mainWindow()
     return wrapInstance(int(ptr), QtWidgets.QWidget)

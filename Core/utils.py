@@ -4,6 +4,7 @@ from maya import cmds
 from maya.api import OpenMaya
 
 from HodoRig.Core import apiUndo
+from HodoRig.Core.component import SoftVertex
 
 
 _dagMod = OpenMaya.MDagModifier()
@@ -50,15 +51,29 @@ def check_object(obj: Union[str, OpenMaya.MObject]) -> OpenMaya.MObject:
     return obj
 
 
-def get_object(name: str) -> OpenMaya.MObject:
+def get_object(node: str) -> OpenMaya.MObject:
     """!@Brief Get MObject of current node."""
 
     try:
         _msl.clear()
-        _msl.add(name)
+        _msl.add(node)
         return _msl.getDependNode(0)
     except RuntimeError:
-        raise RuntimeError(f"Node {name} does not exist !")
+        raise RuntimeError(f"Node {node} does not exist !")
+
+
+def get_path(node: Union[str, OpenMaya.MObject]) -> OpenMaya.MDagPath:
+    if isinstance(node, OpenMaya.MObject):
+        if not node.hasFn(OpenMaya.MFn.kDagNode):
+            raise RuntimeError(f"Node {name(node)} is not a dagNode !")
+        return OpenMaya.MDagPath.getAPathTo(node)
+    
+    try:
+        _msl.clear()
+        _msl.add(node)
+        return _msl.getDagPath(0)
+    except RuntimeError:
+        raise RuntimeError(f"Node {node} does not exist !")
 
 
 def get_handle(node: Union[str, OpenMaya.MObject, OpenMaya.MDagPath]) -> OpenMaya.MObjectHandle:
@@ -125,3 +140,28 @@ def is_valid(node: Union[OpenMaya.MObject, OpenMaya.MDagPath]) -> bool:
         node = node.node()
     handle = OpenMaya.MObjectHandle(node)
     return not node.isNull() and handle.isAlive() and handle.isValid()
+
+
+def soft_selection_weights() -> list:
+
+    mrs = OpenMaya.MGlobal.getRichSelection()
+    msl = mrs.getSelection()
+
+    mit = OpenMaya.MItSelectionList(msl, OpenMaya.MFn.kMeshVertComponent)
+    soft_vertices = []
+    while not mit.isDone():
+        path, component = mit.getComponent()
+        if not path.hasFn(OpenMaya.MFn.kMesh):
+            raise RuntimeError("Only mesh is implemented yet !")
+
+        single_component = OpenMaya.MFnSingleIndexedComponent(component)
+        for i in range(single_component.elementCount):
+            weight = 1.0
+            if single_component.hasWeights:
+                weight = single_component.weight(i).influence
+            soft_vertex = SoftVertex(path.fullPathName(), single_component.element(i), weight)
+            soft_vertices.append(soft_vertex)
+
+        mit.next()
+
+    return soft_vertices

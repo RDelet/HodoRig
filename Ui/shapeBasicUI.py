@@ -96,7 +96,7 @@ class ShapeView(QtWidgets.QWidget):
 
         self.update_content()
     
-    def _build_manip(self, item=None):
+    def _build_manip(self, item: ShapeItem = None):
 
         if not item:
             selected = self._list_view.selectedItems()
@@ -119,7 +119,7 @@ class ShapeView(QtWidgets.QWidget):
         if cmds.nodeType(selected[0]) == "joint":
             new_manip.snap(selected[0])
     
-    def _replace_shape(self, item, nodes):
+    def _replace_shape(self, item: ShapeItem, nodes: list) -> bool:
         replaced = False
         for node in nodes:
             shapes = cmds.listRelatives(node, shapes=True, fullPath=True, noIntermediate=True)

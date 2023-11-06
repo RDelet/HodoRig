@@ -66,3 +66,26 @@ def dict_to_shape(data: dict, parent: OpenMaya.MObject, shape_dir: int = None, s
         data.get(constants.kRational, False),
         parent
     )
+
+
+def get_cvs_component(shape: Union[str, OpenMaya.MObject],
+                      use_u_rows: bool = False) -> OpenMaya.MObject:
+    """!@Brief Get nurbsSurface cvs at component object."""
+    if isinstance(shape, str):
+        shape = utils.get_object(shape)
+
+    double_component = OpenMaya.MFnDoubleIndexedComponent()
+    component = double_component.create(OpenMaya.MFn.kSurfaceCVComponent)
+    
+    mfn = OpenMaya.MFnNurbsSurface(shape)
+    u_count = mfn.numCVsInU
+    v_count = mfn.numCVsInV
+
+    for _ in range(u_count):
+        for _ in range(v_count):
+            if use_u_rows:
+                double_component.addElement(v_count, u_count)
+            else:
+                double_component.addElement(u_count, v_count)
+
+    return component
