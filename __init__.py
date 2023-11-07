@@ -1,18 +1,80 @@
+import os
 import traceback
 
 from PySide2 import QtWidgets
 
+from maya import cmds
+
 from HodoRig.Core.logger import log
-from HodoRig.Core import apiUndo
-from HodoRig.Ui.mayaSyntaxHighLigther import MayaSyntaxHighLigther
 
-
-apiUndo.install()
 
 try:
+    from HodoRig.Core import apiUndo
+
+    apiUndo.install()
+except Exception:
+    log.info(traceback.format_exc())
+    log.error("Error on install apiUndo !")   
+
+
+try:
+    from HodoRig.Ui.mayaSyntaxHighLigther import MayaSyntaxHighLigther
+
     app = QtWidgets.QApplication.instance()
     app.focusChanged.connect(MayaSyntaxHighLigther.focus_changed_cb)
     MayaSyntaxHighLigther.add_on_all_control()
 except Exception:
-    log.debug(traceback.format_exc())
+    log.info(traceback.format_exc())
     log.error("Error on create high lither syntax !")
+
+
+try:
+    from HodoRig.Core import quickScripts
+
+    dir, _ = os.path.split(__file__)
+    hodorig_scripts = os.path.normpath(os.path.join(dir, "scripts"))
+    quickScripts.register_path(hodorig_scripts)
+    quickScripts.retrieve()
+except Exception:
+    log.info(traceback.format_exc())
+    log.error("Error on install HodoRig scripts !")
+
+
+try:
+    from HodoRig.Core import quickScripts
+    from HodoRig.Ui.mayaMenu import MenuItem, Item
+
+    _sub_menu = {}
+
+    def __build_sub_menu(menu_name: str, parent: MenuItem = None):
+        if not menu_name:
+            return
+
+        sub_menu = None
+        if menu_name in _sub_menu:
+            sub_menu = _sub_menu[menu_name]
+        else:
+            sub_menu = Item(menu_name, annotation="")
+            _sub_menu[menu_name] = sub_menu
+        
+        if parent:
+            parent.add_item(sub_menu)
+
+        return sub_menu
+
+    def create_from_scripts():
+        main_menu = MenuItem("HodoRig", annotation="HodoRig Tools")
+        scripts = quickScripts.get_scripts()
+        for name, mod in scripts.items():
+            if not mod.kMayaMenu:
+                continue
+            sub_menu = __build_sub_menu(mod.kCategory, parent=main_menu)
+            item = Item(name, annotation=mod.kAnnotation, image=mod.kImage,
+                        command=mod.process)
+            sub_menu.add_item(item) if sub_menu else main_menu.add_item(item)
+        main_menu.create()
+
+    cmds.evalDeferred(create_from_scripts)
+except Exception:
+    log.info(traceback.format_exc())
+    log.error("Error on create HodoRig menu !")

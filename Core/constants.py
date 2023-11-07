@@ -2,6 +2,8 @@ import os
 
 kModuleDir, _ = os.path.split(__file__)
 
+kSkinExtension = "skin"
+
 kTemplateDir = os.path.normpath(os.path.join(kModuleDir, "../Templates"))
 kTemplateExtension = "hrt"
 

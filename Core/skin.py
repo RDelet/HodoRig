@@ -6,6 +6,7 @@ from maya import cmds
 from maya.api import OpenMaya, OpenMayaAnim
 
 from HodoRig.Core import math, mesh, utils
+from HodoRig.Core.logger import log
 from HodoRig.Core.deformer import Deformer
 
 
@@ -27,6 +28,7 @@ class Skin(Deformer):
     kBindMatrix = 'bindMatrix'
 
     kShape = "shape"
+    kShapeData = "shapeData"
     kShapeType = "shapeType"
 
     kApiType = OpenMaya.MFn.kSkinClusterFilter
@@ -54,6 +56,14 @@ class Skin(Deformer):
         self._maintain_max_influences = True
 
         super(Skin, self).__init__(node=node, **kwargs)
+    
+    @property
+    def shape(self) -> str:
+        return self._shape
+
+    @property
+    def shape_data(self) -> dict:
+        return self._shape_data 
 
     def __repr__(self):
         return "{0}(name: {1}, shape: {2}, InfluencesCount: {3})".format(self.__class__.__name__,
@@ -154,6 +164,7 @@ class Skin(Deformer):
     def from_dict(self, data: dict, shape_namespace: str = None,
                   joint_namespace: str = None, joint_root: Union[str, OpenMaya.MObject] = None):
         self._clear()
+        self.__retrieve_shape(data)
         self.__set_data(data, shape_namespace, joint_namespace)
         self.__retrieve_influence_from_data(joint_root)
         self.__retrieve_skin_from_data(data)
@@ -295,7 +306,7 @@ class Skin(Deformer):
         return sorted(list(influences))
 
     def __retrieve_shape_from_data(self, data):
-        shape_data = data.get(self.kShape, None)
+        shape_data = data.get(self.kShapeData, None)
         if not shape_data:
             raise RuntimeError('Missing shape data !')
 
@@ -316,7 +327,18 @@ class Skin(Deformer):
             if cmds.objExists(skin_name):
                 self._object = utils.get_object(skin_name)
 
-    def __set_data(self, data, shape_namespace, joint_namespace):
+    def __retrieve_shape(self, data: dict):
+        shape = data.get(self.kShape, None)
+        if not shape:
+            return
+
+        try:
+            shape = utils.check_object(shape)
+            self._shape = shape
+        except Exception:
+            log.warning(f"Shape {shape} not found.")
+
+    def __set_data(self, data: dict, shape_namespace: str, joint_namespace: str):
 
         self._shape_namespace = shape_namespace
         self._joints_namespace = joint_namespace
@@ -332,7 +354,7 @@ class Skin(Deformer):
         self._influences_ids = data.get(self.kInfluencesIDs, list())
         self._influences_names = cmds.ls(data.get(self.kInfluencesNames, list()), long=True)
         self._weights = OpenMaya.MDoubleArray(data.get(self.kWeights, list()))
-        if len(self._weights):
+        if not len(self._weights):
             raise RuntimeError('No weight data found !')
 
     def _set_weights(self, normalize: bool = False,
@@ -361,7 +383,11 @@ class Skin(Deformer):
     @classmethod
     def find(cls, node: Union[str, OpenMaya.MObject, OpenMaya.MDagPath]) -> OpenMaya.MObject:
         """!@Brief Find skin cluster from given node."""
-        node = Deformer._find(node, cls.kApiType)
+        return Deformer._find(node, cls.kApiType)
+
+    @classmethod
+    def get(cls, node: Union[str, OpenMaya.MObject, OpenMaya.MDagPath]) -> "Skin":
+        node = cls.find(node)
         return cls(node) if node else None
 
     def to_dict(self) -> dict:
@@ -369,6 +395,7 @@ class Skin(Deformer):
             raise Exception("Data of this instance is empty !")
 
         data = {self.kName: OpenMaya.MFnDependencyNode(self._object).name().split(":")[-1],
+                self.kShape: utils.name(self.shape),
                 self.kSkinningMethod: self._skinning_method, self.kUseComponents: self._use_components,
                 self.kDeformUserNormals: self._deform_user_normals,
                 self.kDqsSupportNonRigid: self._dqs_support_non_rigid, self.kDqsScale: self._dqs_scale,
@@ -377,7 +404,8 @@ class Skin(Deformer):
                 self.kInfluencesIDs: self._influences_ids,
                 self.kInfluencesNames: [x.split("|")[-1].split(":")[-1] for x in self._influences_names],
                 self.kWeights: list(self._weights),
-                self.kShape: mesh.shape_to_dict(self._shape), self.kBindMatrix: self._bind_matrix}
+                self.kShapeData: mesh.shape_to_dict(self._shape),
+                self.kBindMatrix: self._bind_matrix}
 
         return data
 
