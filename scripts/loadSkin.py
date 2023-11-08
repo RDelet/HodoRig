@@ -1,11 +1,9 @@
 # coding=ascii
 
 """
-!@Brief QuickScripts template.
+!@Brief Load skin cluster from file.
 
 File Path: {s_path}
-
-Add any help !
 """
 
 import logging

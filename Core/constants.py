@@ -1,5 +1,7 @@
 import os
 
+from PySide2 import QtGui
+
 kModuleDir, _ = os.path.split(__file__)
 
 kSkinExtension = "skin"
@@ -81,3 +83,8 @@ kColors = [
     __Color("Black", (0, 0, 0), 1),
     __Color("Black", (0, 0, 0), 1)
 ]
+
+# Icons
+kIconsDir = os.path.normpath(os.path.join(kModuleDir, "../Icons"))
+kClose = QtGui.QIcon(os.path.join(kIconsDir, "close.svg"))
+kPython = QtGui.QIcon(os.path.join(kIconsDir, "python.svg"))

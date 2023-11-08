@@ -1,0 +1,10 @@
+{
+    "QuickScript": {
+        "key": "&", 
+        "command": "from HodoRig.Ui.quickScriptUiLite import QuickScriptUiLite; QuickScriptUiLite().show()", 
+        "annotation": "HodoRig - QuickScript", 
+        "category": "HodoRig_TOOLS", 
+        "ctrl_mod": true, 
+        "language": "python"
+    }
+}

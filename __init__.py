@@ -8,6 +8,9 @@ from maya import cmds
 from HodoRig.Core.logger import log
 
 
+dir, _ = os.path.split(__file__)
+
+
 try:
     from HodoRig.Core import apiUndo
 
@@ -31,7 +34,6 @@ except Exception:
 try:
     from HodoRig.Core import quickScripts
 
-    dir, _ = os.path.split(__file__)
     hodorig_scripts = os.path.normpath(os.path.join(dir, "scripts"))
     quickScripts.register_path(hodorig_scripts)
     quickScripts.retrieve()
@@ -56,9 +58,8 @@ try:
         else:
             sub_menu = Item(menu_name, annotation="")
             _sub_menu[menu_name] = sub_menu
-        
-        if parent:
-            parent.add_item(sub_menu)
+            if parent:
+                parent.add_item(sub_menu)
 
         return sub_menu
 
@@ -70,7 +71,7 @@ try:
                 continue
             sub_menu = __build_sub_menu(mod.kCategory, parent=main_menu)
             item = Item(name, annotation=mod.kAnnotation, image=mod.kImage,
-                        command=mod.process)
+                        command=mod.main)
             sub_menu.add_item(item) if sub_menu else main_menu.add_item(item)
         main_menu.create()
 
@@ -78,3 +79,13 @@ try:
 except Exception:
     log.info(traceback.format_exc())
     log.error("Error on create HodoRig menu !")
+
+
+try:
+    from HodoRig.Core.hotKey import Hotkey
+
+    file_path = os.path.normpath(os.path.join(dir, "Settings/hotKeys.json"))
+    Hotkey.from_file(file_path)
+except Exception as exp:
+    log.info(traceback.format_exc())
+    log.error("Error on install HodoRig HotKey !")

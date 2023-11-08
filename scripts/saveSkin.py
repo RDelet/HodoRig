@@ -1,11 +1,12 @@
 # coding=ascii
 
 """
-!@Brief QuickScripts template.
+!@Brief Save selected skin cluster.
 
 File Path: {s_path}
 
-Add any help !
+    - Select all mesh you want to save
+    - Select directory to save files
 """
 
 import logging
