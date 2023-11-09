@@ -1,3 +1,4 @@
+from functools import partial
 import os
 import traceback
 
@@ -85,7 +86,9 @@ try:
     from HodoRig.Core.hotKey import Hotkey
 
     file_path = os.path.normpath(os.path.join(dir, "Settings/hotKeys.json"))
-    Hotkey.from_file(file_path)
+    cmds.evalDeferred(create_from_scripts)
+    func = partial(Hotkey.from_file, file_path)
+    cmds.evalDeferred(func)
 except Exception as exp:
     log.info(traceback.format_exc())
     log.error("Error on install HodoRig HotKey !")
