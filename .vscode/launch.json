@@ -5,7 +5,7 @@
             "name": "HodoRig Debug",
             "type": "python",
             "request": "attach",
-            "port": 5678,
+            "port": 53001,
             "host": "127.0.0.1"
         }
     ]

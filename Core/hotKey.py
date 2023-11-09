@@ -37,24 +37,20 @@ class Hotkey(object):
         return f"{self.name}_CMD"
     
     def _add_on_press(self):
-        if not self.command_exists(self.name):
-            self._addcommand(self.name, self.command)
-
+        self._add_command(self.name, self.command)
         cmds.hotkey(name=self.cmd_name,
                     keyShortcut=self.key,
                     altModifier=self.alt_modifier,
                     ctrlModifier=self.ctrl_modifier,
                     shiftModifier=self.shift_modifier)
-    
+
         log.info(f"Add HotKey {self.cmd_name}")
     
     def _add_on_release(self):
         if self.release_command:
             return
         
-        if self.command_exists(self.release_name):
-                self._addcommand(self.release_name, self.release_command)
-                
+        self._add_command(self.release_name, self.release_command)      
         cmds.hotkey(name="",
                     releaseName=self.release_name,
                     keyShortcut=self.key,
@@ -68,7 +64,7 @@ class Hotkey(object):
         self._add_on_press()
         self._add_on_release()
 
-    def _addcommand(self, name: str, cmd: str):
+    def _add_command(self, name: str, cmd: str):
         self.removecommand(name)
         cmds.runTimeCommand(name, annotation=self.annotation,
                             category=self.category,

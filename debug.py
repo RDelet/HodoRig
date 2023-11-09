@@ -14,6 +14,6 @@ def vs_code(port: int = 53001):
     if not debug_py:
         raise RuntimeError("No module debugpy found !")
 
-    mayapy_exe = os.path.join(os.environ.get("MAYA_LOCATION"), "bin", "mayapy")
+    mayapy_exe = os.path.join(os.environ.get("MAYA_LOCATION"), "bin", "mayapy.exe")
     debugpy.configure(python=mayapy_exe)
     debugpy.listen(port)

@@ -75,7 +75,6 @@ try:
                         command=mod.main)
             sub_menu.add_item(item) if sub_menu else main_menu.add_item(item)
         main_menu.create()
-
     cmds.evalDeferred(create_from_scripts)
 except Exception:
     log.info(traceback.format_exc())
@@ -86,7 +85,6 @@ try:
     from HodoRig.Core.hotKey import Hotkey
 
     file_path = os.path.normpath(os.path.join(dir, "Settings/hotKeys.json"))
-    cmds.evalDeferred(create_from_scripts)
     func = partial(Hotkey.from_file, file_path)
     cmds.evalDeferred(func)
 except Exception as exp:

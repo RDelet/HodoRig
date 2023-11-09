@@ -37,6 +37,7 @@ class MenuItem(object):
         self._items.append(item)
 
     def create(self):
+        log.warning(f"Create menu {self._name}")
         self._full_path = cmds.menu(self._name,
                                     parent=self._parent,
                                     visible=True,
