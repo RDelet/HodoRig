@@ -22,7 +22,7 @@ except Exception:
 
 
 try:
-    from HodoRig.Ui.mayaSyntaxHighLigther import MayaSyntaxHighLigther
+    from HodoRig.Ui.Overrides.mayaSyntaxHighLigther import MayaSyntaxHighLigther
 
     app = QtWidgets.QApplication.instance()
     app.focusChanged.connect(MayaSyntaxHighLigther.focus_changed_cb)
@@ -45,7 +45,7 @@ except Exception:
 
 try:
     from HodoRig.Core import quickScripts
-    from HodoRig.Ui.mayaMenu import MenuItem, Item
+    from HodoRig.Ui.Overrides.mayaMenu import MenuItem, Item
 
     _sub_menu = {}
 

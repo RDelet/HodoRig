@@ -21,7 +21,8 @@ def shape_to_dict(node: Union[str, OpenMaya.MObject], normalize: bool = True) ->
     mfn = OpenMaya.MFnNurbsSurface(node)
 
     points = mfn.cvPositions(OpenMaya.MSpace.kObject)
-    point.normalize(points)    
+    if normalize:
+        point.normalize(points)    
 
     data[constants.kType] = kNodeType
     data[constants.kPoints] = point.array_to_list(points)
