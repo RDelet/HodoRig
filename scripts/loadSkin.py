@@ -14,7 +14,7 @@ from PySide2 import QtWidgets
 
 from maya import cmds
 
-from HodoRig.Core.skin import Skin
+from HodoRig.Core.Deformers.skin import Skin
 from HodoRig.Ui import utils
 
 log = logging.getLogger('Load Skin')

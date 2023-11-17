@@ -2,15 +2,14 @@ import os
 from functools import partial
 
 from maya import cmds
-from maya.api import OpenMaya
 
 from PySide2 import QtCore, QtWidgets
 
-from HodoRig.Core import constants, utils as mayaUtils
+from HodoRig.Core import constants
 from HodoRig.Core.nameBuilder import NameBuilder
-from HodoRig.Core.logger import log
+from HodoRig.Core.Shapes.shape import Shape
 from HodoRig.Nodes.manip import Manip
-from HodoRig.Builders import shape
+from HodoRig.Builders.shape import Shape as ShapeBuilder
 from HodoRig.Ui import utils
 from HodoRig.Ui.Widgets.colorWidget import ColorWidget
 from HodoRig.Ui.Widgets.hSlider import HSlider
@@ -57,17 +56,23 @@ class ScaleWidget(GroupWidget):
             layout.addWidget(button)
     
     def _init_slider(self):
-        slider = HSlider("Scale", 0.1, 100, self)
+        slider = HSlider("Scale", -100, 100, self)
         slider.value = 1.0
-        slider.valueChanged.connect(partial(self._do, relative=False))
+        slider.valueChanged.connect(partial(self._do, normalize=True))
         self.add_widget(slider)
 
-    def _do(self, value, relative=True):
+    def _do(self, value, normalize=False):
+        if value >= 0:
+            value = max(1e-3, value)
+        if value <= 0:
+            value = min(-1e-3, value)
         shapes = cmds.ls(selection=True, long=True, type="shape") or []
         transforms = cmds.ls(selection=True, long=True, type="transform") or []
         children = cmds.listRelatives(transforms, shapes=True, fullPath=True) or []
         shapes = list(set(shapes + children))
-        cmds.scale(value, value, value, shapes, relative=relative)
+        for node in shapes:
+            shape = Shape(node)
+            shape.scale(value, normalize=normalize)
 
 
 class ShapeView(QtWidgets.QWidget):
@@ -129,7 +134,7 @@ class ShapeView(QtWidgets.QWidget):
         if file_name in self.get_shape():
             raise RuntimeError(f"File {file_name}.{constants.kShapeExtension} already exists!")
 
-        new_shape = shape.Shape()
+        new_shape = ShapeBuilder()
         new_shape.get_from_node(selected[0])
         new_shape.dump(file_name)
 
@@ -163,7 +168,7 @@ class ShapeView(QtWidgets.QWidget):
             if not shapes:
                 continue
             cmds.delete(shapes)
-            new_shape = Shape.load(item.name)
+            new_shape = ShapeBuilder.load(item.name)
             new_shape.parent = node
             new_shape.build(scale=self.scale_factor)
             replaced = True

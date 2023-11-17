@@ -3,18 +3,10 @@ from typing import Union
 
 from maya.api import OpenMaya
 
-from HodoRig.Core import curve, constants, mesh, surface, utils
+from HodoRig.Core import constants, utils
+from HodoRig.Core.Shapes import shape as shapeUtils
 from HodoRig.Core.logger import log
 from HodoRig.Builders.builder import Builder
-
-
-shape_getter = {OpenMaya.MFn.kNurbsCurve: curve.shape_to_dict,
-                OpenMaya.MFn.kMesh: mesh.shape_to_dict,
-                OpenMaya.MFn.kNurbsSurface: surface.shape_to_dict}
-
-shape_builder = {curve.kNodeType: curve.dict_to_shape,
-                 mesh.kNodeType: mesh.dict_to_shape,
-                 surface.kNodeType: surface.dict_to_shape}
 
 
 class Shape(Builder):
@@ -61,11 +53,11 @@ class Shape(Builder):
             node = utils.get_object(node)
 
         api_type = node.apiType()
-        if api_type not in shape_getter:
+        if api_type not in shapeUtils.shape_getter:
             valid_type = "\n\t-NurbsCurve\n\t-NurbsSurface\n\t-Mesh"
             raise TypeError(f"Invalid shape type given. Accepted type or {valid_type}")
 
-        return shape_getter[api_type](node, normalize=normalize)
+        return shapeUtils.shape_getter[api_type](node, normalize=normalize)
 
     def _pre_build(self, *args, **kwargs):
         log.debug(f"{self.__class__.__name__} pre build: {utils.name(self._parent)} !")
@@ -77,11 +69,11 @@ class Shape(Builder):
         for shape_data in self._data:
 
             shape_type = shape_data[constants.kType]
-            if shape_type not in shape_builder:
+            if shape_type not in shapeUtils.shape_builder:
                 valid_type = "\n\t-NurbsCurve\n\t-NurbsSurface\n\t-Mesh"
                 raise TypeError(f"Invalid shape type. Accepted type or {valid_type}")
 
-            func = shape_builder[shape_type]
+            func = shapeUtils.shape_builder[shape_type]
             shape = func(shape_data, self._parent, shape_dir=shape_dir, scale=scale)
             shapes.append(shape)
             name = f"{utils.name(self._parent, False, False)}Shape1"

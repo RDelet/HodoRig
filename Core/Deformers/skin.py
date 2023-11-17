@@ -5,9 +5,10 @@ from typing import Union
 from maya import cmds
 from maya.api import OpenMaya, OpenMayaAnim
 
-from HodoRig.Core import math, mesh, utils
+from HodoRig.Core import math, utils
 from HodoRig.Core.logger import log
-from HodoRig.Core.deformer import Deformer
+from HodoRig.Core.Deformers.deformer import Deformer
+from HodoRig.Core.Shapes import mesh
 
 
 class Skin(Deformer):

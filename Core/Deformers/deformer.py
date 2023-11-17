@@ -3,9 +3,10 @@ from typing import Union
 
 from maya.api import OpenMaya, OpenMayaAnim
 
-from HodoRig.Core import mesh, utils
+from HodoRig.Core import utils
 from HodoRig.Core.logger import log
 from HodoRig.Core.jsonEncoder import JsonEncoder
+from HodoRig.Core.Shapes import mesh
 
 
 class Deformer(object):

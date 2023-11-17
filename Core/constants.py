@@ -2,6 +2,9 @@ import os
 
 from PySide2 import QtGui
 
+from maya.api import OpenMaya
+
+
 kModuleDir, _ = os.path.split(__file__)
 
 kSkinExtension = "skin"
@@ -15,11 +18,16 @@ kIconExtension = "png"
 
 # Generic
 kMesh = "mesh"
+kMeshApi = OpenMaya.MFn.kMesh
 kCurve = "nurbsCurve"
+kCurveApi = OpenMaya.MFn.kNurbsCurve
 kSurface = "nurbsSurface"
+kSurfaceApi = OpenMaya.MFn.kNurbsSurface
 kType = "type"
 kPoints = "points"
 kRational = "rational"
+kWorld = OpenMaya.MSpace.kWorld
+kObject = OpenMaya.MSpace.kObject
 
 # Mesh
 kNumVertices = "numVertices"

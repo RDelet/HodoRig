@@ -4,7 +4,7 @@ from maya import cmds
 from maya.api import OpenMaya
 
 from HodoRig.Core import apiUndo
-from HodoRig.Core.component import SoftVertex
+from HodoRig.Core.Shapes.component import SoftVertex
 
 
 _dagMod = OpenMaya.MDagModifier()
