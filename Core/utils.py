@@ -1,4 +1,4 @@
-from typing import Union
+from __future__ import annotations
 
 from maya import cmds
 from maya.api import OpenMaya
@@ -18,7 +18,7 @@ node_caches: list = []
 
 
 def create(node_type: str, name: str = None, restriction: int = 0,
-           parent: Union[str, OpenMaya.MObject] = _nullObj) -> OpenMaya.MObject:
+           parent: str | OpenMaya.MObject = _nullObj) -> OpenMaya.MObject:
     
     if isinstance(parent, str):
         parent = get_object(parent)
@@ -43,7 +43,7 @@ def create(node_type: str, name: str = None, restriction: int = 0,
     return new_node
 
 
-def check_object(obj: Union[str, OpenMaya.MObject]) -> OpenMaya.MObject:
+def check_object(obj: str | OpenMaya.MObject) -> OpenMaya.MObject:
     if isinstance(obj, str):
         obj = get_object(obj)
     elif isinstance(obj, OpenMaya.MObject) and not is_valid(obj):
@@ -62,7 +62,7 @@ def get_object(node: str) -> OpenMaya.MObject:
         raise RuntimeError(f"Node {node} does not exist !")
 
 
-def get_path(node: Union[str, OpenMaya.MObject]) -> OpenMaya.MDagPath:
+def get_path(node: str | OpenMaya.MObject) -> OpenMaya.MDagPath:
     if isinstance(node, OpenMaya.MObject):
         if not node.hasFn(OpenMaya.MFn.kDagNode):
             raise RuntimeError(f"Node {name(node)} is not a dagNode !")
@@ -76,17 +76,15 @@ def get_path(node: Union[str, OpenMaya.MObject]) -> OpenMaya.MDagPath:
         raise RuntimeError(f"Node {node} does not exist !")
 
 
-def get_handle(node: Union[str, OpenMaya.MObject, OpenMaya.MDagPath]) -> OpenMaya.MObjectHandle:
+def get_handle(node: str | OpenMaya.MObject) -> OpenMaya.MObjectHandle:
     """!@Brief Get MObjectHandle of current node."""
     if isinstance(node, str):
         node = get_object(node)
-    elif isinstance(node, OpenMaya.MDagPath):
-        node = node.node()
 
     return OpenMaya.MObjectHandle(node)
 
 
-def name(obj: Union[OpenMaya.MObject, OpenMaya.MDagPath, OpenMaya.MPlug],
+def name(obj: str | OpenMaya.MObject | OpenMaya.MPlug,
          full: bool = True, namespace: bool = True) -> str:
     """!@Brief Get node name."""
     if isinstance(obj, OpenMaya.MDagPath):
@@ -111,12 +109,12 @@ def name(obj: Union[OpenMaya.MObject, OpenMaya.MDagPath, OpenMaya.MPlug],
     return name
 
 
-def node_hash(node: Union[str, OpenMaya.MObject, OpenMaya.MDagPath]) -> str:
+def node_hash(node: str | OpenMaya.MObject) -> str:
     handle = get_handle(node)
     return "%x" % handle.hashCode()
 
 
-def rename(node: Union[str, OpenMaya.MObject], new_name: str, force: bool = False):
+def rename(node: str | OpenMaya.MObject, new_name: str, force: bool = False):
     """!@Brief Rename given node."""
     if isinstance(node, str):
         node = get_object(node)
@@ -134,12 +132,15 @@ def rename(node: Union[str, OpenMaya.MObject], new_name: str, force: bool = Fals
     mfn.isLocked = locked
 
 
-def is_valid(node: Union[OpenMaya.MObject, OpenMaya.MDagPath]) -> bool:
-    """!@Brief Check if node is valid."""
-    if isinstance(node, OpenMaya.MDagPath):
-        node = node.node()
-    handle = OpenMaya.MObjectHandle(node)
-    return not node.isNull() and handle.isAlive() and handle.isValid()
+def is_valid(obj: OpenMaya.MObject |OpenMaya.MObjectHandle) -> bool:
+    if isinstance(obj, OpenMaya.MObject):
+        node = obj
+        handle = get_handle(obj)
+    else:
+        handle = obj
+        node = handle.object()
+        
+    return not node.isNull() and handle.isValid() and handle.isAlive()
 
 
 def soft_selection_weights() -> list:
