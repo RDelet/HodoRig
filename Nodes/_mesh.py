@@ -3,6 +3,7 @@ from dataclasses import asdict, dataclass, field
 from functools import partial
 from typing import Optional
 
+from maya import cmds
 from maya.api import OpenMaya
 
 from HodoRig.Core import _factory, utils, constants
@@ -74,7 +75,9 @@ class _Mesh(_Shape):
 
     def set_uvs(self, uv_data: list):
         uv_names = self._mfn.getUVSetNames()
-        for uv in uv_data:
+        for data in uv_data:
+            uv = UV(**data)
+            print(uv)
             if uv.name not in uv_names:
                 self._mfn.createUVSetWithName(uv.name)
             u = OpenMaya.MFloatArray(uv.u)
@@ -120,7 +123,7 @@ class _Mesh(_Shape):
         return data
 
     @classmethod
-    def from_dict(self, data: dict, parent: str | OpenMaya.MObject,
+    def from_dict(cls, data: dict, parent: str | OpenMaya.MObject,
                   shape_dir: int = None, scale: float = None):
 
         points = OpenMaya.MPointArray(data.get(constants.kPoints, []))
@@ -137,21 +140,19 @@ class _Mesh(_Shape):
         if poly_counts is None or poly_connects is None:
             raise Exception("Invalid mesh data.")
 
-        print("################# Hodor #################")
-        print(points)
-        print(poly_counts)
-        print(poly_connects)
-        print("################# Groot #################")
-
         shape = OpenMaya.MFnMesh().create(points,
                                           poly_counts,
                                           poly_connects,
-                                          None,
-                                          None,
+                                          OpenMaya.MFloatArray(),
+                                          OpenMaya.MFloatArray(),
                                           parent)
+
+        new_node = _factory.create(shape)
 
         uv_data = data.get(constants.kUv)
         if uv_data:
-            self.set_uv(uv_data)
+            new_node.set_uvs(uv_data)
+        
+        cmds.sets(new_node.name, edit=True, forceElement='initialShadingGroup')
 
-        return _factory.create(shape)
+        return new_node
