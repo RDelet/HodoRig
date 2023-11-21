@@ -13,9 +13,6 @@ from HodoRig.Nodes.node import Node
 class _DAGNode(_DGNode):
 
     kApiType = OpenMaya.MFn.kDagNode
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
     def _post_init(self):
         self._mfn = OpenMaya.MFnDagNode(utils.get_path(self._object))
@@ -32,10 +29,7 @@ class _DAGNode(_DGNode):
             parent = Node(parent)
         self._parent = parent
         if parent:
-            if self._object.hasFn(OpenMaya.MFn.kShape):
-                cmds.parent(self.name, parent.name, relative=True, shape=True)
-            else:
-                cmds.parent(self.name, parent.name)
+            cmds.parent(self.name, parent.name)
         else:
             cmds.parent(self.name, world=True)
     

@@ -24,6 +24,8 @@ def _create(node: str | OpenMaya.MObject):
         node = utils.get_object(node)
 
     api_type = _get_type(node)
+    if not is_registered(api_type):
+        raise RuntimeError(f"Type {node.apiTypeStr} not registered !")
     new_cls = _registered[api_type](node)
     _instances.add(node, new_cls)
 
@@ -33,7 +35,9 @@ def _create(node: str | OpenMaya.MObject):
 def _get_type(node: OpenMaya.MObject):
     api_type = node.apiType()
     if not is_registered(api_type):
-        if node.hasFn(OpenMaya.MFn.kDagNode):
+        if node.hasFn(OpenMaya.MFn.kShape):
+            api_type = OpenMaya.MFn.kShape
+        elif node.hasFn(OpenMaya.MFn.kDagNode):
             api_type = OpenMaya.MFn.kDagNode
         else:
             api_type = OpenMaya.MFn.kDependencyNode
