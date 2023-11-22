@@ -170,7 +170,7 @@ class ShapeView(QtWidgets.QWidget):
             cmds.delete(shapes)
             new_shape = ShapeBuilder.load(item.name)
             new_shape.parent = node
-            new_shape.build(scale=self.scale_factor)
+            new_shape.build(scale=self._scale.value)
             replaced = True
 
         return replaced

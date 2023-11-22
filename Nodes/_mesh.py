@@ -6,8 +6,7 @@ from typing import Optional
 from maya import cmds
 from maya.api import OpenMaya
 
-from HodoRig.Core import _factory, utils, constants
-from HodoRig.Core.Shapes import point
+from HodoRig.Core import constants, _factory, point, utils
 from HodoRig.Nodes._shape import _Shape
 
 
@@ -30,9 +29,6 @@ class UV(object):
 class _Mesh(_Shape):
 
     kApiType = OpenMaya.MFn.kMesh
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
     def _post_init(self):
         path = utils.get_path(self._object)
@@ -93,18 +89,15 @@ class _Mesh(_Shape):
             self._mit_vtx.next()
 
         return component
-
-    def update(self):
-        self._mfn.updateSurface()
     
     def to_dict(self, normalize: bool = True) -> dict:
-        data = dict()
+        data = {}
         self._mit_poly.reset()
 
         points = self.points(normalize=normalize)
 
-        poly_counts = list()
-        poly_connects = list()
+        poly_counts = []
+        poly_connects = []
         while not self._mit_poly.isDone():
             vertices = self._mit_poly.getVertices()
             poly_counts.append(len(vertices))
@@ -156,3 +149,6 @@ class _Mesh(_Shape):
         cmds.sets(new_node.name, edit=True, forceElement='initialShadingGroup')
 
         return new_node
+    
+    def update(self):
+        self._mfn.updateSurface()

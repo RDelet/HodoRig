@@ -17,6 +17,7 @@ class Manip(Node):
         self._type = manip_type
         self._shape = None
     
+    
     def _pre_build(self, *args, **kwargs):
         log.debug(f"{self.__class__.__name__} {self._base_name} build: {self._base_name}.")
 
