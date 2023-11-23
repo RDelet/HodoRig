@@ -28,7 +28,7 @@ class _Surface(_Shape):
         space = constants.kWorld if world else constants.kObject
         self._mfn.setCVPositions(points, space)
     
-    def get_cvs_component(self, shape: str | OpenMaya.MObject,
+    def component(self, shape: str | OpenMaya.MObject,
                           use_u_rows: bool = False) -> OpenMaya.MObject:
         double_component = OpenMaya.MFnDoubleIndexedComponent()
         component = double_component.create(OpenMaya.MFn.kSurfaceCVComponent)

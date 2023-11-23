@@ -14,18 +14,17 @@ class _Shape(_DAGNode):
 
     kApiType = OpenMaya.MFn.kShape
 
-    @_DAGNode.parent.setter
-    def parent(self, parent: str | OpenMaya.MObject | _DAGNode):
-        if isinstance(parent, (str, OpenMaya.MObject)):
-            parent = Node(parent)
-        self._parent = parent
-        cmds.parent(self.name, parent.name, relative=True, shape=True)
+    def __init__(self, node: str | OpenMaya.MObject):
+        super().__init__(node)
 
-    def update(self):
-        raise NotImplementedError(f"{self.__class__.__name__}.update need to be reimplemented !")
-
+    def points(self, *args, **kwargs) -> OpenMaya.MPointArray:
+        raise NotImplementedError(f"{self.__class__.__name__}.points need to be reimplemented !")
+    
     def set_points(self, *args, **kwargs):
         raise NotImplementedError(f"{self.__class__.__name__}.set_points need to be reimplemented !")
+
+    def components(self) -> OpenMaya.MObject:
+        raise NotImplementedError(f"{self.__class__.__name__}.components need to be reimplemented !")
 
     def to_dict(self, normalize: bool = True) -> dict:
         raise NotImplementedError(f"{self.__class__.__name__}.to_dic need to be reimplemented !")
@@ -35,8 +34,8 @@ class _Shape(_DAGNode):
                   shape_dir: int = None, scale: float = None):
         raise NotImplementedError(f"{cls.__name__}.from_dict need to be reimplemented !")
     
-    def points(self, *args, **kwargs) -> OpenMaya.MPointArray:
-        raise NotImplementedError(f"{self.__class__.__name__}.points need to be reimplemented !")
+    def update(self):
+        raise NotImplementedError(f"{self.__class__.__name__}.update need to be reimplemented !")
     
     @classmethod
     def load(cls, file_name: str, parent: str | OpenMaya.MObject,

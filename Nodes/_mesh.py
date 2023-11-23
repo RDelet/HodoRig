@@ -80,7 +80,7 @@ class _Mesh(_Shape):
             v = OpenMaya.MFloatArray(uv.v)
             self._mfn.setUVs(u, v, uv.name)
 
-    def vertex_component(self) -> OpenMaya.MObject:
+    def component(self) -> OpenMaya.MObject:
         single_component = OpenMaya.MFnSingleIndexedComponent()
         component = single_component.create(OpenMaya.MFn.kMeshVertComponent)
         self._mit_vtx.reset()

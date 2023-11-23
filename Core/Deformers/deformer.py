@@ -1,20 +1,22 @@
+from __future__ import annotations
 import json
-from typing import Union
 
 from maya.api import OpenMaya, OpenMayaAnim
 
 from HodoRig.Core import utils
 from HodoRig.Core.logger import log
 from HodoRig.Core.jsonEncoder import JsonEncoder
-from HodoRig.Core.Shapes import mesh
+from HodoRig.Nodes.node import Node
 
 
 class Deformer(object):
 
     _kValidShape = [OpenMaya.MFn.kMesh]
 
-    def __init__(self, node: Union[str, OpenMaya.MObject] = None):
+    def __init__(self, node: str | OpenMaya.MObject = None):
         self._object = None
+        self._shape = None
+        self._shape_data = None
         if node:
             self._get_data(node)
 
@@ -27,7 +29,7 @@ class Deformer(object):
     def _clear(self):
         pass
 
-    def _get_data(self, node: Union[str, OpenMaya.MObject]):
+    def _get_data(self, node: str | OpenMaya.MObject):
         """!@Brief Get deformer data."""
 
         if isinstance(node, str):
@@ -46,11 +48,8 @@ class Deformer(object):
         if not self.valid_shape(shapes[0]):
             raise RuntimeError("No valid shape given !")
 
-        self._shape = shapes[0]
-        if self._shape.hasFn(OpenMaya.MFn.kMesh):
-            self._shape_data = mesh.shape_to_dict(self._shape)
-        else:
-            raise TypeError('Only mesh is implemented !')
+        self._shape = Node.get_node(shapes[0])
+        self._shape_data = self._shape.to_dict()
 
     @property
     def name(self) -> str:
@@ -79,20 +78,20 @@ class Deformer(object):
         return input_geom
 
     @classmethod
-    def is_deformer(cls, node: Union[str, OpenMaya.MObject]) -> bool:
+    def is_deformer(cls, node: str | OpenMaya.MObject) -> bool:
         if isinstance(node, str):
             node = utils.get_object(node)
         return node.hasFn(OpenMaya.MFn.kGeometryFilt)
 
     @classmethod
-    def valid_shape(cls, node: Union[str, OpenMaya.MObject]) -> bool:
+    def valid_shape(cls, node: str | OpenMaya.MObject) -> bool:
         if isinstance(node, str):
             node = utils.get_object(node)
 
         return node.apiType() in cls._kValidShape
     
     @classmethod
-    def _find(cls, node: Union[str, OpenMaya.MObject, OpenMaya.MDagPath], mfn_type: int) -> OpenMaya.MObject:
+    def _find(cls, node: str | OpenMaya.MObject, mfn_type: int) -> OpenMaya.MObject:
         """!@Brief Get skinCluster from shape object."""
 
         def __harvest(mo) -> OpenMaya.MObjectArray:

@@ -8,7 +8,7 @@ from maya.api import OpenMaya, OpenMayaAnim
 from HodoRig.Core import math, utils
 from HodoRig.Core.logger import log
 from HodoRig.Core.Deformers.deformer import Deformer
-from HodoRig.Core.Shapes import mesh
+from HodoRig.Nodes.node import Node
 
 
 class Skin(Deformer):
@@ -35,9 +35,8 @@ class Skin(Deformer):
     kApiType = OpenMaya.MFn.kSkinClusterFilter
 
     def __init__(self, node=None, **kwargs):
+        super(Skin, self).__init__(node=node, **kwargs)
 
-        self._shape = None
-        self._shape_data = None
         self._shape_namespace = ""
         self._joint_namespace = ""
 
@@ -55,8 +54,6 @@ class Skin(Deformer):
         self._weight_distribution = 0
         self._max_influences = 8
         self._maintain_max_influences = True
-
-        super(Skin, self).__init__(node=node, **kwargs)
     
     @property
     def shape(self) -> str:
@@ -153,11 +150,9 @@ class Skin(Deformer):
 
     def create_joint_from_soft_selection(self, soft_vertices: list, name: str, parent: str = None) -> OpenMaya.MObject:
         """!@Brief Create new joint from soft selection."""
-        shape = utils.get_path(soft_vertices[0].name)
-        if shape.hasFn(OpenMaya.MFn.kMesh):
-            points = mesh.get_points(shape, vertex_ids=[x.index for x in soft_vertices])
-        else:
-            raise RuntimeError('Invalid shape type "{0}" !'.format(shape.node().apiTypeStr()))
+        shape_name = utils.get_path(soft_vertices[0].name)
+        shape = Node.get_node(shape_name)
+        points = shape.points(shape, vertex_ids=[x.index for x in soft_vertices])
         pos = math.weighted_centroid(points, [x.weight for x in soft_vertices], weight_tolerence=0.75)
 
         return self.add_joint(name, pos=pos, joint_parent=parent, build=True)
@@ -210,7 +205,7 @@ class Skin(Deformer):
 
     def get_shape_component(self):
         if self._shape.hasFn(OpenMaya.MFn.kMesh):
-            component = mesh.get_vertex_component(self._shape)
+            component = self._shape.component()
         else:
             raise RuntimeError(f"Invalide shape type {self._shape.apiTypeStr()} !")
 
@@ -317,7 +312,7 @@ class Skin(Deformer):
             if self._shape_namespace:
                 shape_name = "{0}:{1}".format(self._shape_namespace, shape_name)
             if cmds.objExists(shape_name) is True:
-                self._shape = utils.get_object(shape_name)
+                self._shape = Node.get_node(shape_name)
             else:
                 raise Exception('Shape "{0}" not found !'.format(shape_name))
 
@@ -334,8 +329,7 @@ class Skin(Deformer):
             return
 
         try:
-            shape = utils.check_object(shape)
-            self._shape = shape
+            self._shape = Node.get_node(shape)
         except Exception:
             log.warning(f"Shape {shape} not found.")
 
@@ -365,7 +359,7 @@ class Skin(Deformer):
         if not self._object:
             raise Exception("No SkinCluster setted.")
 
-        component = mesh.get_vertex_component(self._shape)
+        component = self._shape.get_component()
         if weights is not None:
             self._weights = weights
 
@@ -405,40 +399,7 @@ class Skin(Deformer):
                 self.kInfluencesIDs: self._influences_ids,
                 self.kInfluencesNames: [x.split("|")[-1].split(":")[-1] for x in self._influences_names],
                 self.kWeights: list(self._weights),
-                self.kShapeData: mesh.shape_to_dict(self._shape),
+                self.kShapeData: self._shape.to_dict(),
                 self.kBindMatrix: self._bind_matrix}
 
         return data
-
-
-"""
-import time
-from maya import OpenMaya
-from Helpers.logger import output_log
-
-from Helpers.skin import Skin
-from Helpers import api, mesh
-
-
-skin_path = r'D:\Hodor.json'
-output_log_dir = r'D:\Log'
-
-output_log(output_log_dir)
-
-# Save skin
-f = time.time()
-skin = Skin(node='skinCluster1')
-skin.save(skin_path)
-print(time.time() - f)
-
-# Apply skin
-f = time.time()
-skin = Skin.read(skin_path)
-skin.bind()
-skin.apply()
-print(time.time() - f)
-
-# Create mesh
-skin = Skin.read(skin_path)
-build_from_data(skin._shape_data, parent='null1')
-"""

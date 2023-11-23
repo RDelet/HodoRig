@@ -23,7 +23,10 @@ class NameBuilder:
     
     kMirror = {'L': 'R', 'M': 'M', 'R': 'L'}
     kSeparator = "_"
-    kTemplate = [kType, kSide, kIndex, kPrefix, kCore, kSuffix]
+    kTemplateFull = [kType, kSide, kIndex, kPrefix, kCore, kSuffix]
+    kTemplate = [kType, kSide, kIndex, kCore]
+    kUntypedTemplate = [kSide, kIndex, kCore]
+    kTemplates = [kTemplateFull, kTemplate, kUntypedTemplate]
 
     def __str__(self) -> str:
         d = self.to_dict()
@@ -34,16 +37,26 @@ class NameBuilder:
         d = self.to_dict()
         d.update(kwargs)
         return NameBuilder(*d)
-    
+
     @classmethod
     def from_name(cls, name: str) -> NameBuilder:
-        count = len(cls.kTemplate)
         split = name.split(cls.kSeparator)
-        if len(split) != count:
+        split_count = len(split)
+
+        template = None
+        count = 0
+        for t in cls.kTemplates:
+            tc = len(t)
+            if split_count == tc:
+                template = t
+                count = tc
+                break
+
+        if not template:
             return cls(core=name)
         
         new_cls = cls()
-        new_cls.__dict__.update({cls.kTemplate[i]: split[i] for i in range(count)})
+        new_cls.__dict__.update({template[i]: split[i] for i in range(count)})
         if new_cls.index is not None:
             new_cls.index = int(new_cls.index)
         

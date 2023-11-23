@@ -7,9 +7,9 @@ from PySide2 import QtCore, QtWidgets
 
 from HodoRig.Core import constants
 from HodoRig.Core.nameBuilder import NameBuilder
-from HodoRig.Core.Shapes.shape import Shape
+from HodoRig.Nodes.node import Node
+from HodoRig.Nodes._shape import _Shape
 from HodoRig.Nodes.manip import Manip
-from HodoRig.Builders.shape import Shape as ShapeBuilder
 from HodoRig.Ui import utils
 from HodoRig.Ui.Widgets.colorWidget import ColorWidget
 from HodoRig.Ui.Widgets.hSlider import HSlider
@@ -71,7 +71,7 @@ class ScaleWidget(GroupWidget):
         children = cmds.listRelatives(transforms, shapes=True, fullPath=True) or []
         shapes = list(set(shapes + children))
         for node in shapes:
-            shape = Shape(node)
+            shape = Node.get_node(node)
             shape.scale(value, normalize=normalize)
 
 
@@ -134,8 +134,7 @@ class ShapeView(QtWidgets.QWidget):
         if file_name in self.get_shape():
             raise RuntimeError(f"File {file_name}.{constants.kShapeExtension} already exists!")
 
-        new_shape = ShapeBuilder()
-        new_shape.get_from_node(selected[0])
+        new_shape = Node.get_node(selected[0])
         new_shape.dump(file_name)
 
         self.update_content()
@@ -168,9 +167,7 @@ class ShapeView(QtWidgets.QWidget):
             if not shapes:
                 continue
             cmds.delete(shapes)
-            new_shape = ShapeBuilder.load(item.name)
-            new_shape.parent = node
-            new_shape.build(scale=self._scale.value)
+            _Shape.load(item.name, node)
             replaced = True
 
         return replaced

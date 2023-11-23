@@ -11,11 +11,12 @@ class _DGNode:
 
     kApiType = OpenMaya.MFn.kDependencyNode
 
-    def __init__(self, node: str | OpenMaya.MObject):
-        self._object = utils.check_object(node)
+    def __init__(self, node: str | OpenMaya.MObject = None):
+        self._object = utils.check_object(node) if node else None
         self._mfn = None
         self._modifier = None
-        self._post_init()
+        if self._object:
+            self._post_init()
     
     def _post_init(self):
         self._mfn = OpenMaya.MFnDependencyNode(self._object)
@@ -54,6 +55,9 @@ class _DGNode:
     @property
     def type(self) -> str:
         return self.object.apiTypeStr
+    
+    def has_fn(self, fn: OpenMaya.MFn) -> bool:
+        return self._object.hasFn(fn)
     
     def is_valid(self) -> bool:
         if not self._object:

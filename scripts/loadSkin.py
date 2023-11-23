@@ -7,7 +7,6 @@ File Path: {s_path}
 """
 
 import logging
-import os
 import traceback
 
 from PySide2 import QtWidgets
