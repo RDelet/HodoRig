@@ -4,14 +4,16 @@ from typing import Optional
 from maya.api import OpenMaya
 
 from HodoRig.Core import _factory, utils
+from HodoRig.Core.builder import Builder
 
 
 @_factory.register()
-class _DGNode:
+class _DGNode(Builder):
 
     kApiType = OpenMaya.MFn.kDependencyNode
 
     def __init__(self, node: str | OpenMaya.MObject = None):
+        super().__init__()
         self._object = utils.check_object(node) if node else None
         self._mfn = None
         self._modifier = None

@@ -1,10 +1,9 @@
 import functools
-# from contextlib import ContextDecorator
 
 from maya import cmds
 
 
-class ContextDecorator(object):
+class ContextDecorator:
 
     def __call__(self, f):
         @functools.wraps(f)

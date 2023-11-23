@@ -32,7 +32,7 @@ def create(node_type: str, name: str = None, restriction: int = 0,
         new_node = OpenMaya.MFnSet().create(OpenMaya.MSelectionList(), restriction)
     else:
         new_node = modifier.createNode(node_type, parent)
-    modifier.renameNode(new_node, name if name else f"{node_type}1")
+    modifier.renameNode(new_node, str(name) if name else f"{node_type}1")
     modifier.doIt()
 
     apiUndo.commit(modifier.undoIt, modifier.doIt)

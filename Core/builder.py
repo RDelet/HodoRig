@@ -5,7 +5,7 @@ from HodoRig.Core.cache import NodeCache
 from HodoRig.Core.context import NodeCacheContext
 
 
-class Builder(object):
+class Builder:
 
     def __init__(self):
         self._node_cache = NodeCache(enable=False)
@@ -38,13 +38,13 @@ class Builder(object):
                 self._build(*args, **kwargs)
             except Exception:
                 self._on_build_failed()
-                raise RuntimeError("Error on pre build !")
+                raise RuntimeError("Error on build !")
             
             try:
                 self._post_build(*args, **kwargs)
             except Exception:
                 self._on_build_failed()
-                raise RuntimeError("Error on pre build !")
+                raise RuntimeError("Error on post build !")
             
             self._on_build_succed()
 
@@ -53,4 +53,4 @@ class Builder(object):
 
     def _on_build_failed(self):
         log.error(f"{self.__class__.__name__} build failed !")
-        log.debug(traceback.format_exc())
+        log.error(traceback.format_exc())

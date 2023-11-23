@@ -2,7 +2,7 @@ from HodoRig.Core import utils
 from HodoRig.Core.cache import NodeCache
 
 
-class Context(object):
+class Context:
 
     def __init__(self, *args, **kwargs):
         pass

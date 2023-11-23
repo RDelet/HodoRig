@@ -15,7 +15,7 @@ def get(node: OpenMaya.MObject | OpenMaya.MDagPath) -> Any:
         hx = utils.node_hash(handle)
         if hx in _instances:
             instance = _instances[hx]
-            instance._object(node)
+            instance._object = node
             return instance
 
 

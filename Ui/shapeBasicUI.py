@@ -66,10 +66,12 @@ class ScaleWidget(GroupWidget):
             value = max(1e-3, value)
         if value <= 0:
             value = min(-1e-3, value)
+
         shapes = cmds.ls(selection=True, long=True, type="shape") or []
         transforms = cmds.ls(selection=True, long=True, type="transform") or []
         children = cmds.listRelatives(transforms, shapes=True, fullPath=True) or []
         shapes = list(set(shapes + children))
+
         for node in shapes:
             shape = Node.get_node(node)
             shape.scale(value, normalize=normalize)
@@ -153,9 +155,9 @@ class ShapeView(QtWidgets.QWidget):
             return
 
         txt = self._name.text()
-        manip_name = NameBuilder.from_name(item.name if not txt else txt)
-        new_manip = Manip(manip_name)
-        new_manip.build(shape=item.name, scale=self._scale.value)
+        name = item.name if not txt else txt
+        new_manip = Manip()
+        new_manip.build(name, shape=item.name, scale=self._scale.value)
 
         if selected and cmds.nodeType(selected[0]) == "joint":
             new_manip.snap(selected[0])
@@ -167,7 +169,7 @@ class ShapeView(QtWidgets.QWidget):
             if not shapes:
                 continue
             cmds.delete(shapes)
-            _Shape.load(item.name, node)
+            _Shape.load(item.name, Node.get_node(node).object)
             replaced = True
 
         return replaced

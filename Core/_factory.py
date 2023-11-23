@@ -1,7 +1,5 @@
 from __future__ import annotations
 import inspect
-import copy
-import six
 from typing import Any, TypeVar
 
 from maya.api import OpenMaya
@@ -69,4 +67,4 @@ def is_registered(api_type: int) -> bool:
 
 
 def registered() -> dict:
-    return copy.copy(_registered)
+    return _registered

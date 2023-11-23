@@ -23,6 +23,10 @@ kCurve = "nurbsCurve"
 kCurveApi = OpenMaya.MFn.kNurbsCurve
 kSurface = "nurbsSurface"
 kSurfaceApi = OpenMaya.MFn.kNurbsSurface
+
+kTypeToApi = {kMesh: kMeshApi, kCurve: kCurveApi, kSurface: kSurfaceApi}
+kApiToType = {kMeshApi: kMesh, kCurveApi: kCurve, kSurfaceApi: kSurface}
+
 kType = "type"
 kPoints = "points"
 kRational = "rational"

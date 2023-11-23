@@ -36,7 +36,7 @@ class NameBuilder:
     def clone(self, **kwargs):
         d = self.to_dict()
         d.update(kwargs)
-        return NameBuilder(*d)
+        return NameBuilder(**d)
 
     @classmethod
     def from_name(cls, name: str) -> NameBuilder:

@@ -6,7 +6,7 @@ from maya.api import OpenMaya
 from HodoRig.Core import _factory, utils
 
 
-class Node(object):
+class Node:
 
     def __new__(self, node: Union[str, OpenMaya.MObject]):
         return Node.get_node(node)

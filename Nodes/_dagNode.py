@@ -21,7 +21,7 @@ class _DAGNode(_DGNode):
     @property
     def parent(self) -> Optional[OpenMaya.MObject]:
         parent = self._mfn.parent(0)
-        return None if parent.hasFn(OpenMaya.MFn.kWorld) else parent
+        return None if parent.hasFn(OpenMaya.MFn.kWorld) else Node.get_node(parent)
 
     @parent.setter
     def parent(self, parent: str | OpenMaya.MObject | _DAGNode | None):
@@ -34,9 +34,10 @@ class _DAGNode(_DGNode):
             cmds.parent(self.name, world=True)
     
     @property
-    def children(self) -> OpenMaya.MObjectArray:
-        children = OpenMaya.MObjectArray()
+    def children(self) -> list:
+        children = []
         for i in range(self._mfn.childCount()):
-            children.append(self._mfn.child(i))
+            child = self._mfn.child(i)
+            children.append(Node.get_node(child))
 
         return children

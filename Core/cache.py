@@ -6,7 +6,7 @@ from maya.api import OpenMaya
 from HodoRig.Core import utils
 
 
-class NodeCache(object):
+class NodeCache:
 
     def __init__(self, enable: bool = True):
         self.enable: bool = enable

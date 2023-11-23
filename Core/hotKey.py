@@ -9,7 +9,7 @@ from maya import cmds
 from HodoRig.Core.logger import log
 
 
-class Hotkey(object):
+class Hotkey:
 
     def __init__(self, **kwargs):
 
@@ -109,20 +109,3 @@ class Hotkey(object):
                 cls.log.error("Error on add hotkey {0} !".format(name))
         
         return hotkeys
-
-
-"""
-import HodoRig
-import json
-from HodoRig.Core.hotKey import Hotkey
-
-file_path = os.path.normpath(os.path.join(HodoRig.dir, "Settings/hotKeys.json"))
-with open(file_path, "r") as stream:
-    data = json.load(stream)
-
-for name, d in data.items():
-    cls = Hotkey(name=name, **d)
-    break
-
-cls.add()
-"""
