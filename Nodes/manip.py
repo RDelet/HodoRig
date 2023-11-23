@@ -4,15 +4,17 @@ from maya.api import OpenMaya
 
 from HodoRig.Core import constants, utils
 from HodoRig.Core.nameBuilder import NameBuilder
+from HodoRig.Core.builder import Builder
 from HodoRig.Nodes._transformNode import _TransformNode
 from HodoRig.Nodes.node import Node
 from HodoRig.Nodes._shape import _Shape
 
 
-class Manip(_TransformNode):
+class Manip(_TransformNode, Builder):
 
     def __init__(self, node: str | OpenMaya.MObject = None):
-        super().__init__(node)
+        _TransformNode.__init__(self, node=node)
+        Builder.__init__(self)
 
         self._reset = None
         self._type = None
