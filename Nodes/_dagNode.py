@@ -22,6 +22,10 @@ class _DAGNode(_DGNode):
     def parent(self) -> Optional[OpenMaya.MObject]:
         parent = self._mfn.parent(0)
         return None if parent.hasFn(OpenMaya.MFn.kWorld) else Node.get_node(parent)
+    
+    @property
+    def path(self):
+        return utils.get_path(self._object)
 
     @parent.setter
     def parent(self, parent: str | OpenMaya.MObject | _DAGNode | None):

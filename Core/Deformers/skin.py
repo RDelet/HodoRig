@@ -66,7 +66,7 @@ class Skin(Deformer):
     def __repr__(self):
         return "{0}(name: {1}, shape: {2}, InfluencesCount: {3})".format(self.__class__.__name__,
                                                                          self.name,
-                                                                         utils.name(self._shape) if self._shape else '',
+                                                                         self._shape.name if self._shape else '',
                                                                          self.influence_count())
 
     def add_joint(self, name: str, pos: Union[list, OpenMaya.MVector, OpenMaya.MPoint]=None,
@@ -122,7 +122,7 @@ class Skin(Deformer):
         if not self._influences_names:
             raise RuntimeError('No influences to attach skin !')
         
-        skin = cmds.skinCluster(self._influences_names, utils.name(self._shape), toSelectedBones=True, skinMethod=0)[0]
+        skin = cmds.skinCluster(self._influences_names, self._shape.name, toSelectedBones=True, skinMethod=0)[0]
         self._object = utils.get_object(skin)
 
     def _clear(self):
@@ -204,7 +204,7 @@ class Skin(Deformer):
         return ids, influences
 
     def get_shape_component(self):
-        if self._shape.hasFn(OpenMaya.MFn.kMesh):
+        if self._shape.has_fn(OpenMaya.MFn.kMesh):
             component = self._shape.component()
         else:
             raise RuntimeError(f"Invalide shape type {self._shape.apiTypeStr()} !")
@@ -222,7 +222,7 @@ class Skin(Deformer):
               influence_ids = OpenMaya.MIntArray(influence_ids)  
 
         mfn = OpenMayaAnim.MFnSkinCluster(self._object)
-        return mfn.getWeights(utils.get_path(self._shape),
+        return mfn.getWeights(self._shape.path,
                               component,
                               influence_ids)
     
@@ -359,7 +359,7 @@ class Skin(Deformer):
         if not self._object:
             raise Exception("No SkinCluster setted.")
 
-        component = self._shape.get_component()
+        component = self._shape.components()
         if weights is not None:
             self._weights = weights
 
@@ -369,14 +369,14 @@ class Skin(Deformer):
               influences_ids = OpenMaya.MIntArray(influence_ids)  
 
         mfn = OpenMayaAnim.MFnSkinCluster(self._object)
-        return mfn.setWeights(utils.get_path(self._shape),
+        return mfn.setWeights(self._shape.path,
                               component,
                               influences_ids,
                               self._weights,
                               normalize, returnOldWeights=True)
 
     @classmethod
-    def find(cls, node: Union[str, OpenMaya.MObject, OpenMaya.MDagPath]) -> OpenMaya.MObject:
+    def find(cls, node: Union[str, OpenMaya.MObject]) -> OpenMaya.MObject:
         """!@Brief Find skin cluster from given node."""
         return Deformer._find(node, cls.kApiType)
 
@@ -389,8 +389,10 @@ class Skin(Deformer):
         if self.is_empty():
             raise Exception("Data of this instance is empty !")
 
-        data = {self.kName: OpenMaya.MFnDependencyNode(self._object).name().split(":")[-1],
-                self.kShape: utils.name(self.shape),
+        self._get_data(self._object, get_weights=True)
+
+        data = {self.kName: utils.name(self._object, False, False),
+                self.kShape: self._shape.name,
                 self.kSkinningMethod: self._skinning_method, self.kUseComponents: self._use_components,
                 self.kDeformUserNormals: self._deform_user_normals,
                 self.kDqsSupportNonRigid: self._dqs_support_non_rigid, self.kDqsScale: self._dqs_scale,

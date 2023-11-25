@@ -12,7 +12,9 @@ ClassType = TypeVar("ClassType", bound="BaseClass")
 _registered = dict()
 
 
-def create(node: OpenMaya.MObject) -> Any:
+def create(node: str | OpenMaya.MObject) -> Any:
+    if isinstance(node, str):
+        node = utils.get_object(node)
     instance = _instances.get(node)
     return instance if instance else _create(node)
 

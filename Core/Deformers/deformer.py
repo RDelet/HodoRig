@@ -58,6 +58,10 @@ class Deformer(object):
     @property
     def object(self) -> OpenMaya.MObject:
         return self._object
+    
+    @object.setter
+    def object(self, value: OpenMaya.MObject):
+        self._object = value
 
     def outputs_geometry(self) -> OpenMaya.MObjectArray:
         """!@Brief Get all output deformer shapes."""

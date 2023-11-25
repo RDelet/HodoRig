@@ -41,6 +41,7 @@ def _save_skin(node: str, directory: str):
         skin.save(file_path)
     except Exception:
         log.error(f"Error on save skin of {node} !")
+        log.error(traceback.format_exc())
 
 
 def process(*args, **kwargs):

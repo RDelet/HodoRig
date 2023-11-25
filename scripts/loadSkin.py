@@ -34,12 +34,15 @@ def _load_skin(node: str, file_path: str):
         if not skin.shape:
             raise RuntimeError("No shape found !")
 
-        skin_obj = Skin.find(skin.shape)
+        skin_obj = Skin.find(skin.shape.object)
         if not skin_obj:
             skin.bind()
+        else:
+            skin.object = skin_obj
         skin.apply()
     except Exception:
-        log.error(f"Error on save skin of {node} !")
+        log.error(f"Error on load skin on {node} !")
+        log.error(traceback.format_exc())
 
 
 def process(*args, **kwargs):
