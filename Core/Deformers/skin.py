@@ -205,7 +205,7 @@ class Skin(Deformer):
 
     def get_shape_component(self):
         if self._shape.has_fn(OpenMaya.MFn.kMesh):
-            component = self._shape.component()
+            component = self._shape.components()
         else:
             raise RuntimeError(f"Invalide shape type {self._shape.apiTypeStr()} !")
 
