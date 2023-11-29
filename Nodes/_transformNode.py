@@ -18,6 +18,16 @@ class _TransformNode(_DAGNode):
 
     kApiType = OpenMaya.MFn.kTransform
 
+    @property
+    def shapes(self) -> list:
+        shapes = []
+        for i in range(self._mfn.childCount()):
+            child = self._mfn.child(i)
+            if child.hasFn(OpenMaya.MFn.kShape):
+                shapes.append(Node.get_node(child))
+
+        return shapes
+
     def matrix(self, world: bool = True) -> OpenMaya.MMatrix:
         matrix = cmds.xform(self.name, query=True,
                             matrix=True, objectSpace=not world, worldSpace=world)

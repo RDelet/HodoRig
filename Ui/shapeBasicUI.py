@@ -2,11 +2,11 @@ import os
 from functools import partial
 
 from maya import cmds
+from maya.api import OpenMaya
 
 from PySide2 import QtCore, QtWidgets
 
-from HodoRig.Core import constants
-from HodoRig.Core.nameBuilder import NameBuilder
+from HodoRig.Core import constants, file
 from HodoRig.Nodes.node import Node
 from HodoRig.Nodes._shape import _Shape
 from HodoRig.Nodes.manip import Manip
@@ -24,6 +24,12 @@ class ShapeItem(QtWidgets.QListWidgetItem):
         self.name = os.path.split(path)[-1].split(".")[0]
 
         super().__init__(self.name, *args, **kwargs)
+    
+    def __str__(self) -> str:
+        return self.__repr__()
+
+    def __repr__(self) -> str:
+        return self.name
     
     @property
     def icon(self) -> str:
@@ -114,18 +120,32 @@ class ShapeView(QtWidgets.QWidget):
         layout.addRow("Scale Factor", self._scale)
     
     @staticmethod
-    def get_shape() -> list:
+    def get_shape_path(file_name: str) -> str:
+        if "." not in file_name:
+            file_name = f"{file_name}.{constants.kShapeExtension}"
+        return os.path.join(constants.kShapeDir, file_name)
+    
+    @classmethod
+    def get_shapes(cls) -> list:
         p = constants.kShapeDir
-        return [ShapeItem(os.path.join(p, x)) for x in os.listdir(p)]
+        return [ShapeItem(cls.get_shape_path(x)) for x in os.listdir(p)]
     
     def update_content(self):
         self._list_view.clear()
-        [self._list_view.addItem(item) for item in self.get_shape()]
+        [self._list_view.addItem(item) for item in self.get_shapes()]
     
     def dump_shape(self):
         selected = cmds.ls(selection=True, long=True)
         if len(selected) > 1:
             raise RuntimeError("select one node !")
+        
+        node = Node.get_node(selected[0])
+        if not node.has_fn(OpenMaya.MFn.kTransform):
+            raise RuntimeError("Select transform node !")
+    
+        shapes = node.shapes
+        if len(shapes) == 0:
+            raise RuntimeError(f"No shape found under {node.name} !")
 
         file_name, valid = QtWidgets.QInputDialog.getText(self, 'File Name', 'Give file name')
         if not valid:
@@ -133,11 +153,14 @@ class ShapeView(QtWidgets.QWidget):
         if not file_name:
             raise RuntimeError("No name given !")
 
-        if file_name in self.get_shape():
+        if file_name in self.get_shapes():
             raise RuntimeError(f"File {file_name}.{constants.kShapeExtension} already exists!")
 
-        new_shape = Node.get_node(selected[0])
-        new_shape.dump(file_name)
+        data = []
+        for shape in node.shapes:
+            data.append(shape.to_dict())
+        file.dump_json(data, self.get_shape_path(file_name))
+
 
         self.update_content()
     

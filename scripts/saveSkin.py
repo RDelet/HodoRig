@@ -18,6 +18,7 @@ from PySide2 import QtWidgets
 from maya import cmds
 
 from HodoRig.Core import constants
+from HodoRig.Core.logger import log
 from HodoRig.Core.Deformers.skin import Skin
 from HodoRig.Ui import utils
 
@@ -35,6 +36,9 @@ kScriptName = 'Save Skin'
 def _save_skin(node: str, directory: str):
     try:
         skin = Skin.get(node)
+        if not skin:
+            log.debug(f"Node {node} does not have skin.")
+            return
         short_name = node.split("|")[-1].split(":")[-1]
         file_name = f"{short_name}.{constants.kSkinExtension}"
         file_path = os.path.normpath(os.path.join(directory, file_name))
