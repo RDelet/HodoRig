@@ -1,8 +1,11 @@
 from maya import cmds
+from maya.api import OpenMaya
 
 from PySide2 import QtWidgets
 
 from HodoRig.Core import constants
+from HodoRig.Core.logger import log
+from HodoRig.Nodes.node import Node
 from HodoRig.Ui.Widgets.groupWidget import GroupWidget
 
 
@@ -39,8 +42,13 @@ class ColorWidget(GroupWidget):
 
     def _set_color(self):
         color = self.sender().color
-        selected = cmds.ls(selection=True, long=True, type='transform')
-        shapes = cmds.listRelatives(selected, shapes=True, fullPath=True)
-        for shape in shapes:
-            cmds.setAttr('{0}.overrideEnabled'.format(shape), True)
-            cmds.setAttr('{0}.overrideColor'.format(shape), color.maya_index)
+        selected = cmds.ls(selection=True, long=True)
+        for node in selected:
+            node = Node.get_node(node)
+            if not node.has_fn(OpenMaya.MFn.kDagNode):
+                continue
+            try:
+                cmds.setAttr('{0}.overrideEnabled'.format(node.name), True)
+                cmds.setAttr('{0}.overrideColor'.format(node.name), color.maya_index)
+            except:
+                log.debug(f"Impossible to set color on {node.name}.")

@@ -75,8 +75,4 @@ class _TransformNode(_DAGNode):
             node = Node(node)
         if not isinstance(node, _TransformNode):
             raise RuntimeError(f"Node must be a transform not {type(node)}")
-        
-        if world:
-            self.world_matrix = node.world_matrix
-        else:
-            self.matrix = node.matrix
+        self.set_matrix(node.matrix(world=world), world=world)

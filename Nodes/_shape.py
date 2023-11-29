@@ -71,7 +71,7 @@ class _Shape(_DAGNode):
         log.info(f"File write: {output_path}")
 
     def scale(self, factor: float, normalize: bool = False):
-        points = self.points(normalize=normalize)
+        points = self.points(normalize=normalize, world=False)
         point.scale(points, factor)
-        self.set_points(points)
+        self.set_points(points, world=False)
         self.update()
