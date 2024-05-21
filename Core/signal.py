@@ -19,7 +19,7 @@ class Signal:
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(count: {len(self._callbacks)})"
     
-    def __wrap_weakref(self, slot: callable) -> weakref.ReferenceType:
+    def __wrap_weakref(self, slot: Callable[[T], None]) -> weakref.ReferenceType:
         return weakref.WeakMethod(slot) if ismethod(slot) else weakref.ref(slot)
     
     @property
