@@ -68,6 +68,22 @@ class Skin(Deformer):
                                                                          self.name,
                                                                          self._shape.name if self._shape else '',
                                                                          self.influence_count())
+    
+    def get_influence_weights(skn):
+        # ToDo transform to this lib
+        influences = [x.split("|")[-1].split("|")[-1] for x in skn.influences_names]
+        weights = skn.weights()
+        inf_count = len(influences)
+        vtx_count = int(weights.length() / skn.influences_count())
+
+        data = {x: [0.0] * vtx_count for x in influences}
+
+        for j in range(vtx_count):
+            for i, influence in enumerate(influences):
+                weight_id = int((j * inf_count) + i)
+                data[influence][j] = weights[weight_id]
+
+        return data
 
     def add_joint(self, name: str, pos: Union[list, OpenMaya.MVector, OpenMaya.MPoint]=None,
                   parent: Union[str, OpenMaya.MObject] = None, build: bool = False) -> OpenMaya.MObject:

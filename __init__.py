@@ -10,6 +10,7 @@ from HodoRig.Core.logger import log
 
 
 dir, _ = os.path.split(__file__)
+batch_mode = cmds.about(batch=True)
 
 
 try:
@@ -22,11 +23,12 @@ except Exception:
 
 
 try:
-    from HodoRig.Ui.Overrides.mayaSyntaxHighLigther import MayaSyntaxHighLigther
+    if not batch_mode:
+        from HodoRig.Ui.Overrides.mayaSyntaxHighLigther import MayaSyntaxHighLigther
 
-    app = QtWidgets.QApplication.instance()
-    app.focusChanged.connect(MayaSyntaxHighLigther.focus_changed_cb)
-    MayaSyntaxHighLigther.add_on_all_control()
+        app = QtWidgets.QApplication.instance()
+        app.focusChanged.connect(MayaSyntaxHighLigther.focus_changed_cb)
+        MayaSyntaxHighLigther.add_on_all_control()
 except Exception:
     log.info(traceback.format_exc())
     log.error("Error on create high lither syntax !")
