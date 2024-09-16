@@ -6,25 +6,29 @@ from PySide2 import QtWidgets
 
 from maya import cmds
 
-from HodoRig.Core.logger import log
+from .Core.logger import log
 
 
 dir, _ = os.path.split(__file__)
-batch_mode = cmds.about(batch=True)
+
+try:
+    batch_mode = cmds.about(batch=True)
+except Exception:
+    batch_mode = True
 
 
 try:
-    from HodoRig.Core import apiUndo
+    from .Core import apiUndo
 
     apiUndo.install()
 except Exception:
-    log.info(traceback.format_exc())
+    log.error(traceback.format_exc())
     log.error("Error on install apiUndo !")   
 
 
 try:
     if not batch_mode:
-        from HodoRig.Ui.Overrides.mayaSyntaxHighLigther import MayaSyntaxHighLigther
+        from .Ui.Overrides.mayaSyntaxHighLigther import MayaSyntaxHighLigther
 
         app = QtWidgets.QApplication.instance()
         app.focusChanged.connect(MayaSyntaxHighLigther.focus_changed_cb)
@@ -35,7 +39,7 @@ except Exception:
 
 
 try:
-    from HodoRig.Core import quickScripts
+    from .Core import quickScripts
 
     hodorig_scripts = os.path.normpath(os.path.join(dir, "scripts"))
     quickScripts.register_path(hodorig_scripts)
@@ -46,8 +50,8 @@ except Exception:
 
 
 try:
-    from HodoRig.Core import quickScripts
-    from HodoRig.Ui.Overrides.mayaMenu import MenuItem, Item
+    from .Core import quickScripts
+    from .Ui.Overrides.mayaMenu import MenuItem, Item
 
     _sub_menu = {}
 
@@ -84,7 +88,7 @@ except Exception:
 
 
 try:
-    from HodoRig.Core.hotKey import Hotkey
+    from .Core.hotKey import Hotkey
 
     file_path = os.path.normpath(os.path.join(dir, "Settings/hotKeys.json"))
     func = partial(Hotkey.from_file, file_path)

@@ -1,9 +1,8 @@
-import os
+from pathlib import Path
 import sys
 
-# Init current module
-dir, _ = os.path.split(__file__)
-module_dir = os.path.normpath(os.path.join(dir, "../.."))
-sys.path.insert(0, module_dir)
+_current_dir = Path(__file__)
+_module_dir = _current_dir.parent.parent.parent.parent
+sys.path.insert(0, str(_module_dir))
 
 import HodoRig
