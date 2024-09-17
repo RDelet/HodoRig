@@ -6,14 +6,14 @@ from maya.api import OpenMaya
 
 from PySide2 import QtCore, QtWidgets
 
-from HodoRig.Core import constants, file
-from HodoRig.Nodes.node import Node
-from HodoRig.Nodes._shape import _Shape
-from HodoRig.Nodes.manip import Manip
-from HodoRig.Ui import utils
-from HodoRig.Ui.Widgets.colorWidget import ColorWidget
-from HodoRig.Ui.Widgets.hSlider import HSlider
-from HodoRig.Ui.Widgets.groupWidget import GroupWidget
+from ..Core import constants, file
+from ..Nodes.node import Node
+from ..Nodes._shape import _Shape
+from ..Nodes.manip import Manip
+from ..Ui import utils
+from ..Ui.Widgets.colorWidget import ColorWidget
+from ..Ui.Widgets.hSlider import HSlider
+from ..Ui.Widgets.groupWidget import GroupWidget
 
 
 class ShapeItem(QtWidgets.QListWidgetItem):

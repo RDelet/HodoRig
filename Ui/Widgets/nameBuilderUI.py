@@ -1,6 +1,6 @@
 from PySide2 import QtWidgets
 
-from HodoRig.Core.nameBuilder import NameBuilder
+from ...Core.nameBuilder import NameBuilder
 
 
 class NameBuilderUI(QtWidgets.QWidget):

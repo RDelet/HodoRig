@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from maya.api import OpenMaya
 
-from HodoRig.Core import constants, _factory, point, utils
-from HodoRig.Nodes._shape import _Shape
+from ..Core import constants, _factory, point, utils
+from ..Nodes._shape import _Shape
 
 
 @_factory.register()

@@ -3,7 +3,7 @@ from typing import Union
 
 from maya.api import OpenMaya
 
-from HodoRig.Core import _factory, utils
+from ..Core import _factory, utils
 
 
 class Node:

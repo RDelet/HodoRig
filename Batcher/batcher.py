@@ -47,6 +47,56 @@ except Exception as e:
 
 
 # ===========================================
+# subprocess
+# ===========================================
+
+def _get_cmd(scene_file: Path, python_file: Path):
+    cmd = [str(_mayapy), str(python_file), f"-f \"{str(scene_file)}\""]
+
+    batcher_vars = ["name", "directory"]
+    for key, value in _args.items():
+        if key not in batcher_vars and value is not None:
+            cmd.append(f"--{key} {str(value)}")
+    
+    return cmd
+
+
+def run_process(cmd: list | tuple):
+    try:
+        print(f"subprocess.Popen command: {cmd}")
+        proc = subprocess.Popen(cmd,
+                                stdin=None,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                bufsize=1,
+                                universal_newlines=True,
+                                shell=True)
+        for line in _unbuffered(proc):
+            print(line)
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"Error on excecute command !") from e
+
+
+def _unbuffered(proc, stream='stdout'):
+    stream = getattr(proc, stream)
+    with contextlib.closing(stream):
+        while True:
+            out = []
+            last = stream.read(1)
+            # Don't loop forever
+            if last == '' and proc.poll() is not None:
+                break
+            while last not in ['\n', '\r\n', '\r']:
+                # Don't loop forever
+                if last == '' and proc.poll() is not None:
+                    break
+                out.append(last)
+                last = stream.read(1)
+            out = ''.join(out)
+            yield out
+
+
+# ===========================================
 # Batcher
 # ===========================================
 
@@ -82,7 +132,7 @@ def _get_all_scenario_names() -> list:
     return [x.with_suffix("").name for x in _scenarios_dir.glob("*.py") if x.is_file()]
 
 
-def _create_scenario(scenario: str) -> Path:
+def _create_scenario_file(scenario: str) -> Path:
     # Read maya stand alone file
     with _maya_stand_alone_path.open('r') as source_file:
         source_content = source_file.readlines()
@@ -113,59 +163,15 @@ def _create_scenario(scenario: str) -> Path:
     return python_batch_path
 
 
-def _unbuffered(proc, stream='stdout'):
-    stream = getattr(proc, stream)
-    with contextlib.closing(stream):
-        while True:
-            out = []
-            last = stream.read(1)
-            # Don't loop forever
-            if last == '' and proc.poll() is not None:
-                break
-            while last not in ['\n', '\r\n', '\r']:
-                # Don't loop forever
-                if last == '' and proc.poll() is not None:
-                    break
-                out.append(last)
-                last = stream.read(1)
-            out = ''.join(out)
-            yield out
-
-
-def run_process(scene_file: Path, python_file: Path):
-    # Create commande
-    cmd_args = [str(_mayapy), str(python_file), f"-f \"{str(scene_file)}\""]
-    # Add scenario arguments
-    batcher_vars = ["name", "directory"]
-    for key, value in _args.items():
-        if key not in batcher_vars and value is not None:
-            cmd_args.append(f"--{key} {str(value)}")
-    
-    try:
-        print(f"Batch command: {cmd_args}")
-        proc = subprocess.Popen(cmd_args,
-                                stdin=None,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT,
-                                bufsize=1,
-                                universal_newlines=True,
-                                shell=True)
-        for line in _unbuffered(proc):
-            print(line)
-    except subprocess.CalledProcessError as e:
-        error = f"Erreur lors de l'exécution du script : {e}"
-
-
-
 def main():
     scenario_name = _get_scenario_name()
     if scenario_name not in _get_all_scenario_names():
         raise RuntimeError(f'Scenario "{scenario_name}" not found !')
 
-    tmp_file = _create_scenario(scenario_name)
+    tmp_file = _create_scenario_file(scenario_name)
     files = _get_files()
     for f in files:
-        run_process(f, tmp_file)
+        run_process(_get_cmd(f, tmp_file))
 
 if __name__ == "__main__":
     main()

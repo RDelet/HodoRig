@@ -3,10 +3,10 @@ from maya.api import OpenMaya
 
 from PySide2 import QtWidgets
 
-from HodoRig.Core import constants
-from HodoRig.Core.logger import log
-from HodoRig.Nodes.node import Node
-from HodoRig.Ui.Widgets.groupWidget import GroupWidget
+from ...Core import constants
+from ...Core.logger import log
+from ...Nodes.node import Node
+from ...Ui.Widgets.groupWidget import GroupWidget
 
 
 class ColorButton(QtWidgets.QPushButton):

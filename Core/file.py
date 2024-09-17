@@ -5,7 +5,7 @@ import traceback
 from pathlib import Path
 from typing import Optional
 
-from HodoRig.Core.logger import log
+from ..Core.logger import log
 
 
 def is_valid_directory(dir_path) -> bool:

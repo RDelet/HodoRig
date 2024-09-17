@@ -29,23 +29,23 @@ class GroupWidget(QtWidgets.QWidget):
         self._header.setFixedHeight(20)
         self._layout.addWidget(self._header)
 
-        header_layout = QtWidgets.QHBoxLayout(self._header)
-        header_layout.setSpacing(2)
-        header_layout.setContentsMargins(0, 0, 0, 0)
-        header_layout.setAlignment(QtCore.Qt.AlignLeft)
+        self._header_layout = QtWidgets.QHBoxLayout(self._header)
+        self._header_layout.setSpacing(2)
+        self._header_layout.setContentsMargins(0, 0, 0, 0)
+        self._header_layout.setAlignment(QtCore.Qt.AlignLeft)
 
         self._expand = QtWidgets.QToolButton()
         self._expand.setArrowType(QtCore.Qt.RightArrow)
         self._expand.setStyleSheet("QToolButton { border: none; }")
         self._expand.clicked.connect(self.__on_expand_clicked)
-        header_layout.addWidget(self._expand)
+        self._header_layout.addWidget(self._expand)
 
         self._title = QtWidgets.QLabel(title)
         self._title.setObjectName("HeaderLabel")
         self._title.setStyleSheet("font: bold;")
-        header_layout.addWidget(self._title)
+        self._header_layout.addWidget(self._title)
 
-        header_layout.addStretch()
+        # self._header_layout.addStretch()
     
     def _init_widget(self):
 
@@ -61,6 +61,16 @@ class GroupWidget(QtWidgets.QWidget):
     def set_expanded(self, expanded):
         self._expand.setArrowType(QtCore.Qt.DownArrow if expanded else QtCore.Qt.RightArrow)
         self._widget.setVisible(expanded)
+        self._widget.updateGeometry()
+
+        layout = self._widget.layout()
+        if layout:
+            layout.update()
+            layout.activate()
+        
+        self.updateGeometry()
+        self._header_layout.update()
+        self._header_layout.activate()
 
     def set_header_color(self, color: list = None):
         if color:

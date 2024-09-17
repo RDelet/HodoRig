@@ -6,8 +6,8 @@ import traceback
 
 from PySide2 import QtCore, QtGui, QtWidgets
 
-from HodoRig.Core import quickScripts, constants
-from HodoRig.Core.logger import log
+from ..Core import quickScripts, constants
+from ..Core.logger import log
 
 
 class QuickScriptUiLite(QtWidgets.QWidget):

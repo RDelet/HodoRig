@@ -2,7 +2,7 @@ from typing import Optional
 
 from PySide2 import QtCore, QtGui, QtWidgets
 
-from HodoRig.Ui import utils as uiUtils
+from ...Ui import utils as uiUtils
 
 
 class SyntaxHighLigther(QtGui.QSyntaxHighlighter):

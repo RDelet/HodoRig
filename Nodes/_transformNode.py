@@ -4,9 +4,9 @@ import math
 from maya import cmds
 from maya.api import OpenMaya
 
-from HodoRig.Core import _factory
-from HodoRig.Nodes._dagNode import _DAGNode
-from HodoRig.Nodes.node import Node
+from ..Core import _factory
+from ..Nodes._dagNode import _DAGNode
+from ..Nodes.node import Node
 
 
 to_rad = math.radians

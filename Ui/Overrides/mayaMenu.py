@@ -6,7 +6,7 @@ import uuid
 
 from maya import cmds
 
-from HodoRig.Core.logger import log
+from ...Core.logger import log
 
 
 kMainWindow = "MayaWindow"

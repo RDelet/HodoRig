@@ -1,9 +1,11 @@
-import sys
 import logging
+from pathlib import Path
 
 
-_logLevel = logging.DEBUG
-_kLoggerName = "Hodo Rig"
+_current_dir = Path(__file__)
+
+_logLevel = logging.INFO
+_kLoggerName = _current_dir.parent.name
 log = logging.getLogger(_kLoggerName)
 log.setLevel(_logLevel)
 

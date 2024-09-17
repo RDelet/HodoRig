@@ -3,9 +3,9 @@ import os
 
 from maya.api import OpenMaya
 
-from HodoRig.Core import constants, _factory, file, point
-from HodoRig.Core.logger import log
-from HodoRig.Nodes._dagNode import _DAGNode
+from ..Core import constants, _factory, file, point
+from ..Core.logger import log
+from ..Nodes._dagNode import _DAGNode
 
 
 class _Shape(_DAGNode):
@@ -63,6 +63,7 @@ class _Shape(_DAGNode):
         file_path = os.path.join(constants.kShapeDir, f"{file_name}.{constants.kShapeExtension}")
         data = file.read_json(file_path)
         log.info(f"File read: {file_path}")
+
         return cls.from_dict(data, parent, shape_dir=shape_dir, scale=scale)
 
     def dump(self, file_name: str, normalize: bool = True):

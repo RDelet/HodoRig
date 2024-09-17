@@ -3,7 +3,7 @@ from typing import Optional
 
 from maya.api import OpenMaya
 
-from HodoRig.Core import _factory, utils
+from ..Core import _factory, utils
 
 
 @_factory.register()

@@ -3,7 +3,7 @@ from typing import Any
 
 from maya.api import OpenMaya
 
-from HodoRig.Core import utils
+from ..Core import utils
 
 
 _instances = {}

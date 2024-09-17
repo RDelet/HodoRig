@@ -1,11 +1,15 @@
 import traceback
 
-from HodoRig.Core.logger import log
-from HodoRig.Core.cache import NodeCache
-from HodoRig.Core.context import NodeCacheContext
+from ..Core.logger import log
+from ..Core.cache import NodeCache
+from ..Core.context import NodeCacheContext
+from ..Core.signal import Signal
 
 
 class Builder:
+
+    build_succed = Signal()
+    build_failed = Signal()
 
     def __init__(self):
         self._node_cache = NodeCache(enable=False)
@@ -30,27 +34,28 @@ class Builder:
         with NodeCacheContext(self._node_cache):
             try:
                 self._pre_build(*args, **kwargs)
-            except Exception:
+            except Exception as e:
                 self._on_build_failed()
-                raise RuntimeError("Error on pre build !")
+                raise RuntimeError("Error on pre build !") from e
             
             try:
                 self._build(*args, **kwargs)
-            except Exception:
+            except Exception as e:
                 self._on_build_failed()
-                raise RuntimeError("Error on build !")
+                raise RuntimeError("Error on build !") from e
             
             try:
                 self._post_build(*args, **kwargs)
-            except Exception:
+            except Exception as e:
                 self._on_build_failed()
-                raise RuntimeError("Error on post build !")
+                raise RuntimeError("Error on post build !") from e
             
             self._on_build_succed()
 
     def _on_build_succed(self):
         log.debug(f"{self.__class__.__name__} build succes !")
+        self.build_succed.emit(self)
 
     def _on_build_failed(self):
         log.error(f"{self.__class__.__name__} build failed !")
-        log.error(traceback.format_exc())
+        self.build_failed.emit(self)

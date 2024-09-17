@@ -1,5 +1,5 @@
-from HodoRig.Core import utils
-from HodoRig.Core.cache import NodeCache
+from ..Core import utils
+from ..Core.cache import NodeCache
 
 
 class Context:

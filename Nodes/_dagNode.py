@@ -4,9 +4,9 @@ from typing import Optional
 from maya import cmds
 from maya.api import OpenMaya
 
-from HodoRig.Core import _factory, utils
-from HodoRig.Nodes._dgNode import _DGNode
-from HodoRig.Nodes.node import Node
+from ..Core import _factory, utils
+from ..Nodes._dgNode import _DGNode
+from ..Nodes.node import Node
 
 
 @_factory.register()

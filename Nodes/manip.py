@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from maya.api import OpenMaya
 
-from HodoRig.Core import constants, utils
-from HodoRig.Core.nameBuilder import NameBuilder
-from HodoRig.Core.builder import Builder
-from HodoRig.Nodes._transformNode import _TransformNode
-from HodoRig.Nodes.node import Node
-from HodoRig.Nodes._shape import _Shape
+from ..Core import constants, utils
+from ..Core.nameBuilder import NameBuilder
+from ..Core.builder import Builder
+from ..Nodes._transformNode import _TransformNode
+from ..Nodes.node import Node
+from ..Nodes._shape import _Shape
 
 
 class Manip(_TransformNode, Builder):

@@ -1,6 +1,6 @@
 from PySide2 import QtWidgets
 
-from HodoRig.Ui.Overrides.syntaxHighLigther import SyntaxHighLigther
+from ...Ui.Overrides.syntaxHighLigther import SyntaxHighLigther
 
 
 class MayaSyntaxHighLigther(SyntaxHighLigther):

@@ -1,5 +1,8 @@
 from functools import partial
 
+from maya import cmds
+
+
 kObjectMenu = "buildObjectMenuItemsNow"  # ViewPort menu
 
 

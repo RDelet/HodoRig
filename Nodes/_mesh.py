@@ -6,8 +6,8 @@ from typing import Optional
 from maya import cmds
 from maya.api import OpenMaya
 
-from HodoRig.Core import constants, _factory, point, utils
-from HodoRig.Nodes._shape import _Shape
+from ..Core import constants, _factory, point, utils
+from ..Nodes._shape import _Shape
 
 
 @dataclass

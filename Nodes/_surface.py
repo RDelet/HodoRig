@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from maya.api import OpenMaya
 
-from HodoRig.Core import constants, _factory, point, utils
-from HodoRig.Nodes._shape import _Shape
+from ..Core import constants, _factory, point, utils
+from ..Nodes._shape import _Shape
 
 
 @_factory.register()
@@ -29,7 +29,7 @@ class _Surface(_Shape):
         self._mfn.setCVPositions(points, space)
     
     def components(self, shape: str | OpenMaya.MObject,
-                          use_u_rows: bool = False) -> OpenMaya.MObject:
+                   use_u_rows: bool = False) -> OpenMaya.MObject:
         double_component = OpenMaya.MFnDoubleIndexedComponent()
         component = double_component.create(OpenMaya.MFn.kSurfaceCVComponent)
         u_count = self._mfn.numCVsInU

@@ -4,8 +4,8 @@ from typing import Any, TypeVar
 
 from maya.api import OpenMaya
 
-from HodoRig.Core import _instances, utils
-from HodoRig.Core.logger import log
+from ..Core import _instances, utils
+from ..Core.logger import log
 
 
 ClassType = TypeVar("ClassType", bound="BaseClass")

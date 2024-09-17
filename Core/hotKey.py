@@ -6,7 +6,7 @@ import traceback
 
 from maya import cmds
 
-from HodoRig.Core.logger import log
+from ..Core.logger import log
 
 
 class Hotkey:
@@ -44,7 +44,7 @@ class Hotkey:
                     ctrlModifier=self.ctrl_modifier,
                     shiftModifier=self.shift_modifier)
 
-        log.info(f"Add HotKey {self.cmd_name}")
+        log.warning(f"Add HotKey {self.cmd_name}")
     
     def _add_on_release(self):
         if self.release_command:
@@ -58,7 +58,7 @@ class Hotkey:
                     ctrlModifier=self.ctrl_modifier,
                     shiftModifier=self.shift_modifier)
 
-        log.info(f"Add release HotKey {self.cmd_name}")
+        log.warning(f"Add release HotKey {self.cmd_name}")
     
     def add(self):
         self._add_on_press()
@@ -83,7 +83,7 @@ class Hotkey:
     def removecommand(cls, name):
         if cls.command_exists(name):
             cmds.runTimeCommand(name, edit=True, delete=True)
-            log.info(f"Remove HotKey command {name}")
+            log.warning(f"Remove HotKey command {name}")
 
     @classmethod
     def from_file(cls, path: str) -> list:

@@ -1,5 +1,6 @@
 from functools import partial
 import os
+from pathlib import Path
 import traceback
 
 from PySide2 import QtWidgets
@@ -9,12 +10,9 @@ from maya import cmds
 from .Core.logger import log
 
 
-dir, _ = os.path.split(__file__)
+_current_dir = Path(__file__).parent
 
-try:
-    batch_mode = cmds.about(batch=True)
-except Exception:
-    batch_mode = True
+batch_mode = cmds.about(batch=True)
 
 
 try:
@@ -22,7 +20,7 @@ try:
 
     apiUndo.install()
 except Exception:
-    log.error(traceback.format_exc())
+    log.info(traceback.format_exc())
     log.error("Error on install apiUndo !")   
 
 
@@ -41,7 +39,7 @@ except Exception:
 try:
     from .Core import quickScripts
 
-    hodorig_scripts = os.path.normpath(os.path.join(dir, "scripts"))
+    hodorig_scripts = _current_dir / "scripts"
     quickScripts.register_path(hodorig_scripts)
     quickScripts.retrieve()
 except Exception:
@@ -90,7 +88,7 @@ except Exception:
 try:
     from .Core.hotKey import Hotkey
 
-    file_path = os.path.normpath(os.path.join(dir, "Settings/hotKeys.json"))
+    file_path = _current_dir / "Settings" / "hotKeys.json"
     func = partial(Hotkey.from_file, file_path)
     cmds.evalDeferred(func)
 except Exception as exp:
