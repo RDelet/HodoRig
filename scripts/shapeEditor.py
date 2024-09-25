@@ -4,13 +4,14 @@
 !@Brief Open shape editor.
 
 File Path: {s_path}
+Command: None
 """
 
 import logging
 import traceback
 
-from HodoRig.Core.logger import log
-from HodoRig.Ui.shapeBasicUI import ShapeBasicUI
+from ..Core.logger import log
+from ..Ui.shapeBasicUI import ShapeBasicUI
 
 
 log = logging.getLogger('Shape Editor')

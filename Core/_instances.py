@@ -3,7 +3,7 @@ from typing import Any
 
 from maya.api import OpenMaya
 
-from ..Core import utils
+from ..Helpers import utils
 
 
 _instances = {}

@@ -1,12 +1,10 @@
-# coding=ascii
-
-from functools import partial
 import traceback
 import uuid
 
 from maya import cmds
 
 from ...Core.logger import log
+from ...Helpers import quickScripts
 
 
 kMainWindow = "MayaWindow"
@@ -79,8 +77,7 @@ class Item(MenuItem):
                                             subMenu=is_sub)
             
             if not is_sub and self._command:
-                func = partial(self._execute, self._command)
-                cmds.menuItem(self.path, edit=True, command=func)
+                cmds.menuItem(self.path, edit=True, command=self._command)
         except Exception as e:
             log.error(f"Error on create item {self._name} !")
             log.debug(traceback.format_exc())
@@ -89,5 +86,33 @@ class Item(MenuItem):
         for item in self._items:
             item.create()
 
-    def _execute(self, command, *args, **kwargs):
-        command()
+
+_sub_menu = {}
+
+def __build_sub_menu(menu_name: str, parent: MenuItem = None):
+    if not menu_name:
+        return
+
+    sub_menu = None
+    if menu_name in _sub_menu:
+        sub_menu = _sub_menu[menu_name]
+    else:
+        sub_menu = Item(menu_name, annotation="")
+        _sub_menu[menu_name] = sub_menu
+        if parent:
+            parent.add_item(sub_menu)
+
+    return sub_menu
+
+
+def build_hodorig_menu():
+    main_menu = MenuItem("HodoRig", annotation="HodoRig Tools")
+    scripts = quickScripts.get_scripts()
+    for name, mod in scripts.items():
+        if not mod.kMayaMenu:
+            continue
+        sub_menu = __build_sub_menu(mod.kCategory, parent=main_menu)
+        item = Item(name, annotation=mod.kAnnotation, image=mod.kImage,
+                    command=f"from {mod.__name__} import main as hodorMain; hodorMain()")
+        sub_menu.add_item(item) if sub_menu else main_menu.add_item(item)
+    main_menu.create()

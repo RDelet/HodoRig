@@ -1,9 +1,7 @@
 from __future__ import annotations
 import json
-import os
 import traceback
 from pathlib import Path
-from typing import Optional
 
 from ..Core.logger import log
 
@@ -54,7 +52,7 @@ def dump_json(data, path: str):
 
 
 def read_json(path: str):
-    if not os.path.isfile(path):
+    if not Path(path).is_file(path):
         raise RuntimeError(f"Path {path} is not a file !")
 
     try:

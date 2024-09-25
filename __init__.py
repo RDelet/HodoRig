@@ -37,10 +37,7 @@ except Exception:
 
 
 try:
-    from .Core import quickScripts
-
-    hodorig_scripts = _current_dir / "scripts"
-    quickScripts.register_path(hodorig_scripts)
+    from .Helpers import quickScripts
     quickScripts.retrieve()
 except Exception:
     log.info(traceback.format_exc())
@@ -48,45 +45,15 @@ except Exception:
 
 
 try:
-    from .Core import quickScripts
-    from .Ui.Overrides.mayaMenu import MenuItem, Item
-
-    _sub_menu = {}
-
-    def __build_sub_menu(menu_name: str, parent: MenuItem = None):
-        if not menu_name:
-            return
-
-        sub_menu = None
-        if menu_name in _sub_menu:
-            sub_menu = _sub_menu[menu_name]
-        else:
-            sub_menu = Item(menu_name, annotation="")
-            _sub_menu[menu_name] = sub_menu
-            if parent:
-                parent.add_item(sub_menu)
-
-        return sub_menu
-
-    def create_from_scripts():
-        main_menu = MenuItem("HodoRig", annotation="HodoRig Tools")
-        scripts = quickScripts.get_scripts()
-        for name, mod in scripts.items():
-            if not mod.kMayaMenu:
-                continue
-            sub_menu = __build_sub_menu(mod.kCategory, parent=main_menu)
-            item = Item(name, annotation=mod.kAnnotation, image=mod.kImage,
-                        command=mod.main)
-            sub_menu.add_item(item) if sub_menu else main_menu.add_item(item)
-        main_menu.create()
-    cmds.evalDeferred(create_from_scripts)
+    from .Ui.Overrides.mayaMenu import build_hodorig_menu
+    cmds.evalDeferred(build_hodorig_menu)
 except Exception:
     log.info(traceback.format_exc())
     log.error("Error on create HodoRig menu !")
 
 
 try:
-    from .Core.hotKey import Hotkey
+    from .Helpers.hotKey import Hotkey
 
     file_path = _current_dir / "Settings" / "hotKeys.json"
     func = partial(Hotkey.from_file, file_path)

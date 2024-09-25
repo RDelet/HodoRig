@@ -4,7 +4,9 @@ from typing import Optional
 from maya import cmds
 from maya.api import OpenMaya
 
-from ..Core import _factory, utils
+from ..Helpers import utils
+
+from ..Core import _factory
 from ..Nodes._dgNode import _DGNode
 from ..Nodes.node import Node
 

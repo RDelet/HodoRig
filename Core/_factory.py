@@ -4,7 +4,9 @@ from typing import Any, TypeVar
 
 from maya.api import OpenMaya
 
-from ..Core import _instances, utils
+from ..Helpers import utils
+
+from ..Core import _instances
 from ..Core.logger import log
 
 

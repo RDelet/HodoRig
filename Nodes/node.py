@@ -3,7 +3,9 @@ from typing import Union
 
 from maya.api import OpenMaya
 
-from ..Core import _factory, utils
+from ..Helpers import utils
+
+from ..Core import _factory
 
 
 class Node:

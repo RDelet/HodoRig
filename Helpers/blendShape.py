@@ -6,15 +6,13 @@ from typing import Union
 from maya import cmds
 from maya.api import OpenMaya, OpenMayaAnim
 
-from HodoRig.Core import utils
-from HodoRig.Core.logger import log
-from HodoRig.Core.Deformers.deformer import Deformer
-from HodoRig.Nodes.node import Node
-
-from qdHelpers import qdAttr
-from qdHelpers.mayaProgressBar import ProgressBar
+from ..Core import utils
+from ..Core.logger import log
+from ..Helpers.deformer import Deformer
+from ..Nodes.node import Node
 
 
+'''
 class BlendShape(Deformer):
 
     kType = 'blendShape'
@@ -1094,3 +1092,4 @@ class BlendShape(Deformer):
 
         #   Dump
         cls._dump(a_data, s_output_path)
+'''

@@ -3,7 +3,9 @@ import os
 
 from maya.api import OpenMaya
 
-from ..Core import constants, _factory, file, point
+from ..Helpers import point
+
+from ..Core import constants, _factory, file
 from ..Core.logger import log
 from ..Nodes._dagNode import _DAGNode
 

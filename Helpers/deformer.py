@@ -3,10 +3,10 @@ import json
 
 from maya.api import OpenMaya, OpenMayaAnim
 
-from HodoRig.Core import utils
-from HodoRig.Core.logger import log
-from HodoRig.Core.jsonEncoder import JsonEncoder
-from HodoRig.Nodes.node import Node
+from ..Helpers import utils
+from ..Core.logger import log
+from ..Core.jsonEncoder import JsonEncoder
+from ..Nodes.node import Node
 
 
 class Deformer(object):

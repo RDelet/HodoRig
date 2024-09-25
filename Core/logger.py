@@ -4,7 +4,7 @@ from pathlib import Path
 
 _current_dir = Path(__file__)
 
-_logLevel = logging.INFO
+_logLevel = logging.DEBUG
 _kLoggerName = _current_dir.parent.name
 log = logging.getLogger(_kLoggerName)
 log.setLevel(_logLevel)

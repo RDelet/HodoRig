@@ -39,7 +39,7 @@ class Builder:
                 raise RuntimeError("Error on pre build !") from e
             
             try:
-                self._build(*args, **kwargs)
+                r = self._build(*args, **kwargs)
             except Exception as e:
                 self._on_build_failed()
                 raise RuntimeError("Error on build !") from e
@@ -51,6 +51,8 @@ class Builder:
                 raise RuntimeError("Error on post build !") from e
             
             self._on_build_succed()
+        
+        return r
 
     def _on_build_succed(self):
         log.debug(f"{self.__class__.__name__} build succes !")

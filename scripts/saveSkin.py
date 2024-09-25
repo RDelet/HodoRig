@@ -2,11 +2,11 @@
 
 """
 !@Brief Save selected skin cluster.
-
-File Path: {s_path}
-
     - Select all mesh you want to save
     - Select directory to save files
+
+File Path: {s_path}
+Command: None
 """
 
 import logging
@@ -17,10 +17,10 @@ from PySide2 import QtWidgets
 
 from maya import cmds
 
-from HodoRig.Core import constants
-from HodoRig.Core.logger import log
-from HodoRig.Core.Deformers.skin import Skin
-from HodoRig.Ui import utils
+from ..Core import constants
+from ..Core.logger import log
+from ..Helpers.skin import Skin
+from ..Ui import utils
 
 log = logging.getLogger('Save Skin')
 log.setLevel(logging.INFO)

@@ -6,7 +6,9 @@ from typing import Optional
 from maya import cmds
 from maya.api import OpenMaya
 
-from ..Core import constants, _factory, point, utils
+from ..Helpers import point, utils
+
+from ..Core import constants, _factory
 from ..Nodes._shape import _Shape
 
 

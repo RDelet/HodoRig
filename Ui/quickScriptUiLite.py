@@ -6,7 +6,9 @@ import traceback
 
 from PySide2 import QtCore, QtGui, QtWidgets
 
-from ..Core import quickScripts, constants
+from ..Helpers import quickScripts
+
+from ..Core import constants
 from ..Core.logger import log
 
 

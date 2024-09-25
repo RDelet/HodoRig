@@ -18,16 +18,6 @@ class _TransformNode(_DAGNode):
 
     kApiType = OpenMaya.MFn.kTransform
 
-    @property
-    def shapes(self) -> list:
-        shapes = []
-        for i in range(self._mfn.childCount()):
-            child = self._mfn.child(i)
-            if child.hasFn(OpenMaya.MFn.kShape):
-                shapes.append(Node.get_node(child))
-
-        return shapes
-
     def matrix(self, world: bool = True) -> OpenMaya.MMatrix:
         matrix = cmds.xform(self.name, query=True,
                             matrix=True, objectSpace=not world, worldSpace=world)
@@ -69,6 +59,16 @@ class _TransformNode(_DAGNode):
 
     def set_scale(self, value: list | OpenMaya.MVector, world: bool = True):
         cmds.xform(self.name, scale=value, objectSpace=not world, worldSpace=world)
+    
+    @property
+    def shapes(self) -> list:
+        shapes = []
+        for i in range(self._mfn.childCount()):
+            child = self._mfn.child(i)
+            if child.hasFn(OpenMaya.MFn.kShape):
+                shapes.append(Node.get_node(child))
+
+        return shapes
 
     def snap(self, node: str | OpenMaya.MObject | _TransformNode, world: bool = True):
         if isinstance(node, (str, OpenMaya.MObject)):

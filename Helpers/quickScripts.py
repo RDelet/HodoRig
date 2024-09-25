@@ -6,6 +6,7 @@ import traceback
 
 from ..Core.logger import log
 from ..Core import file
+from ..Scripts import all as allScripts
 
 
 _scripts_path = []
@@ -45,8 +46,15 @@ def get_scripts() -> dict:
     return _scripts
 
 
+def _retrieve_scripts():
+    _scripts.clear()
+    for mod in allScripts:
+        module_name = Path(mod.__file__).with_suffix("").name
+        _scripts[module_name] = mod
+
 def retrieve():
     _scripts.clear()
+    _retrieve_scripts()
     for path in _scripts_path:
         for f in file.get_directory_files(path, extension="*.py"):
             if not f.name.startswith("__"):

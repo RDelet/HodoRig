@@ -1,8 +1,9 @@
 from maya.api import OpenMaya, OpenMayaAnim
 
-from HodoRig.Core import mesh, utils
-from HodoRig.Core.component import SoftVertex
-from HodoRig.Core.deformer import Deformer
+from ..Core import mesh
+from ..Helpers import utils
+from ..Core.component import SoftVertex
+from ..Helpers.deformer import Deformer
 
 
 class SoftMod(Deformer):
