@@ -4,7 +4,6 @@
 !@Brief Open shape editor.
 
 File Path: {s_path}
-Command: None
 """
 
 import logging

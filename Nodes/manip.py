@@ -6,7 +6,7 @@ from maya.api import OpenMaya
 
 from ..Helpers import utils
 
-from ..Core import constants
+from ..Core import constants, _factory
 from ..Core.nameBuilder import NameBuilder
 from ..Builders.builder import Builder
 from ..Nodes._transformNode import _TransformNode
@@ -23,14 +23,15 @@ class ManipBuilder(Builder):
         if isinstance(name, str):
             name = NameBuilder.from_name(name)
 
-        reset = Node.create("transform", name=name.clone(type="RESET"))
-        object = utils.create("transform", name.clone(type="MANIP"), parent=self._reset.object)
-        shapes = _Shape.load(shape, self._object, shape_dir=shape_dir, scale=scale)
+        reset_obj = Node.create("transform", name=name.clone(type="RESET"))
+        manip_obj = Node.create("transform", name.clone(type="MANIP"), parent=reset_obj.object)
+        shapes = _Shape.load(shape, manip_obj.object, shape_dir=shape_dir, scale=scale)
 
-        cmds.addAttr(object.name, longName="resetGroup", dataType="message")
-        cmds.connectAttr(f"{reset.name}.message", f"{object.name}.resetGroup", force=True)
+        cmds.addAttr(manip_obj.name, longName=constants.kResetGroup, attributeType=constants.kMessage)
+        cmds.connectAttr(f"{reset_obj.name}.{constants.kMessage}",
+                         f"{manip_obj.name}.{constants.kResetGroup}", force=True)
 
-        manip = Manip(object, type=manip_type, shape=shapes)
+        manip = Manip(manip_obj, type=manip_type, shapes=shapes)
 
         return manip
 
@@ -40,15 +41,19 @@ class Manip(_TransformNode):
     builder = ManipBuilder()
 
     def __init__(self, node: Optional[str | OpenMaya.MObject] = None,
-                 type: Optional[str] = None, shape: Optional[list | tuple] = None):
-        super().__init__(self, node=node)
+                 type: Optional[str] = None, shapes: Optional[list | tuple] = None):
+        super().__init__(node=node)
 
         self._reset = None
-        self._shapes = None
+        self._shapes = shapes
         self._type = type
     
     @property
     def reset(self) -> _TransformNode:
+        if not self._reset and self._object and utils.is_valid(self._object):
+            plug = self._object.find_attribute(constants.kResetGroup)
+            plug_src = plug.source()
+            self._reset = None if plug_src.isNull() else _factory.create(plug_src.node())
         return self._reset
     
     @property

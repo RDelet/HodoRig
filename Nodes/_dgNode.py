@@ -15,6 +15,8 @@ class _DGNode:
     builder = None
 
     def __init__(self, node: Optional[str | OpenMaya.MObject] = None):
+        if isinstance(node, _DGNode):
+            node = node.object
         self._object = utils.check_object(node) if node else None
         self._mfn = None
         self._modifier = None

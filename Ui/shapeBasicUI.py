@@ -9,7 +9,7 @@ from PySide2 import QtCore, QtWidgets
 from ..Core import constants, file
 from ..Nodes.node import Node
 from ..Nodes._shape import _Shape
-from ..Nodes.manip import Manip
+from ..Nodes.manip import ManipBuilder
 from ..Ui import utils
 from ..Ui.Widgets.colorWidget import ColorWidget
 from ..Ui.Widgets.hSlider import HSlider
@@ -179,7 +179,7 @@ class ShapeView(QtWidgets.QWidget):
 
         txt = self._name.text()
         name = item.name if not txt else txt
-        new_manip = Manip()
+        new_manip = ManipBuilder()
         new_manip.build(name, shape=item.name, scale=self._scale.value)
 
         if selected and cmds.nodeType(selected[0]) == "joint":

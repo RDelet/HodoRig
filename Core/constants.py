@@ -57,6 +57,10 @@ kDegreeV = "degreeV"
 # Manip types
 kFk = "FK"
 
+# Attributes
+kMessage = "message"
+kResetGroup = "resetGroup"
+
 
 # Maya Colors
 class __Color(object):

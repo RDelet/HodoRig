@@ -6,7 +6,6 @@
     - Select directory to save files
 
 File Path: {s_path}
-Command: None
 """
 
 import logging

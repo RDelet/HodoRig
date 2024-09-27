@@ -4,7 +4,6 @@
 !@Brief QuickScripts template.
 
 File Path: {s_path}
-Command: None
 
 Add any help !
 """

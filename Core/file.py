@@ -52,7 +52,7 @@ def dump_json(data, path: str):
 
 
 def read_json(path: str):
-    if not Path(path).is_file(path):
+    if not Path(path).is_file():
         raise RuntimeError(f"Path {path} is not a file !")
 
     try:
