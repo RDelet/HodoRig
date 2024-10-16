@@ -1,18 +1,19 @@
 import os
+from pathlib import Path
 
 from PySide2 import QtGui
 
 from maya.api import OpenMaya
 
 
-kModuleDir, _ = os.path.split(__file__)
+kModuleDir = Path(__file__).parent
 
 kSkinExtension = "skin"
 
-kTemplateDir = os.path.normpath(os.path.join(kModuleDir, "../Templates"))
+kTemplateDir = kModuleDir.parent / "Templates"
 kTemplateExtension = "hrt"
 
-kShapeDir = os.path.normpath(os.path.join(kModuleDir, "../Shapes"))
+kShapeDir = kModuleDir.parent / "Shapes"
 kShapeExtension = "json"
 kIconExtension = "png"
 
@@ -101,6 +102,11 @@ kColors = [
 ]
 
 # Icons
-kIconsDir = os.path.normpath(os.path.join(kModuleDir, "../Icons"))
-kClose = QtGui.QIcon(os.path.join(kIconsDir, "close.svg"))
-kPython = QtGui.QIcon(os.path.join(kIconsDir, "python.svg"))
+kIconsDir = kModuleDir.parent / "Icons"
+kCloseIcon = QtGui.QIcon(str(kIconsDir / "close.svg"))
+kPythonIcon = QtGui.QIcon(str(kIconsDir / "python.svg"))
+kTrashIcon = QtGui.QIcon(str(kIconsDir / "trash.svg"))
+kLockCloseIcon = QtGui.QIcon(str(kIconsDir / "lockClose.svg"))
+klockOpenIcon = QtGui.QIcon(str(kIconsDir / "lockOpen.svg"))
+kSelectionOnIcon = QtGui.QIcon(str(kIconsDir / "cbSelectionOn.svg"))
+kSelectionOffIcon = QtGui.QIcon(str(kIconsDir / "cbSelectionOff.svg"))

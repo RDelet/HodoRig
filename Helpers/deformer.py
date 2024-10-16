@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+from typing import Optional
 
 from maya.api import OpenMaya, OpenMayaAnim
 
@@ -13,7 +14,7 @@ class Deformer(object):
 
     _kValidShape = [OpenMaya.MFn.kMesh]
 
-    def __init__(self, node: str | OpenMaya.MObject = None):
+    def __init__(self, node: Optional[str | OpenMaya.MObject] = None):
         self._object = None
         self._shape = None
         self._shape_data = None

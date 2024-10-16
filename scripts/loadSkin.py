@@ -20,7 +20,6 @@ log = logging.getLogger('Load Skin')
 log.setLevel(logging.INFO)
 
 kMayaMenu = True
-
 kCategory = "Skin"
 kAnnotation = "Load skin from file"
 kImage = None
