@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from typing import Optional
 
-from PySide2 import QtWidgets
+try:
+    from PySide2 import QtGui
+except:
+    from PySide6 import QtGui
 
 
 class StateButton(QtWidgets.QPushButton):

@@ -1,7 +1,10 @@
 import os
 from pathlib import Path
 
-from PySide2 import QtGui
+try:
+    from PySide2 import QtGui
+except:
+    from PySide6 import QtGui
 
 from maya.api import OpenMaya
 

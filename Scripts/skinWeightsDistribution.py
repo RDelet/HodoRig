@@ -15,7 +15,10 @@ import numpy as np
 import traceback
 from typing import Optional
 
-from PySide2 import QtCore, QtGui, QtWidgets
+try:
+    from PySide2 import QtCore, QtGui, QtWidgets
+except:
+    from PySide6 import QtCore, QtGui, QtWidgets
 
 from maya import cmds
 from maya.api import OpenMaya as om2

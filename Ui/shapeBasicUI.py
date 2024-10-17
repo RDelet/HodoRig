@@ -4,7 +4,10 @@ from functools import partial
 from maya import cmds
 from maya.api import OpenMaya
 
-from PySide2 import QtCore, QtWidgets
+try:
+    from PySide2 import QtCore, QtWidgets
+except:
+    from PySide6 import QtCore, QtWidgets
 
 from ..Core import constants, file
 from ..Nodes.node import Node
