@@ -10,6 +10,10 @@ from maya import cmds
 
 
 _current_dir = Path(__file__)
+_log_dir = _current_dir.parent.parent / "Logs"
+if not _log_dir.exists():
+    _log_dir.mkdir(parents=True, exist_ok=True)
+
 _logLevel = logging.DEBUG
 _kLoggerName = _current_dir.parent.name
 __date_str = datetime.now().strftime("%m_%d_%Y_%Hh%Mmin")

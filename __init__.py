@@ -16,7 +16,6 @@ batch_mode = cmds.about(batch=True)
 
 try:
     from .Core import apiUndo
-
     apiUndo.install()
 except Exception:
     log.info(traceback.format_exc())
@@ -26,7 +25,6 @@ except Exception:
 try:
     if not batch_mode:
         from .Ui.Overrides.mayaSyntaxHighLigther import MayaSyntaxHighLigther
-
         app = QtWidgets.QApplication.instance()
         app.focusChanged.connect(MayaSyntaxHighLigther.focus_changed_cb)
         MayaSyntaxHighLigther.add_on_all_control()
@@ -60,3 +58,11 @@ try:
 except Exception as exp:
     log.info(traceback.format_exc())
     log.error("Error on install HodoRig HotKey !")
+
+
+try:
+    from HodoRig.Core import _install_lib
+    _install_lib.install()
+except Exception as exp:
+    log.info(traceback.format_exc())
+    log.error("Error on install external lib !")

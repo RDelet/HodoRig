@@ -1,9 +1,9 @@
-
-__pycache__/__init__.cpython-310.pyc
 *.pyc
+*.log
 batch_settings/2022/Maya.env
 batch_settings/mayaLog
 batch_settings/projects/default/workspace.mel
 Batcher/maya_settings/2022/Maya.env
 Batcher/maya_settings/mayaLog
 Batcher/maya_settings/projects/default/workspace.mel
+Logs
