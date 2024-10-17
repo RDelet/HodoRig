@@ -1,6 +1,9 @@
 # coding=ascii
 
-from PySide2 import QtCore, QtWidgets
+try:
+    from PySide2 import QtCore, QtWidgets
+except:
+    from PySide6 import QtCore, QtWidgets
 
 
 class GroupWidget(QtWidgets.QWidget):
