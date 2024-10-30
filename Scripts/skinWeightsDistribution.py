@@ -17,8 +17,10 @@ from typing import Optional
 
 try:
     from PySide2 import QtCore, QtGui, QtWidgets
+    from PySide2.QtWidgets import QAction
 except:
     from PySide6 import QtCore, QtGui, QtWidgets
+    from PySide2.QtGui import QAction
 
 from maya import cmds
 from maya.api import OpenMaya as om2
@@ -423,7 +425,7 @@ class SkinWeightsDistribution(QtWidgets.QDialog):
         if not index.isValid():
             return
 
-        add_influence = QtWidgets.QAction("Add influence", self)
+        add_influence = QAction("Add influence", self)
         add_influence.triggered.connect(partial(self._add_influence, index))
 
         menu = QtWidgets.QMenu(self)
