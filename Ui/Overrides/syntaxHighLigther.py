@@ -2,8 +2,10 @@ from typing import Optional
 
 try:
     from PySide2 import QtCore, QtGui, QtWidgets
+    from Pyside2.QtCore import QRegExp
 except:
     from PySide6 import QtCore, QtGui, QtWidgets
+    from PySide6.QtCore import QRegularExpression as QRegExp
 
 from ...Ui import utils as uiUtils
 
@@ -16,10 +18,10 @@ class SyntaxHighLigther(QtGui.QSyntaxHighlighter):
     kGreen = QtGui.QColor(35, 170, 30)
     kBlue = QtGui.QColor(35, 170, 30)
 
-    rx_error = QtCore.QRegExp(r'[Ee][Rr][Rr][Oo][Rr]')
-    rx_warning = QtCore.QRegExp(r'[Ww][Aa][Rr][Nn][Ii][Nn][Gg]')
-    rx_debug = QtCore.QRegExp(r'[De][Ee][Bb][Uu][Gg]')
-    rx_info = QtCore.QRegExp(r'[Ii][Nn]][Fo][Oo]')
+    rx_error = QRegExp(r'[Ee][Rr][Rr][Oo][Rr]')
+    rx_warning = QRegExp(r'[Ww][Aa][Rr][Nn][Ii][Nn][Gg]')
+    rx_debug = QRegExp(r'[De][Ee][Bb][Uu][Gg]')
+    rx_info = QRegExp(r'[Ii][Nn]][Fo][Oo]')
 
     kBaseName = None
 

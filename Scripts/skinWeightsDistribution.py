@@ -17,10 +17,10 @@ from typing import Optional
 
 try:
     from PySide2 import QtCore, QtGui, QtWidgets
-    from PySide2.QtWidgets import QAction
+    from PySide2.QtWidgets import QAction, QUndoStack
 except:
     from PySide6 import QtCore, QtGui, QtWidgets
-    from PySide2.QtGui import QAction
+    from PySide6.QtGui import QAction, QUndoStack
 
 from maya import cmds
 from maya.api import OpenMaya as om2
@@ -184,7 +184,7 @@ class WeightSlider(QtWidgets.QWidget):
     lockToggled = QtCore.Signal()
 
     def __init__(self, influence_name: str, influence_id: int, weight: float, slider_id: int,
-                 parent: Optional[QtWidgets.QWidget] = None, undo_stack: Optional[QtWidgets.QUndoStack] = None):
+                 parent: Optional[QtWidgets.QWidget] = None, undo_stack: Optional[QUndoStack] = None):
         super().__init__(parent)
         self.undo_stack = undo_stack
 
@@ -292,7 +292,7 @@ class SkinWeightsDistribution(QtWidgets.QDialog):
 
         self.setWindowTitle('Influence Weights Distribution')
         self.installEventFilter(self)
-        self.undo_stack = QtWidgets.QUndoStack(self)
+        self.undo_stack = QUndoStack(self)
 
         self._skin = None
         self._weight_solver = WeightSolver.Uniform

@@ -4,8 +4,10 @@ from typing import Optional
 
 try:
     from PySide2 import QtCore, QtGui, QtWidgets
+    from PySide2.QtWidgets import QUndoCommand
 except:
     from PySide6 import QtCore, QtGui, QtWidgets
+    from PySide6.QtGui import QUndoCommand
 
 
 class Slider(QtWidgets.QSlider):
@@ -13,7 +15,7 @@ class Slider(QtWidgets.QSlider):
     isPressed = QtCore.Signal()
     isReleased = QtCore.Signal()
 
-    class __Undo(QtWidgets.QUndoCommand):
+    class __Undo(QUndoCommand):
 
         def __init__(self, widget, old_value, new_value):
             super().__init__(str(widget))
