@@ -62,8 +62,11 @@ kDegreeV = "degreeV"
 kFk = "FK"
 
 # Attributes
+kClassName = "className"
+kManipulatorType = "manipulatorType"
 kMessage = "message"
 kResetGroup = "resetGroup"
+kString = "string"
 
 
 # Maya Colors

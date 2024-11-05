@@ -64,14 +64,14 @@ class _Shape(_DAGNode):
              shape_dir: int = None, scale: float = None):
         file_path = os.path.join(constants.kShapeDir, f"{file_name}.{constants.kShapeExtension}")
         data = file.read_json(file_path)
-        log.info(f"File read: {file_path}")
+        log.debug(f"File read: {file_path}")
 
         return cls.from_dict(data, parent, shape_dir=shape_dir, scale=scale)
 
     def dump(self, file_name: str, normalize: bool = True):
         output_path = os.path.join(constants.kShapeDir, f"{file_name}.{constants.kShapeExtension}")
         file.dump_json(self.to_dict(normalize=normalize), output_path)
-        log.info(f"File write: {output_path}")
+        log.debug(f"File write: {output_path}")
 
     def scale(self, factor: float, normalize: bool = False):
         points = self.points(normalize=normalize, world=False)

@@ -1,5 +1,3 @@
-import traceback
-
 from ..Core.logger import log
 from ..Core.cache import NodeCache
 from ..Core.context import NodeCacheContext
@@ -20,14 +18,26 @@ class Builder:
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}"
 
+    def _check_validity(self):
+        pass
+
     def _pre_build(self, *args, **kwargs):
         log.debug(f"{self.__class__.__name__} pre build !")
+        self._check_validity()
 
     def _build(self, *args, **kwargs):
         log.debug(f"{self.__class__.__name__} build !")
 
     def _post_build(self, *args, **kwargs):
         log.debug(f"{self.__class__.__name__} post build !")
+    
+    def _on_build_succed(self):
+        log.debug(f"{self.__class__.__name__} build succes !")
+        self.build_succed.emit(self)
+
+    def _on_build_failed(self):
+        log.error(f"{self.__class__.__name__} build failed !")
+        self.build_failed.emit(self)
 
     def build(self, *args, **kwargs):
 
@@ -39,7 +49,7 @@ class Builder:
                 raise RuntimeError("Error on pre build !") from e
             
             try:
-                r = self._build(*args, **kwargs)
+                self._build(*args, **kwargs)
             except Exception as e:
                 self._on_build_failed()
                 raise RuntimeError("Error on build !") from e
@@ -51,13 +61,3 @@ class Builder:
                 raise RuntimeError("Error on post build !") from e
             
             self._on_build_succed()
-        
-        return r
-
-    def _on_build_succed(self):
-        log.debug(f"{self.__class__.__name__} build succes !")
-        self.build_succed.emit(self)
-
-    def _on_build_failed(self):
-        log.error(f"{self.__class__.__name__} build failed !")
-        self.build_failed.emit(self)

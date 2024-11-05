@@ -86,7 +86,6 @@ def get_handle(node: str | OpenMaya.MObject) -> OpenMaya.MObjectHandle:
 
 def name(obj: str | OpenMaya.MObject | OpenMaya.MPlug,
          full: bool = True, namespace: bool = True) -> str:
-    """!@Brief Get node name."""
     if isinstance(obj, OpenMaya.MDagPath):
         name = obj.fullPathName()
     elif isinstance(obj, OpenMaya.MPlug):
@@ -108,6 +107,9 @@ def name(obj: str | OpenMaya.MObject | OpenMaya.MPlug,
     
     return name
 
+def short_name(node: str) -> str:
+    return node.split("|")[-1].split(":")[-1]
+
 
 def node_hash(node: str | OpenMaya.MObject) -> str:
     handle = get_handle(node)
@@ -115,7 +117,6 @@ def node_hash(node: str | OpenMaya.MObject) -> str:
 
 
 def rename(node: str | OpenMaya.MObject, new_name: str, force: bool = False):
-    """!@Brief Rename given node."""
     if isinstance(node, str):
         node = get_object(node)
 
