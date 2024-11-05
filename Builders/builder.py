@@ -44,20 +44,23 @@ class Builder:
         with NodeCacheContext(self._node_cache):
             try:
                 self._pre_build(*args, **kwargs)
-            except Exception as e:
+            except Exception as err:
                 self._on_build_failed()
-                raise RuntimeError("Error on pre build !") from e
+                log.error("Error on pre build !")
+                raise err
             
             try:
                 self._build(*args, **kwargs)
-            except Exception as e:
+            except Exception as err:
                 self._on_build_failed()
-                raise RuntimeError("Error on build !") from e
+                log.error("Error on build !")
+                raise err
             
             try:
                 self._post_build(*args, **kwargs)
-            except Exception as e:
+            except Exception as err:
                 self._on_build_failed()
-                raise RuntimeError("Error on post build !") from e
+                log.error("Error on post build !")
+                raise err
             
             self._on_build_succed()
