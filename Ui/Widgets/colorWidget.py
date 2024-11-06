@@ -6,7 +6,7 @@ try:
 except:
     from PySide6 import QtWidgets
 
-from ...Core import constants
+from ...Helpers import color as Color
 from ...Core.logger import log
 from ...Nodes.node import Node
 from ...Ui.Widgets.groupWidget import GroupWidget
@@ -31,7 +31,7 @@ class ColorWidget(GroupWidget):
         self._button_size = button_size
         
         button_layout = None
-        for i, color in enumerate(constants.kColors):
+        for i, color in enumerate(Color.kAll.values()):
             if i % line_count == 0:
                 button_layout = QtWidgets.QHBoxLayout()
                 button_layout.setContentsMargins(0, 0, 0, 0)
@@ -47,11 +47,7 @@ class ColorWidget(GroupWidget):
         color = self.sender().color
         selected = cmds.ls(selection=True, long=True)
         for node in selected:
-            node = Node.get_node(node)
+            node = Node.get(node)
             if not node.has_fn(OpenMaya.MFn.kDagNode):
                 continue
-            try:
-                cmds.setAttr('{0}.overrideEnabled'.format(node.name), True)
-                cmds.setAttr('{0}.overrideColor'.format(node.name), color.maya_index)
-            except:
-                log.debug(f"Impossible to set color on {node.name}.")
+            color.apply_by_index(node)

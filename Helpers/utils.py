@@ -24,14 +24,17 @@ def create(node_type: str, name: str = None, restriction: int = 0,
         parent = get_object(parent)
 
     is_dag = node_type in kDagNodeType
-    if not is_dag and not is_valid(parent):
-        raise RuntimeError("Impossible to set parent on dependency node !")
+    if parent != _nullObj and not is_valid(parent):
+        raise RuntimeError("Invalid parent given !")
 
     modifier = _dagMod if node_type in kDagNodeType else _dgMod
     if node_type == "objectSet":
         new_node = OpenMaya.MFnSet().create(OpenMaya.MSelectionList(), restriction)
     else:
-        new_node = modifier.createNode(node_type, parent)
+        if is_dag:
+            new_node = modifier.createNode(node_type, parent)
+        else:
+            new_node = modifier.createNode(node_type)
     modifier.renameNode(new_node, str(name) if name else f"{node_type}1")
     modifier.doIt()
 
@@ -167,3 +170,12 @@ def soft_selection_weights() -> list:
         mit.next()
 
     return soft_vertices
+
+
+def type_of(node: str | OpenMaya.MObject | OpenMaya.MDagPath) -> str:
+    if isinstance(node, str):
+        node = get_object(node)
+    elif isinstance(node, OpenMaya.MDagPath):
+        node = node.node()
+
+    return OpenMaya.MFnDependencyNode(node).typeName

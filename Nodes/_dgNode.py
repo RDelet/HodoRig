@@ -3,9 +3,8 @@ from typing import Optional
 
 from maya.api import OpenMaya
 
-from ..Helpers import utils
-
 from ..Core import _factory
+from ..Helpers import utils
 
 
 @_factory.register()

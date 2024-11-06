@@ -10,9 +10,9 @@ except:
     from PySide6 import QtCore, QtWidgets
 
 from ..Core import constants, file
+from ..Builders.manipulator import Manipulator
 from ..Nodes.node import Node
 from ..Nodes._shape import _Shape
-from ..Nodes.manip import ManipBuilder
 from ..Ui import utils
 from ..Ui.Widgets.colorWidget import ColorWidget
 from ..Ui.Widgets.hSlider import HSlider
@@ -82,7 +82,7 @@ class ScaleWidget(GroupWidget):
         shapes = list(set(shapes + children))
 
         for node in shapes:
-            shape = Node.get_node(node)
+            shape = Node.get(node)
             shape.scale(value, normalize=normalize)
 
 
@@ -142,7 +142,7 @@ class ShapeView(QtWidgets.QWidget):
         if len(selected) > 1:
             raise RuntimeError("select one node !")
         
-        node = Node.get_node(selected[0])
+        node = Node.get(selected[0])
         if not node.has_fn(OpenMaya.MFn.kTransform):
             raise RuntimeError("Select transform node !")
     
@@ -182,11 +182,11 @@ class ShapeView(QtWidgets.QWidget):
 
         txt = self._name.text()
         name = item.name if not txt else txt
-        new_manip = ManipBuilder()
-        new_manip.build(name, shape=item.name, scale=self._scale.value)
 
+        manip_builder = Manipulator(name)
+        manip_builder.build(shape=item.name, scale=self._scale.value)
         if selected and cmds.nodeType(selected[0]) == "joint":
-            new_manip.snap(selected[0])
+            manip_builder.reset.snap(selected[0])
     
     def _replace_shape(self, item: ShapeItem, nodes: list) -> bool:
         replaced = False
@@ -195,7 +195,7 @@ class ShapeView(QtWidgets.QWidget):
             if not shapes:
                 continue
             cmds.delete(shapes)
-            _Shape.load(item.name, Node.get_node(node).object)
+            _Shape.load(item.name, Node.get(node).object)
             replaced = True
 
         return replaced

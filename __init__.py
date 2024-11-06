@@ -64,7 +64,7 @@ except Exception as exp:
 
 
 try:
-    from HodoRig.Core import _install_lib
+    from .Core import _install_lib
     _install_lib.install()
 except Exception as exp:
     log.info(traceback.format_exc())

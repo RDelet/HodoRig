@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 from ..Core.logger import log
+from ..Core.nameBuilder import NameBuilder
 from ..Core.cache import NodeCache
 from ..Core.context import NodeCacheContext
+from ..Core.settings import Settings
 from ..Core.signal import Signal
 
 
@@ -9,14 +13,21 @@ class Builder:
     build_succed = Signal()
     build_failed = Signal()
 
-    def __init__(self):
+    def __init__(self, name: str | NameBuilder):
+        self._name = name if isinstance(name, NameBuilder) else NameBuilder.from_name(name)
         self._node_cache = NodeCache(enable=False)
+        self._settings = Settings()
+
+        self._init_settings()
 
     def __str__(self) -> str:
         return self.__repr__()
     
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}"
+    
+    def _init_settings(self):
+        pass
 
     def _check_validity(self):
         pass
@@ -64,3 +75,7 @@ class Builder:
                 raise err
             
             self._on_build_succed()
+    
+    @property
+    def settings(self):
+        return self._settings

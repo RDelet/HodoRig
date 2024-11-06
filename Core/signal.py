@@ -34,7 +34,7 @@ class Signal:
             ref = self.__wrap_weakref(slot)
             self._callbacks.append(ref)
 
-    def unsubscribe(self, slot: Callable[[T], None]) -> None:
+    def unregister(self, slot: Callable[[T], None]) -> None:
         if not isinstance(slot, collections.abc.Callable):
             raise ValueError("Argument must be callable")
         

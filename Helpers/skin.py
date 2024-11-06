@@ -183,7 +183,7 @@ class Skin(Deformer):
     def create_joint_from_soft_selection(self, soft_vertices: list, name: str, parent: str = None) -> OpenMaya.MObject:
         """!@Brief Create new joint from soft selection."""
         shape_name = utils.get_path(soft_vertices[0].name)
-        shape = Node.get_node(shape_name)
+        shape = Node.get(shape_name)
         points = shape.points(shape, vertex_ids=[x.index for x in soft_vertices])
         pos = math.weighted_centroid(points, [x.weight for x in soft_vertices], weight_tolerence=0.75)
 
@@ -344,7 +344,7 @@ class Skin(Deformer):
             if self._shape_namespace:
                 shape_name = "{0}:{1}".format(self._shape_namespace, shape_name)
             if cmds.objExists(shape_name) is True:
-                self._shape = Node.get_node(shape_name)
+                self._shape = Node.get(shape_name)
             else:
                 raise Exception('Shape "{0}" not found !'.format(shape_name))
 
@@ -361,7 +361,7 @@ class Skin(Deformer):
             return
 
         try:
-            self._shape = Node.get_node(shape)
+            self._shape = Node.get(shape)
         except Exception:
             log.warning(f"Shape {shape} not found.")
 

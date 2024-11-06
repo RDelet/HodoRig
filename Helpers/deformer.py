@@ -49,7 +49,7 @@ class Deformer(object):
         if not self.valid_shape(shapes[0]):
             raise RuntimeError("No valid shape given !")
 
-        self._shape = Node.get_node(shapes[0])
+        self._shape = Node.get(shapes[0])
         self._shape_data = self._shape.to_dict()
 
     @property

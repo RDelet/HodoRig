@@ -5,6 +5,7 @@ from maya.api import OpenMaya
 from ..Helpers import point, utils
 
 from ..Core import constants, _factory
+from ..Nodes._dagNode import _DAGNode
 from ..Nodes._shape import _Shape
 
 
@@ -42,8 +43,10 @@ class _Curve(_Shape):
         return data
 
     @classmethod
-    def from_dict(cls, data: dict, parent: str | OpenMaya.MObject,
+    def from_dict(cls, data: dict, parent: str | OpenMaya.MObject | _DAGNode,
                   shape_dir: int = None, scale: float = None):
+        if isinstance(parent, _DAGNode):
+            parent = parent.object
 
         points = OpenMaya.MPointArray(data.get(constants.kPoints, []))
         if len(points) == 0:

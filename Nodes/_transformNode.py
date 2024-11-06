@@ -41,6 +41,8 @@ class _TransformNode(_DAGNode):
 
     def set_rotation(self, value: list | OpenMaya.MVector | OpenMaya.MEulerRotation,
                      world: bool = True):
+        if isinstance(value, OpenMaya.MEulerRotation):
+            value = [math.degrees(x) for x in value]
         cmds.xform(self.name, rotation=value, objectSpace=not world, worldSpace=world)
     
     def quaternion(self, world: bool = True) -> OpenMaya.MQuaternion:
@@ -66,7 +68,7 @@ class _TransformNode(_DAGNode):
         for i in range(self._mfn.childCount()):
             child = self._mfn.child(i)
             if child.hasFn(OpenMaya.MFn.kShape):
-                shapes.append(Node.get_node(child))
+                shapes.append(Node.get(child))
 
         return shapes
 

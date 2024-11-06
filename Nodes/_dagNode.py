@@ -21,13 +21,13 @@ class _DAGNode(_DGNode):
         self._modifier = OpenMaya.MDagModifier()
     
     @property
-    def parent(self) -> Optional[OpenMaya.MObject]:
-        parent = self._mfn.parent(0)
-        return None if parent.hasFn(OpenMaya.MFn.kWorld) else Node.get_node(parent)
-    
-    @property
     def path(self):
         return utils.get_path(self._object)
+
+    @property
+    def parent(self) -> Optional[OpenMaya.MObject]:
+        parent = self._mfn.parent(0)
+        return None if parent.hasFn(OpenMaya.MFn.kWorld) else Node.get(parent)
 
     @parent.setter
     def parent(self, parent: str | OpenMaya.MObject | _DAGNode | None):
@@ -39,11 +39,12 @@ class _DAGNode(_DGNode):
         else:
             cmds.parent(self.name, world=True)
     
-    @property
-    def children(self) -> list:
+    def children(self, type: Optional[str] = None) -> list:
         children = []
         for i in range(self._mfn.childCount()):
             child = self._mfn.child(i)
-            children.append(Node.get_node(child))
+            if type and self.type != type:
+                continue
+            children.append(Node.get(child))
 
         return children

@@ -1,10 +1,10 @@
 from typing import Optional
 
 try:
-    from PySide2 import QtCore, QtGui, QtWidgets
-    from Pyside2.QtCore import QRegExp
+    from PySide2 import QtGui, QtWidgets
+    from PySide2.QtCore import QRegExp
 except:
-    from PySide6 import QtCore, QtGui, QtWidgets
+    from PySide6 import QtGui, QtWidgets
     from PySide6.QtCore import QRegularExpression as QRegExp
 
 from ...Ui import utils as uiUtils
