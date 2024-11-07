@@ -4,9 +4,10 @@ from typing import Optional
 from maya import cmds
 from maya.api import OpenMaya
 
-from ..Helpers import utils
-
 from ..Core import _factory
+from ..Core.logger import log
+from ..Helpers import utils
+from ..Helpers.color import Color
 from ..Nodes._dgNode import _DGNode
 from ..Nodes.node import Node
 
@@ -48,3 +49,13 @@ class _DAGNode(_DGNode):
             children.append(Node.get(child))
 
         return children
+
+    def apply_color(self, color: Color):
+        try:
+            cmds.setAttr(f"{self.name}.overrideEnabled", True)
+            cmds.setAttr(f"{self.name}.overrideColor", color.maya_index)
+        except:
+            log.debug(f"Impossible to set color on {self.name}.")
+    
+    def apply_rgb_color(self, color: Color):
+        raise NotImplemented("Methode apply_rgb_color not implemented yet !")

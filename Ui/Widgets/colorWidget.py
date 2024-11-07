@@ -7,7 +7,6 @@ except:
     from PySide6 import QtWidgets
 
 from ...Helpers import color as Color
-from ...Core.logger import log
 from ...Nodes.node import Node
 from ...Ui.Widgets.groupWidget import GroupWidget
 
@@ -50,4 +49,4 @@ class ColorWidget(GroupWidget):
             node = Node.get(node)
             if not node.has_fn(OpenMaya.MFn.kDagNode):
                 continue
-            color.apply_by_index(node)
+            node.apply_color(color)

@@ -39,7 +39,7 @@ class Manipulator(Builder):
         self._reset = Node.create("transform", name=self._name.clone(type="RESET"), parent=parent)
         self._node = Node.create("transform", self._name.clone(type="MANIP"), parent=self._reset)
         if color:
-            color.apply_by_index(self._node)
+            self._node.apply_color(color)
         _Shape.load(shape, self._node, shape_dir=shape_dir, scale=scale)
 
         self.__connect_nodes()

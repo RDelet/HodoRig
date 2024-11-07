@@ -1,10 +1,6 @@
 from __future__ import annotations
 
-from maya import cmds
-
-from ..Core.logger import log
 from ..Core.nameBuilder import NameBuilder
-from ..Nodes._dagNode import _DAGNode
 
 
 class Color:
@@ -31,16 +27,6 @@ class Color:
             return kAll["Blue"]
         else:
             return kAll["Yellow"]
-    
-    def apply_by_index(self, node: str | _DAGNode):
-        if isinstance(node, _DAGNode):
-            node = node.name
-
-        try:
-            cmds.setAttr('{0}.overrideEnabled'.format(node), True)
-            cmds.setAttr('{0}.overrideColor'.format(node), self.maya_index)
-        except:
-            log.debug(f"Impossible to set color on {node}.")
 
 
 
