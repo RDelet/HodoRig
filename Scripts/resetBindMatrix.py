@@ -21,7 +21,7 @@ kScriptName = 'Reset BindMatrix'
 
 def main():
     try:
-        selected = Node.selected(type="joint")
+        selected = Node.selected(node_type="joint")
         if not selected:
             raise RuntimeError("No joint selected !")
 

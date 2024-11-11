@@ -77,7 +77,7 @@ class _Joint(_TransformNode):
 
 
     def go_to_bindpose(self, recursive: bool = True):
-        bindpose = self.bind_pose
+        bindpose = self.bind_pose()
         if bindpose:
             cmds.xform(self.name, matrix=bindpose, worldSpace=True)
 
