@@ -54,9 +54,15 @@ def check_object(obj: str | OpenMaya.MObject) -> OpenMaya.MObject:
     return obj
 
 
+def exists(node: str | OpenMaya.MObject | OpenMaya.MDagPath) -> bool:
+    if not isinstance(node, str):
+        node = name(node)
+
+    return cmds.objExists(node)
+
+
 def get_object(node: str) -> OpenMaya.MObject:
     """!@Brief Get MObject of current node."""
-
     try:
         _msl.clear()
         _msl.add(node)

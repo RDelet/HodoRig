@@ -9,8 +9,8 @@ from maya.api import OpenMaya
 from ..Helpers import point, utils
 
 from ..Core import constants, _factory
-from ..Nodes._dagNode import _DAGNode
-from ..Nodes._shape import _Shape
+from .dagNode import DAGNode
+from .shape import Shape
 
 
 @dataclass
@@ -29,7 +29,7 @@ class UV(object):
 
 
 @_factory.register()
-class _Mesh(_Shape):
+class Mesh(Shape):
 
     kApiType = OpenMaya.MFn.kMesh
 
@@ -119,9 +119,9 @@ class _Mesh(_Shape):
         return data
 
     @classmethod
-    def from_dict(cls, data: dict, parent: str | OpenMaya.MObject | _DAGNode,
+    def from_dict(cls, data: dict, parent: str | OpenMaya.MObject | DAGNode,
                   shape_dir: int = None, scale: float = None):
-        if isinstance(parent, _DAGNode):
+        if isinstance(parent, DAGNode):
             parent = parent.object
 
         points = OpenMaya.MPointArray(data.get(constants.kPoints, []))

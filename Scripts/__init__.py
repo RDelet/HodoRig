@@ -6,6 +6,8 @@ from ..Scripts import skinWeightsDistribution
 # Joint
 from ..Scripts import goToBindPose
 from ..Scripts import resetBindMatrix
+from ..Scripts import bakeJointRotation
+from ..Scripts import bakeJointOrient
 
 # Other
 from ..Scripts import shapeEditor
@@ -14,6 +16,6 @@ from ..Scripts import shapeEditor
 
 all = [
     loadSkin, saveSkin, skinWeightsDistribution,
-    goToBindPose, resetBindMatrix,
+    bakeJointRotation, bakeJointOrient, goToBindPose, resetBindMatrix,
     shapeEditor
 ]

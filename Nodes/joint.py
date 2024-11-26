@@ -7,13 +7,19 @@ from maya.api import OpenMaya
 
 from ..Core import _factory
 from ..Helpers import utils
-from ..Nodes._transformNode import _TransformNode
+from .transform import Transform
 
 
 @_factory.register()
-class _Joint(_TransformNode):
+class Joint(Transform):
 
     kApiType = OpenMaya.MFn.kJoint
+
+    def duplicate(self, name: Optional[str] = None, parent: Optional[str | Transform] = None) -> Joint:
+        new_node = super().duplicate(name=name, parent=parent)
+        new_node.freeze_rotation(to_rotate=False)
+
+        return new_node
 
     def bind_pose(self) -> Optional[OpenMaya.MMatrix]:
         bp = cmds.getAttr(f"{self.name}.bindPose")

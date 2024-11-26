@@ -16,14 +16,14 @@ _current_dir = Path(__file__).parent
 
 batch_mode = cmds.about(batch=True)
 
-
+"""
 try:
     from .Core import _install_lib
     _install_lib.install()
 except Exception as exp:
     log.debug(traceback.format_exc())
     log.error("Error on install external lib !")
-
+"""
 
 try:
     from .Core import apiUndo
@@ -69,3 +69,14 @@ try:
 except Exception as exp:
     log.debug(traceback.format_exc())
     log.error("Error on install HodoRig HotKey !")
+
+
+try:
+    plugins = ["quatNodes", "lokkDevKit"]
+    for plugin in plugins:
+        if not cmds.pluginInfo(plugin, query=True, loaded=True):
+            log.debug(f"Load plugin {plugin}")
+            cmds.loadPlugin(plugin)
+except Exception as exp:
+    log.debug(traceback.format_exc())
+    log.error("Error on load plugin !")       

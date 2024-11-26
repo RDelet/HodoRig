@@ -4,17 +4,16 @@ from typing import Optional
 from maya import cmds
 from maya.api import OpenMaya
 
-from ..Core import constants as cst
-from ..Core.nameBuilder import NameBuilder
-from ..Builders.builder import Builder
-from ..Helpers import utils
-from ..Helpers.color import Color
+from ...Core import constants as cst
+from ...Core.nameBuilder import NameBuilder
+from ...Helpers import utils
+from ...Helpers.color import Color
+from ...Nodes.node import Node
+from ...Nodes.shape import Shape
+from ..builder import Builder
 
-from ..Nodes.node import Node
-from ..Nodes._shape import _Shape
 
-
-class Manipulator(Builder):
+class ManipulatorBuilder(Builder):
 
     def __init__(self, name: str | NameBuilder, manip_type: str = cst.kFk):
         super().__init__(name)
@@ -40,7 +39,7 @@ class Manipulator(Builder):
         self._node = Node.create("transform", self._name.clone(type="MANIP"), parent=self._reset)
         if color:
             self._node.apply_color(color)
-        _Shape.load(shape, self._node, shape_dir=shape_dir, scale=scale)
+        Shape.load(shape, self._node, shape_dir=shape_dir, scale=scale)
 
         self.__connect_nodes()
         self.__set_classname()

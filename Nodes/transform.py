@@ -1,12 +1,12 @@
 from __future__ import annotations
 import math
+from typing import Optional
 
 from maya import cmds
 from maya.api import OpenMaya
 
 from ..Core import _factory
-from ..Nodes._dagNode import _DAGNode
-from ..Nodes.node import Node
+from .dagNode import DAGNode
 
 
 to_rad = math.radians
@@ -14,9 +14,15 @@ to_deg = math.degrees
 
 
 @_factory.register()
-class _TransformNode(_DAGNode):
+class Transform(DAGNode):
 
     kApiType = OpenMaya.MFn.kTransform
+
+    def duplicate(self, name: Optional[str] = None, parent: Optional[str | Transform] = None) -> Transform:
+        new_node = super().duplicate(name=name, parent=parent)
+        new_node.snap(self)
+
+        return new_node
 
     def matrix(self, world: bool = True) -> OpenMaya.MMatrix:
         matrix = cmds.xform(self.name, query=True,
@@ -68,13 +74,13 @@ class _TransformNode(_DAGNode):
         for i in range(self._mfn.childCount()):
             child = self._mfn.child(i)
             if child.hasFn(OpenMaya.MFn.kShape):
-                shapes.append(Node.get(child))
+                shapes.append(self.get(child))
 
         return shapes
 
-    def snap(self, node: str | OpenMaya.MObject | _TransformNode, world: bool = True):
+    def snap(self, node: str | OpenMaya.MObject | Transform, world: bool = True):
         if isinstance(node, (str, OpenMaya.MObject)):
-            node = Node(node)
-        if not isinstance(node, _TransformNode):
+            node = self(node)
+        if not isinstance(node, Transform):
             raise RuntimeError(f"Node must be a transform not {type(node)}")
         self.set_matrix(node.matrix(world=world), world=world)

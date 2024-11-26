@@ -8,18 +8,27 @@ from ..Core import _factory
 from ..Core.logger import log
 from ..Helpers import utils
 from ..Helpers.color import Color
-from ..Nodes._dgNode import _DGNode
-from ..Nodes.node import Node
+from .node import Node
 
 
 @_factory.register()
-class _DAGNode(_DGNode):
+class DAGNode(Node):
 
     kApiType = OpenMaya.MFn.kDagNode
 
     def _post_init(self):
         self._mfn = OpenMaya.MFnDagNode(utils.get_path(self._object))
         self._modifier = OpenMaya.MDagModifier()
+
+    def duplicate(self, name: Optional[str] = None, parent: Optional[str | DAGNode] = None) -> DAGNode:
+        new_node = super().duplicate(name=name)
+        if parent is not None:
+            if isinstance(parent, (str, OpenMaya.MObject)):
+                parent = self.get(parent)
+            if parent.is_valid():
+                new_node.parent = parent
+
+        return new_node
     
     @property
     def path(self):
@@ -28,12 +37,12 @@ class _DAGNode(_DGNode):
     @property
     def parent(self) -> Optional[OpenMaya.MObject]:
         parent = self._mfn.parent(0)
-        return None if parent.hasFn(OpenMaya.MFn.kWorld) else Node.get(parent)
+        return None if parent.hasFn(OpenMaya.MFn.kWorld) else self.get(parent)
 
     @parent.setter
-    def parent(self, parent: str | OpenMaya.MObject | _DAGNode | None):
+    def parent(self, parent: str | OpenMaya.MObject | DAGNode | None):
         if isinstance(parent, (str, OpenMaya.MObject)):
-            parent = Node(parent)
+            parent = self(parent)
         self._parent = parent
         if parent:
             cmds.parent(self.name, parent.name)
@@ -46,7 +55,7 @@ class _DAGNode(_DGNode):
             child = self._mfn.child(i)
             if type and self.type != type:
                 continue
-            children.append(Node.get(child))
+            children.append(self.get(child))
 
         return children
 

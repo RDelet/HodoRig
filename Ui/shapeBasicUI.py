@@ -10,9 +10,9 @@ except:
     from PySide6 import QtCore, QtWidgets
 
 from ..Core import constants, file
-from ..Builders.manipulator import Manipulator
+from ..Builders.RigBuilders.manipulatorBuilder import ManipulatorBuilder
 from ..Nodes.node import Node
-from ..Nodes._shape import _Shape
+from ..Nodes.shape import Shape
 from ..Ui import utils
 from ..Ui.Widgets.colorWidget import ColorWidget
 from ..Ui.Widgets.hSlider import HSlider
@@ -183,7 +183,7 @@ class ShapeView(QtWidgets.QWidget):
         txt = self._name.text()
         name = item.name if not txt else txt
 
-        manip_builder = Manipulator(name)
+        manip_builder = ManipulatorBuilder(name)
         manip_builder.build(shape=item.name, scale=self._scale.value)
         if selected and cmds.nodeType(selected[0]) == "joint":
             manip_builder.reset.snap(selected[0])
@@ -195,7 +195,7 @@ class ShapeView(QtWidgets.QWidget):
             if not shapes:
                 continue
             cmds.delete(shapes)
-            _Shape.load(item.name, Node.get(node).object)
+            Shape.load(item.name, Node.get(node).object)
             replaced = True
 
         return replaced

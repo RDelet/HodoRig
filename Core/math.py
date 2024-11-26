@@ -27,3 +27,27 @@ def weighted_centroid(points: Union[OpenMaya.MVectorArray, OpenMaya.MPointArray]
     output /= weight_sum
 
     return output
+
+
+def distance_between(nodes: list) -> float:
+    distance = 0.0
+    for i in range(len(nodes) - 1):
+        distance += abs((nodes[i + 1] - nodes[i]).lenth())
+    
+    return distance
+
+
+def project_from_matrix(matrix: OpenMaya.MMatrix, direction: int, distance: float) -> OpenMaya.MVector:
+    return
+
+
+def sign(dir_index: int) -> float:
+    """!@Brief Get sign for dir index."""
+    return 1.0 if dir_index % 2 == 0 else -1.0
+
+
+def absolute_dir(dir_index: int) -> int:
+    """!@Brief Get absolute dir index.
+               direction can be X, -X, Y, -Y, Z, -Z. Here we get only X, Y, Z
+    """
+    return abs(int(dir_index / 2))

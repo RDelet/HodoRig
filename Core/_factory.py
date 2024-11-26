@@ -11,7 +11,7 @@ from ..Core.logger import log
 
 
 ClassType = TypeVar("ClassType", bound="BaseClass")
-_registered = dict()
+_registered = {}
 
 
 def create(node: str | OpenMaya.MObject) -> Any:

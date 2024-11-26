@@ -7,10 +7,10 @@ from ..Helpers import point
 
 from ..Core import constants, _factory, file
 from ..Core.logger import log
-from ..Nodes._dagNode import _DAGNode
+from .dagNode import DAGNode
 
 
-class _Shape(_DAGNode):
+class Shape(DAGNode):
 
     kApiType = OpenMaya.MFn.kShape
     kShapes = {}
@@ -43,9 +43,9 @@ class _Shape(_DAGNode):
         return output
     
     @classmethod
-    def _from_dict(cls, data: dict, parent: str | OpenMaya.MObject | _DAGNode,
-                    shape_dir: int = None, scale: float = None) -> _Shape:
-        if isinstance(parent, _DAGNode):
+    def _from_dict(cls, data: dict, parent: str | OpenMaya.MObject | DAGNode,
+                    shape_dir: int = None, scale: float = None) -> Shape:
+        if isinstance(parent, DAGNode):
             parent = parent.object
 
         shape_type = data.get(constants.kType)
@@ -62,7 +62,7 @@ class _Shape(_DAGNode):
         raise NotImplementedError(f"{self.__class__.__name__}.update need to be reimplemented !")
     
     @classmethod
-    def load(cls, file_name: str, parent: str | OpenMaya.MObject | _DAGNode,
+    def load(cls, file_name: str, parent: str | OpenMaya.MObject | DAGNode,
              shape_dir: int = None, scale: float = None):
         file_path = os.path.join(constants.kShapeDir, f"{file_name}.{constants.kShapeExtension}")
         data = file.read_json(file_path)

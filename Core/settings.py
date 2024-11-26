@@ -1,13 +1,14 @@
 from __future__ import annotations
 from typing import Optional
 
+from ..Core import constants as cst
 from .signal import Signal
 
 
 class Setting(object):
 
-    def __init__(self, name: str, value: int | float | str | bool,
-                 nice_name: Optional[str] = None, default: Optional[int | float | str | bool] = None):
+    def __init__(self, name: str, value: cst.T,
+                 nice_name: Optional[str] = None, default: Optional[cst.T] = None):
 
         self.value_changed = Signal()
 
@@ -27,21 +28,21 @@ class Setting(object):
         return self._name
 
     @property
-    def value(self) -> int | float | str | bool:
+    def value(self) -> cst.T:
         return self._value
 
     @value.setter
-    def value(self, value: int | float | str | bool):
+    def value(self, value: cst.T):
         if value != self._value:
             self._value = value
             self.value_changed.emit(self)
     
     @property
-    def default(self) -> int | float | str | bool:
+    def default(self) -> cst.T:
         return self._default
 
     @default.setter
-    def default(self, value: int | float | str | bool):
+    def default(self, value: cst.T):
         self._default = value
 
 
@@ -78,15 +79,15 @@ class Settings:
             raise ValueError(f"Setting {name} does not exist")
         return self._settings[name]
     
-    def set(self, name: str, value: int | float | str | bool):
+    def set(self, name: str, value: cst.T):
         if not self.exists(name):
             raise ValueError(f"Setting {name} does not exist")
         self._settings[name].value = value
 
-    def value(self, name: str) -> int | float | str | bool:
+    def value(self, name: str) -> cst.T:
         return self.get(name).value
 
-    def default_value(self, name: str) -> int | float | str | bool:
+    def default_value(self, name: str) -> cst.T:
         return self.get(name).attribute.default
 
     def remove(self, name: str):

@@ -4,11 +4,11 @@ from typing import List
 
 from maya import cmds
 
-from ..Core.logger import log
-from ..Core import constants as cst
-from ..Core.nameBuilder import NameBuilder
-from ..Builders.builder import Builder
-from ..Nodes.node import Node
+from ...Core.logger import log
+from ...Core import constants as cst
+from ...Core.nameBuilder import NameBuilder
+from ..builder import Builder
+from ...Nodes.node import Node
 
 
 class RigBuilder(Builder):
@@ -16,10 +16,13 @@ class RigBuilder(Builder):
     def __init__(self, name: str | NameBuilder, sources: List[str], is_blended: bool = False):
         super().__init__(name)
 
+        self._name.type = self.__class__.__name__
+
         self._object = None
         self._sources = sources
         self._is_blended = is_blended
 
+        self._sub_builders = []
         self._manipulators = []
         self._output_blend = []
 
@@ -29,6 +32,10 @@ class RigBuilder(Builder):
 
     def _pre_build(self):
         super()._pre_build()
+
+        self._manipulators = []
+        self._output_blend = []
+
         self._check_validity()
         self._build_node()
 
@@ -44,3 +51,7 @@ class RigBuilder(Builder):
         for i, manipulator in enumerate(self._manipulators):
             cmds.connectAttr(f"{manipulator.name}.{cst.kMessage}",
                              f"{self._object.name}.{cst.kManipulators}[{i}]", force=True)
+    
+    @property
+    def is_blended(self) -> bool:
+        return self._is_blended

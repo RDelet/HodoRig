@@ -6,6 +6,7 @@ from ..Core.cache import NodeCache
 from ..Core.context import NodeCacheContext
 from ..Core.settings import Settings
 from ..Core.signal import Signal
+from .builderState import BuilderState
 
 
 class Builder:
@@ -16,6 +17,7 @@ class Builder:
     def __init__(self, name: str | NameBuilder):
         self._name = name if isinstance(name, NameBuilder) else NameBuilder.from_name(name)
         self._node_cache = NodeCache(enable=False)
+        self._state = BuilderState()
         self._settings = Settings()
 
         self._init_settings()
@@ -77,5 +79,17 @@ class Builder:
             self._on_build_succed()
     
     @property
+    def name(self) -> NameBuilder:
+        return self._name
+    
+    @name.setter
+    def name(self, name: str | NameBuilder):
+        self._name = name if isinstance(name, NameBuilder) else NameBuilder.from_name(name)
+
+    @property
     def settings(self):
         return self._settings
+    
+    @property
+    def state(self) -> BuilderState:
+        return self._state
