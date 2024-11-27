@@ -3,12 +3,17 @@ class BuilderState(object):
     kToBuild = "ToBuild"
     kBuilt = "Built"
     kToUpdate = "ToUpdate"
-    kRed = [200, 20, 20]
+    kError = "Error"
+
+    kRed = [200, 50, 50]
+    kDarkRed = [200, 20, 20]
     kGreen = [20, 200, 20]
     kOrange = [200, 150, 20]
+
     kStates = {kToBuild: kRed,
                kBuilt: kGreen,
-               kToUpdate: kOrange}
+               kToUpdate: kOrange,
+               kError: kDarkRed}
 
     def __init__(self):
         self._value = self.kToBuild

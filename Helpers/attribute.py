@@ -1,6 +1,13 @@
 from maya import cmds
 
 
+def exists(node: str, attribute: str) -> bool:
+    attr_exists = cmds.objExists(f"{node}.{attribute}")
+    if not attr_exists:
+        attr_exists = cmds.attributeQuery(attribute, node=node, exists=True)
+
+    return attr_exists
+
 
 def duplicate_from_node(source_node: str, target_node: str):
     """!@Brief Duplique tous les attributs custom d'un noeud Maya source sur un noeud cible."""

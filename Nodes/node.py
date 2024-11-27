@@ -4,8 +4,9 @@ from typing import Optional
 from maya import cmds
 from maya.api import OpenMaya
 
-from ..Core import _factory
-from ..Helpers import attribute as attr, utils
+from ..Core import _factory, constants
+from ..Core.logger import log
+from ..Helpers import attribute, utils
 
 
 @_factory.register()
@@ -31,7 +32,7 @@ class Node:
         return self.__repr__()
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(name: {self.name}, type: {self.type})"
+        return str(self.name)
     
     @property
     def api_type(self) -> int:
@@ -89,11 +90,36 @@ class Node:
 
         return new_node
     
-    def find_attribute(self, attr: str, networked: bool = False) -> Optional[OpenMaya.MPlug]:
-        try:
-            return self._mfn.findPlug(attr, networked)
-        except:
-            return None
+    def add_attribute(self, name: str, attr_type: str, **kwargs):
+        if attribute.exists(self, name):
+            log.warning(f"Attirbute {name} already exists on {self}.")
+            return
+
+        if attr_type in constants.kAttributeTypes:
+            cmds.addAttr(self, longName=name, attributeType=attr_type, **kwargs)
+        else:
+            cmds.addAttr(self, longName=name, dataType=attr_type, **kwargs)
+    
+    def add_settings_attribute(self, attr_name: str):
+        cmds.addAttr(self, longName=attr_name, attributeType="enum", enumName="-----")
+        cmds.setAttr(f"{self}.{attr_name}", channelBox=True, lock=True)
+    
+    def set_attribute(self, attr_name: str, value: str | int | float | bool | list | tuple):
+        if not attribute.exists(self, attr_name):
+            raise RuntimeError(f"Attirbute {attr_name} does not exists on {self}.")
+
+        node_attr = f"{self}.{attr_name}"
+        attr_type = cmds.attributeQuery(attr_name, node=self, attributeType=True)
+        if attr_type in constants.kAttributeTypes:
+            cmds.setAttr(node_attr, value)
+        else:
+            cmds.setAttr(node_attr, value, type=attr_type)
+    
+    def connect_to(self, src_attr: str, dst_attr: str):
+        if not attribute.exists(self, src_attr):
+            raise RuntimeError(f"Attirbute {src_attr} does not exists on {self}.")
+
+        cmds.connectAttr(f"{self}.{src_attr}", dst_attr, force=True)
 
     def has_fn(self, fn: OpenMaya.MFn) -> bool:
         return self._object.hasFn(fn)

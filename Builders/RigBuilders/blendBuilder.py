@@ -26,6 +26,7 @@ from typing import List
 
 from maya import cmds
 
+from ...Core import constants
 from ...Core.nameBuilder import NameBuilder
 from ...Core.settings import Setting
 from ...Helpers import utils
@@ -38,73 +39,85 @@ from .manipulatorBuilder import ManipulatorBuilder
 
 class BlendBuilder(RigBuilder):
 
+    _kBlendName = "blendName"
+
     def __init__(self,  name: str | NameBuilder, sources: List[RigBuilder]):
         super().__init__(name, sources)
 
-    def _init_settings(self):
-        self._settings.add(Setting("blendAttrName", "blender"))
+        self._build_rig_group = False
 
-        self._manipulator = None
-        self._reverse_blend = None
-
-    def _build_manipulators(self):
-        manip_name = self._name.clone()
-        manip_name.type = "Settings"
-        builder_pv = ManipulatorBuilder(manip_name)
-        color = Color.from_name(manip_name)
-        builder_pv.build(utils._nullObj, shape="cross", shape_dir=2, color=color)
-        self._manipulator = builder_pv.node
-        self._manipulator.snap(self._sources[0])
-        self._manipulators.append(self._manipulator)
-
-        blend_name = self._settings.value("blendAttrName")
-        cmds.addAttr(self._manipulator.name, longName=blend_name, attributeType="float",
-                     keyable=True, min=0.0, max=1.0)
+        self.__manipulator = None
+        self.__reverse_blend = None
+        self.__blend_name = None
+        self.__hook_a = None
+        self.__hook_b = None
+        self.__manipulator_a = None
+        self.__manipulator_b = None
     
-    def _build_reverse_blend(self):
-        # ToDo: Load plugin on HodoRig init
-        self._reverse_blend = Node.create("floatMath")
-        blend_name = self._settings.value("blendAttrName")
-        cmds.connectAttr(f"{self._manipulator.name}.{blend_name}",
-                         f"{self._reverse_blend.name}.floatB")
-        cmds.setAttr(f"{self._reverse_blend.name}.operation", 1)
+    def _init_settings(self):
+        self._settings.add(Setting(self._kBlendName, "blender"))
 
+    def _get_settings(self):
+        self.__blend_name = self._settings.value(self._kBlendName)
+    
     def _build(self):
         super()._build()
-        blend_name = self._settings.value("blendAttrName")
+        self._build_sub_builders()
+        self._build_attribute()
+        self._build_reverse_blend()
+        self._build_constraint()
+        self._connect_manipulators()
 
+    def _build_sub_builders(self):
         for builder in self._sub_builders:
             builder.build()
+            if not builder.state.value == BuilderState.kBuilt:
+                raise RuntimeError(f"Error on build {builder.name} !")
         
-        src_a = self._sub_builders[0]._output_blend
-        src_b = self._sub_builders[1]._output_blend
-        if len(src_a) != len(src_b):
+        self.__hook_a = self._sub_builders[0]._output_blend
+        self.__hook_b = self._sub_builders[1]._output_blend
+        self.__manipulator_a = self._sub_builders[0]._manipulators
+        self.__manipulator_b = self._sub_builders[1]._manipulators
+        if len(self.__hook_a) != len(self.__hook_b):
             raise RuntimeError(f"Mismatch output node between {self._sub_builders[0].name} and {self._sub_builders[1].name}")
-         
-        self._build_manipulators()
-        self._build_reverse_blend()
 
-        for manipulator in self._sub_builders[0]._manipulators:
-            cmds.connectAttr(f"{self._manipulator.name}.{blend_name}", f"{manipulator.name}.visibility")
-        
-        for manipulator in self._sub_builders[1]._manipulators:
-            cmds.connectAttr(f"{self._reverse_blend.name}.outFloat", f"{manipulator.name}.visibility")
-
-        for node_a, node_b, src in zip(src_a, src_b, self._sources):
-            # ToDo: check attributes
-            cst = cmds.parentConstraint(node_a.name, node_b.name, src.name, maintainOffset=True)[0]
+    def _build_attribute(self):
+        manipulators = self.__manipulator_a + self.__manipulator_b
+        self.__manipulator = manipulators[0]
+        self.__manipulator.add_settings_attribute("blenderSettings")
+        self.__manipulator.add_attribute(self.__blend_name, constants.kFloat, keyable=True, min=0.0, max=1.0)
+        proxy_attr = f"{manipulators[0]}.{self.__blend_name}"
+        for manipulator in manipulators[1:]:
+            manipulator.add_settings_attribute("blenderSettings")
+            manipulator.add_attribute(self.__blend_name, constants.kFloat,
+                                            keyable=True, min=0.0, max=1.0, proxy=proxy_attr)
+    
+    def _build_reverse_blend(self):
+        self.__reverse_blend = Node.create("floatMath")
+        self.__manipulator.connect_to(self.__blend_name, f"{self.__reverse_blend}.floatB")
+        self.__reverse_blend.set_attribute("operation", 1)
+    
+    def _build_constraint(self):
+        for hook_a, hook_b, src in zip(self.__hook_a, self.__hook_b, self._sources):
+            cst = Node.get(cmds.parentConstraint(hook_a, hook_b, src, maintainOffset=True)[0])
             cst_attrs = cmds.parentConstraint(cst, query=True, weightAliasList=True)
-            cmds.setAttr(f"{cst}.interpType", 2)
-            cmds.connectAttr(f"{self._manipulator.name}.{blend_name}", f"{cst}.{cst_attrs[0]}")
-            cmds.connectAttr(f"{self._reverse_blend.name}.outFloat", f"{cst}.{cst_attrs[1]}")
+            cst.set_attribute("interpType", 2)
+            self.__manipulator.connect_to(self.__blend_name, f"{cst}.{cst_attrs[0]}")
+            self.__reverse_blend.connect_to("outFloat", f"{cst}.{cst_attrs[1]}")
+
+    def _connect_manipulators(self):
+        for manipulator in self.__manipulator_a:
+            self.__manipulator.connect_to(self.__blend_name, f"{manipulator}.visibility")
+        for manipulator in self.__manipulator_b:
+            self.__reverse_blend.connect_to("outFloat", f"{manipulator}.visibility")
      
     def add_sub_builder(self, builder: RigBuilder):
         if len(self._sub_builders) == 2:
             raise RuntimeError("You already have to builder set !")
         if builder in self._sub_builders:
-            raise RuntimeError(f"Builder {builder.name} already set !")
+            raise RuntimeError(f"Builder {builder} already set !")
         if builder.state.value == BuilderState.kBuilt:
-            raise RuntimeError(f"Builder {builder.name} already built !")
+            raise RuntimeError(f"Builder {builder} already built !")
 
         builder._is_blended = True
         builder._sources = self._sources

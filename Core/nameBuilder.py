@@ -40,6 +40,9 @@ class NameBuilder:
 
     @classmethod
     def from_name(cls, name: str) -> NameBuilder:
+        # Split path or extension / attribute
+        name = name.split("|")[-1].split(":")[-1].split("/")[-1].split("\\")[-1].split(".")[0]
+        
         split = name.split(cls.kSeparator)
         split_count = len(split)
 

@@ -1,4 +1,5 @@
 from __future__ import annotations
+import traceback
 
 from ..Core.logger import log
 from ..Core.nameBuilder import NameBuilder
@@ -46,35 +47,34 @@ class Builder:
     
     def _on_build_succed(self):
         log.debug(f"{self.__class__.__name__} build succes !")
+        self._state.value = BuilderState.kBuilt
         self.build_succed.emit(self)
 
     def _on_build_failed(self):
         log.error(f"{self.__class__.__name__} build failed !")
+        log.debug(traceback.format_exc())
+        self._state.value = BuilderState.kError
         self.build_failed.emit(self)
 
     def build(self, *args, **kwargs):
-
         with NodeCacheContext(self._node_cache):
             try:
                 self._pre_build(*args, **kwargs)
             except Exception as err:
                 self._on_build_failed()
-                log.error("Error on pre build !")
-                raise err
+                raise RuntimeError(f"Error on pre build {self.name}") from err
             
             try:
                 self._build(*args, **kwargs)
             except Exception as err:
                 self._on_build_failed()
-                log.error("Error on build !")
-                raise err
+                raise RuntimeError(f"Error on build {self.name}") from err
             
             try:
                 self._post_build(*args, **kwargs)
             except Exception as err:
                 self._on_build_failed()
-                log.error("Error on post build !")
-                raise err
+                raise RuntimeError(f"Error on post build {self.name}") from err
             
             self._on_build_succed()
     

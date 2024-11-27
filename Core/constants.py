@@ -64,6 +64,44 @@ kDegreeV = "degreeV"
 # Manip types
 kFk = "FK"
 
+# Attributes Type
+kBool = "bool"
+kByte = "byte"
+kChar = "char"
+kCompound = "compound"
+kDouble = "double"
+kDoubleAngle = "doubleAngle"
+kDoubleLinear = "doubleLinear"
+kEnum = "enum"
+kFloat = "float"
+kFloatAngle = "floatAngle"
+kFloatLinear = "floatLinear"
+kLong = "long"
+kMessage = "message"
+kShort = "short"
+kTime = "time"
+kAttributeTypes = [kBool, kByte, kChar, kCompound, kDouble, kDoubleAngle,
+                   kDoubleLinear, kEnum, kFloat, kFloatAngle, kFloatLinear,
+                   kLong, kMessage, kShort, kTime]
+
+# Attributes DataType
+kString = "string"
+kMatrix = "matrix"
+kDoubleArray = "doubleArray"
+kFloatArray = "floatArray"
+kInt32Array = "Int32Array"
+kVectorArray = "vectorArray"
+kNurbsCurve = "nurbsCurve"
+kNurbsSurface = "nurbsSurface"
+kMesh = "mesh"
+kLattice = "lattice"
+kPointArray = "pointArray"
+kSpectrumRGB = "spectrumRGB"
+kComponentList = "componentList"
+kDataTypes = [kString, kMatrix, kDoubleArray, kFloatArray, kInt32Array,
+              kVectorArray, kNurbsCurve, kNurbsSurface, kMesh, kLattice,
+              kPointArray, kSpectrumRGB, kComponentList]
+
 # Attributes
 kClassName = "className"
 kManipulators = "manipulators"
