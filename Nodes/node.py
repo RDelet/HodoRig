@@ -99,12 +99,13 @@ class Node:
             cmds.addAttr(self, longName=name, attributeType=attr_type, **kwargs)
         else:
             cmds.addAttr(self, longName=name, dataType=attr_type, **kwargs)
+
     
     def add_settings_attribute(self, attr_name: str):
         cmds.addAttr(self, longName=attr_name, attributeType="enum", enumName="-----")
         cmds.setAttr(f"{self}.{attr_name}", channelBox=True, lock=True)
     
-    def set_attribute(self, attr_name: str, value: str | int | float | bool | list | tuple):
+    def set_attribute(self, attr_name: str, value: str | int | float | bool | list | tuple, **kwargs):
         if not attribute.exists(self, attr_name):
             raise RuntimeError(f"Attirbute {attr_name} does not exists on {self}.")
 

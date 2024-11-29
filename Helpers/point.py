@@ -2,6 +2,10 @@ from typing import Union
 
 from maya.api import OpenMaya
 
+"""
+ToDo: Use numpy !
+"""
+
 
 def array_to_list(points: Union[OpenMaya.MVectorArray, OpenMaya.MPointArray]) -> list:
     return [list(p) for p in points]

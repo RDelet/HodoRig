@@ -46,15 +46,13 @@ class ManipulatorBuilder(Builder):
         self.__set_type()
 
     def __connect_nodes(self):
-        cmds.addAttr(self._node.name, longName=cst.kResetGroup, attributeType=cst.kMessage)
-        cmds.connectAttr(f"{self._reset.name}.{cst.kMessage}", f"{self._node.name}.{cst.kResetGroup}", force=True)
+        self._node.add_attribute(cst.kResetGroup, cst.kMessage)
+        self._reset.connect_to(cst.kMessage, f"{self._node}.{cst.kResetGroup}")
 
     def __set_classname(self):
-        cmds.addAttr(self._node.name, longName=cst.kClassName, dataType=cst.kString)
-        cmds.setAttr(f"{self._node.name}.{cst.kClassName}", self.__class__.__name__,
-                     type=cst.kString, lock=True)
+        self._node.add_attribute(cst.kClassName, cst.kString)
+        self._node.set_attribute(cst.kClassName, self.__class__.__name__, lock=True)
 
     def __set_type(self):
-        cmds.addAttr(self._node.name, longName=cst.kManipulatorType, dataType=cst.kString)
-        cmds.setAttr(f"{self._node.name}.{cst.kManipulatorType}", self._type,
-                     type=cst.kString, lock=True)
+        self._node.add_attribute(cst.kManipulatorType, cst.kString)
+        self._node.set_attribute(cst.kManipulatorType, self._type, lock=True)
