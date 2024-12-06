@@ -16,14 +16,14 @@ _current_dir = Path(__file__).parent
 
 batch_mode = cmds.about(batch=True)
 
-"""
+
 try:
     from .Core import _install_lib
     _install_lib.install()
 except Exception as exp:
     log.debug(traceback.format_exc())
     log.error("Error on install external lib !")
-"""
+
 
 try:
     from .Core import apiUndo
@@ -36,9 +36,7 @@ except Exception:
 try:
     if not batch_mode:
         from .Ui.Overrides.mayaSyntaxHighLigther import MayaSyntaxHighLigther
-        app = QtWidgets.QApplication.instance()
-        app.focusChanged.connect(MayaSyntaxHighLigther.focus_changed_cb)
-        MayaSyntaxHighLigther.add_on_all_control()
+        MayaSyntaxHighLigther.init_high_ligther()
 except Exception:
     log.debug(traceback.format_exc())
     log.error("Error on create high lither syntax !")
@@ -72,7 +70,7 @@ except Exception as exp:
 
 
 try:
-    plugins = ["quatNodes", "lokkDevKit"]
+    plugins = ["quatNodes", "lookDevKit"]
     for plugin in plugins:
         if not cmds.pluginInfo(plugin, query=True, loaded=True):
             log.debug(f"Load plugin {plugin}")

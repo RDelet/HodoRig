@@ -1,28 +1,33 @@
+from __future__ import annotations
+from typing import Optional
+
 try:
     from PySide2 import QtWidgets
 except:
     from PySide6 import QtWidgets
 
+from ...Ui import utils as uiUtils
 from ...Ui.Overrides.syntaxHighLigther import SyntaxHighLigther
 
 
 class MayaSyntaxHighLigther(SyntaxHighLigther):
 
-    kBaseName = "cmdScrollField"
+    @classmethod
+    def add_on_script_editor(cls) -> Optional[MayaSyntaxHighLigther]:
+        script_editor_widget = uiUtils.find_control("scriptEditorPanel1Window")
+        if not script_editor_widget:
+            return
+
+        output_widget = script_editor_widget.findChild(QtWidgets.QWidget, "cmdScrollFieldReporter1")
+        if output_widget:
+            return cls(output_widget)
 
     @classmethod
-    def focus_changed_cb(cls, old_widget: QtWidgets.QWidget, new_widget: QtWidgets.QWidget):
-        if new_widget:
-            widget_name = new_widget.objectName()
-            if cls.kBaseName and not widget_name.startswith(cls.kBaseName):
-                return
-            cls.add_on_all_control()
-
+    def _on_focus_changed(cls):
+        cls.add_on_script_editor()
+    
     @classmethod
-    def add_on_all_control(cls):
-        i = 1
-        while True:
-            widget = cls.add_on_widget(f"{cls.kBaseName}Reporter{i}")
-            if not widget:
-                break
-            i += 1
+    def init_high_ligther(cls):
+        app = QtWidgets.QApplication.instance()
+        app.focusChanged.connect(MayaSyntaxHighLigther._on_focus_changed)
+    
