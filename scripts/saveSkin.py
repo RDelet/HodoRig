@@ -13,9 +13,9 @@ import os
 import traceback
 
 try:
-    from PySide2 import QtWidgets
+    from PySide2 import QtGui
 except:
-    from PySide6 import QtWidgets
+    from PySide6 import QtGui
 
 from maya import cmds
 
