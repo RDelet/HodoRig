@@ -52,10 +52,10 @@ class DAGNode(Node):
     def children(self, type: Optional[str] = None) -> list:
         children = []
         for i in range(self._mfn.childCount()):
-            child = self._mfn.child(i)
-            if type and self.type != type:
+            child = self.get(self._mfn.child(i))
+            if type and child.type != type:
                 continue
-            children.append(self.get(child))
+            children.append(child)
 
         return children
 

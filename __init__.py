@@ -34,7 +34,7 @@ except Exception:
 
 
 try:
-    if not batch_mode:
+    if not batch_mode and cmds.about(version=True) < "2025":
         from .Ui.Overrides.mayaSyntaxHighLigther import MayaSyntaxHighLigther
         app = QtWidgets.QApplication.instance()
         app.focusChanged.connect(MayaSyntaxHighLigther.focus_changed_cb)
@@ -72,7 +72,7 @@ except Exception as exp:
 
 
 try:
-    plugins = ["quatNodes", "lokkDevKit"]
+    plugins = ["quatNodes", "lookDevKit"]
     for plugin in plugins:
         if not cmds.pluginInfo(plugin, query=True, loaded=True):
             log.debug(f"Load plugin {plugin}")
