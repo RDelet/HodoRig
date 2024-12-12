@@ -1,0 +1,85 @@
+{
+    "taches": [{
+        "name": "Module Root",
+        "note": 0.5
+    }, {
+        "name": "Module Spine",
+        "note": 1.0
+    }, {
+        "name": "Autres Modules",
+        "note": 1.0
+    }, {
+        "name": "IK / FK blend",
+        "note": 1.0
+    }, {
+        "name": "Limb Roll",
+        "note": 1.0
+    }, {
+        "name": "Foot Roll",
+        "note": 1.0
+    }, {
+        "name": "Skin",
+        "note": 3.0
+    }, {
+        "name": "Rangement de chambre",
+        "note": 1.0
+    }],
+    "barem": {
+        "name": {
+            "0": "Trop d'erreur",
+            "-": "Tache pas faite",
+            "+/-": "Quelques erreur mais fonctionne",
+            "+": "Tache fonctionnel"
+        },
+        "factor": [0.0, -1, 0.5, 1.0]
+    },
+    "etudiants": [{
+        "name": "ANDREROMAGNY Mael",
+        "notes": ["+", "+/-", "-", "+/-", "-", "+/-", "+/-", "0"],
+        "total": "11.5",
+        "baremComentaires": "- + | Module Root | Tache fonctionnel\n- +/- | Module Spine | Quelques erreur mais fonctionne\n- - | Autres Modules | Tache pas faite\n- +/- | IK / FK blend | Quelques erreur mais fonctionne\n- - | Limb Roll | Tache pas faite\n- +/- | Foot Roll | Quelques erreur mais fonctionne\n- +/- | Skin | Quelques erreur mais fonctionne\n- 0 | Rangement de chambre | Trop d'erreur\n",
+        "commentaires": "Le module spine fonctionne mais la manipulation des maipulateurs n'est pas optimal. Le joint toe ne se blend pas. Les manipulateurs des bras FK ne sont pas bien oriente. Des erreurs sur le footRoll. Le skin aurait pu \u00eatre mieux travailler. (-1 pts \u00e0 faire)"
+    }, {
+        "name": "Bellon Nadjid",
+        "notes": ["+", "-", "+/-", "+", "+/-", "+/-", "+/-", "0"],
+        "total": "13.5",
+        "baremComentaires": "- + | Module Root | Tache fonctionnel\n- - | Module Spine | Tache pas faite\n- +/- | Autres Modules | Quelques erreur mais fonctionne\n- + | IK / FK blend | Tache fonctionnel\n- +/- | Limb Roll | Quelques erreur mais fonctionne\n- +/- | Foot Roll | Quelques erreur mais fonctionne\n- +/- | Skin | Quelques erreur mais fonctionne\n- 0 | Rangement de chambre | Trop d'erreur\n",
+        "commentaires": "Il te manque un petit la pliure du toe sur le footRoll. Tu as des rotations \u00e0 revoir sur les doigts. tu n'as pas fait les rolls sur les jambes. tu as beaucoup d'erreur sur le skin (-1 pts)"
+    }, {
+        "name": "BELOTTI Romane",
+        "notes": ["+", "+/-", "+/-", "+/-", "0", "+", "+/-", "0"],
+        "total": "14.5",
+        "baremComentaires": "- + | Module Root | Tache fonctionnel\n- +/- | Module Spine | Quelques erreur mais fonctionne\n- +/- | Autres Modules | Quelques erreur mais fonctionne\n- +/- | IK / FK blend | Quelques erreur mais fonctionne\n- 0 | Limb Roll | Trop d'erreur\n- + | Foot Roll | Tache fonctionnel\n- +/- | Skin | Quelques erreur mais fonctionne\n- 0 | Rangement de chambre | Trop d'erreur\n",
+        "commentaires": "La manipulation de la spine n'est pas optimal. Les jambes ik ne suivent pas le mouvement du bassin. Le manip de t\u00eate devrait etre contraint au joint et non au manip spine. Dommage que les manips des doigts ne se voient pas en IK. les rolls ne sont pas present sur les jambes. Il y a pas mal d'erreurs sur le skin mais il y a eu un effort de fait. (-0.5 pts)"
+    }, {
+        "name": "Bergeron Ruben",
+        "notes": ["+", "+/-", "+", "+/-", "+", "+", "0", "0"],
+        "total": "14.0",
+        "baremComentaires": "- + | Module Root | Tache fonctionnel\n- +/- | Module Spine | Quelques erreur mais fonctionne\n- + | Autres Modules | Tache fonctionnel\n- +/- | IK / FK blend | Quelques erreur mais fonctionne\n- +/- | Limb Roll | Quelques erreur mais fonctionne\n- + | Foot Roll | Tache fonctionnel\n- 0 | Skin | Trop d'erreur\n- 0 | Rangement de chambre | Trop d'erreur\n",
+        "commentaires": "Ton ikSpine donnent des rotations etranges aux joints. les jambes ik ne suivent pas les mouvements du bassin. Le skin pourrait \u00eatre plus travaill\u00e9 mais ce n'est pas trop mal"
+    }, {
+        "name": "CAO Chris",
+        "notes": ["0", "+/-", "+/-", "+/-", "0", "+/-", "+/-", "0"],
+        "total": "13.5",
+        "baremComentaires": "- 0 | Module Root | Trop d'erreur\n- +/- | Module Spine | Quelques erreur mais fonctionne\n- +/- | Autres Modules | Quelques erreur mais fonctionne\n- +/- | IK / FK blend | Quelques erreur mais fonctionne\n- 0 | Limb Roll | Trop d'erreur\n- +/- | Foot Roll | Quelques erreur mais fonctionne\n- +/- | Skin | Quelques erreur mais fonctionne\n- 0 | Rangement de chambre | Trop d'erreur\n",
+        "commentaires": "Les manips root n'entrainent pas le reste du rig. Le dernier manip de la spine n'entraine pas le haut du corps. Les orteilles ne reste pas droit lors du \"roll\" du pied. Les bras suivent le manipulateur de la spine plutot que le joint de la spine. Les doigts ne suivent pas en mode ik. Les rolls ont une petite erreurs mais fonctionnent bien. Il y a des erreurs sur le skin mais il y a eu un effort"
+    }, {
+        "name": "CIMBARO Cl\u00e9ment",
+        "notes": ["+", "+/-", "+", "+/-", "+", "+", "+/-", "0"],
+        "total": "16.0",
+        "baremComentaires": "- + | Module Root | Tache fonctionnel\n- +/- | Module Spine | Quelques erreur mais fonctionne\n- + | Autres Modules | Tache fonctionnel\n- +/- | IK / FK blend | Quelques erreur mais fonctionne\n- + | Limb Roll | Tache fonctionnel\n- + | Foot Roll | Tache fonctionnel\n- +/- | Skin | Quelques erreur mais fonctionne\n- 0 | Rangement de chambre | Trop d'erreur\n",
+        "commentaires": "La courbe de la spine ne suit pas correctement le derner manipulateur. Les orteilles ne se blend pas. Il y a des erreurs de skin mais un effort de fait (-0.5 pts)"
+    }, {
+        "name": "COCHET Na\u00efs",
+        "notes": ["+", "+/-", "+", "+/-", "+/-", "+", "+/-", "0"],
+        "total": "15.5",
+        "baremComentaires": "- + | Module Root | Tache fonctionnel\n- +/- | Module Spine | Quelques erreur mais fonctionne\n- + | Autres Modules | Tache fonctionnel\n- +/- | IK / FK blend | Quelques erreur mais fonctionne\n- +/- | Limb Roll | Quelques erreur mais fonctionne\n- + | Foot Roll | Tache fonctionnel\n- +/- | Skin | Quelques erreur mais fonctionne\n- 0 | Rangement de chambre | Trop d'erreur\n",
+        "commentaires": "La spine ne suit pas correctement le dernier manipulateur. Les orientations des joints des bras ne sont pas bonnes, les orteilles ne blend pas. Il n'y a pas les rolls sur les jambes. Il y a pas mal d'erreur sur le skin mais un effort de fait. (-1 pts)"
+    }, {
+        "name": "COULAUD Alex",
+        "notes": ["+", "+/-", "+", "+/-", "+", "+/-", "+/-", "0"],
+        "total": "15.5",
+        "baremComentaires": "- + | Module Root | Tache fonctionnel\n- +/- | Module Spine | Quelques erreur mais fonctionne\n- + | Autres Modules | Tache fonctionnel\n- +/- | IK / FK blend | Quelques erreur mais fonctionne\n- + | Limb Roll | Tache fonctionnel\n- +/- | Foot Roll | Quelques erreur mais fonctionne\n- +/- | Skin | Quelques erreur mais fonctionne\n- 0 | Rangement de chambre | Trop d'erreur\n",
+        "commentaires": "Tu as un comportement \u00e9trange quand tu bouges le dernier manip de la spine. Le pied se blend mal, les joints ik des jambes ne suivent pas le bassin. de Petites erreurs sur le foot roll. Le skin aurait pu \u00eatre pouss\u00e9 un peu plus mais il y a eu un effort de fait"
+    }]
+}
