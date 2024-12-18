@@ -1,12 +1,32 @@
 """!@Brief IK builder.
            Select joints and launch this code
 
-from HodoRig.Builders.RigBuilders.ikBuilder import IKBuilder
+from HodoRig.Rig.module import Module
+from HodoRig.Rig.ikBuilder import IKBuilder
 from HodoRig.Nodes.node import Node
 
+# ------------------------------------------
+# Without Module
+# ------------------------------------------
+
 sources = Node.selected(node_type="joint")
-ik_builder = IKBuilder(name="Hodor", sources=sources)
+ik_builder = IKBuilder("L_0_Hodor", sources)
 ik_builder.build()
+
+# ------------------------------------------
+# With Module
+# ------------------------------------------
+
+# Create Module
+sources = Node.selected(node_type="joint")
+module = Module("L_0_Hodor", sources)
+
+# Create Ik
+ik_builder = IKBuilder()
+module.add_builder(ik_builder)
+
+# Build Module
+module.build()
 """
 
 from __future__ import annotations
@@ -15,12 +35,12 @@ from typing import Optional, List
 from maya import cmds
 from maya.api import OpenMaya
 
-from ...Helpers.color import Color
-from ...Core.nameBuilder import NameBuilder
-from ...Core.settings import Setting
-from ...Helpers import utils
-from ..RigBuilders.rigBuilder import RigBuilder
-from ...Nodes.transform import Transform
+from ..Helpers.color import Color
+from ..Core.nameBuilder import NameBuilder
+from ..Core.settings import Setting
+from .rigBuilder import RigBuilder
+from ..Nodes.node import Node
+from ..Nodes.transform import Transform
 from .manipulatorBuilder import ManipulatorBuilder
 
 
@@ -31,8 +51,9 @@ class IKBuilder(RigBuilder):
     _kPvDistance = "pvDistance"
     _kShapeScale = "shapeScale"
 
-    def __init__(self,  name: str | NameBuilder, sources: List[str], is_blended: bool = False):
-        super().__init__(name=name, sources=sources, is_blended=is_blended)
+    def __init__(self, name: Optional[str | NameBuilder] = NameBuilder(),
+                 sources: Optional[List[Node]]= []):
+        super().__init__(name, sources)
 
         self._ikh = None
         self._eff = None

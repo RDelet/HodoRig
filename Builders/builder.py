@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import List
 import traceback
 
 from ..Core.logger import log
@@ -20,6 +21,7 @@ class Builder:
         self._node_cache = NodeCache(enable=False)
         self._state = BuilderState()
         self._settings = Settings()
+        self._children: List[Builder] = []
 
         self._init_settings()
 
@@ -40,6 +42,8 @@ class Builder:
         self._check_validity()
 
     def _build(self, *args, **kwargs):
+        if self._state == BuilderState.kBuilt:
+            raise RuntimeError(f"Builder {self.name} already built !")
         log.debug(f"{self.__class__.__name__} build !")
 
     def _post_build(self, *args, **kwargs):
@@ -78,6 +82,18 @@ class Builder:
             
             self._on_build_succed()
     
+    def add_children(self, builder: Builder):
+        if builder in self._children:
+            raise RuntimeError(f"Builder {builder} already set !")
+        if builder.state.value == BuilderState.kBuilt:
+            raise RuntimeError(f"Builder {builder} already built !")
+
+        self._children.append(builder)
+    
+    @property
+    def children(self) -> list:
+        return self.children
+
     @property
     def name(self) -> NameBuilder:
         return self._name

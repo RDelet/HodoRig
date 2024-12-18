@@ -4,13 +4,13 @@ from typing import Optional
 from maya import cmds
 from maya.api import OpenMaya
 
-from ...Core import constants as cst
-from ...Core.nameBuilder import NameBuilder
-from ...Helpers import utils
-from ...Helpers.color import Color
-from ...Nodes.node import Node
-from ...Nodes.shape import Shape
-from ..builder import Builder
+from ..Core import constants as cst
+from ..Core.nameBuilder import NameBuilder
+from ..Helpers import utils
+from ..Helpers.color import Color
+from ..Nodes.node import Node
+from ..Nodes.shape import Shape
+from ..Builders.builder import Builder
 
 
 class ManipulatorBuilder(Builder):
@@ -42,16 +42,11 @@ class ManipulatorBuilder(Builder):
         Shape.load(shape, self._node, shape_dir=shape_dir, scale=scale)
 
         self.__connect_nodes()
-        self.__set_classname()
         self.__set_type()
 
     def __connect_nodes(self):
         self._node.add_attribute(cst.kResetGroup, cst.kMessage)
         self._reset.connect_to(cst.kMessage, f"{self._node}.{cst.kResetGroup}")
-
-    def __set_classname(self):
-        self._node.add_attribute(cst.kClassName, cst.kString)
-        self._node.set_attribute(cst.kClassName, self.__class__.__name__, lock=True)
 
     def __set_type(self):
         self._node.add_attribute(cst.kManipulatorType, cst.kString)

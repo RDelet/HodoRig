@@ -1,47 +1,77 @@
-"""!@Brief FK builder.
+"""!@Brief Blend builder.
            Select joints and launch this code
 
-from HodoRig.Builders.RigBuilders.fkBuilder import FKBuilder
-from HodoRig.Builders.RigBuilders.ikBuilder import IKBuilder
-from HodoRig.Builders.RigBuilders.blendBuilder import BlendBuilder
+from HodoRig.Rig.module import Module
+from HodoRig.Rig.fkBuilder import FKBuilder
+from HodoRig.Rig.ikBuilder import IKBuilder
+from HodoRig.Rig.blendBuilder import BlendBuilder
 from HodoRig.Nodes.node import Node
 
-sources = Node.selected(node_type="joint")
 
-# Ik
-ik_builder = IKBuilder(name="L_0_GrootFK", sources=sources)
-# Fk
-fk_builder = FKBuilder("L_0_GrootIK", sources)
+# ------------------------------------------
+# Without Module
+# ------------------------------------------
+
+# Create Ik
+ik_builder = IKBuilder()
+
+# Create Fk
+fk_builder = FKBuilder()
 fk_builder._settings.set("shapeScale", 1.0)
-# Blend
-blend_builder = BlendBuilder("L_0_GrootBLENDER", sources)
-blend_builder.add_sub_builder(ik_builder)
-blend_builder.add_sub_builder(fk_builder)
+
+# Create blender
+sources = Node.selected(node_type="joint")
+blend_builder = BlendBuilder("L_0_Hodor", sources)
 blend_builder._settings.set("blendName", "ikFkBlend")
+blend_builder.add_children(ik_builder)
+blend_builder.add_children(fk_builder)
 blend_builder.build()
+
+# ------------------------------------------
+# With Module
+# ------------------------------------------
+
+# Create Module
+sources = Node.selected(node_type="joint")
+module = Module("L_0_Hodor", sources)
+
+# Create blender
+blend_builder = BlendBuilder()
+blend_builder._settings.set("blendName", "ikFkBlend")
+module.add_builder(blend_builder)
+
+# Create Ik
+ik_builder = IKBuilder()
+blend_builder.add_children(ik_builder)
+
+# Create Fk
+fk_builder = FKBuilder()
+fk_builder._settings.set("shapeScale", 1.0)
+blend_builder.add_children(fk_builder)
+
+# Build Module
+module.build()
 """
 
 from __future__ import annotations
-from typing import List
+from typing import Optional, List
 
 from maya import cmds
 
-from ...Core import constants
-from ...Core.nameBuilder import NameBuilder
-from ...Core.settings import Setting
-from ...Helpers import utils
-from ...Helpers.color import Color
-from ...Nodes.node import Node
-from ..builderState import BuilderState
-from ..RigBuilders.rigBuilder import RigBuilder
-from .manipulatorBuilder import ManipulatorBuilder
+from ..Core import constants
+from ..Core.nameBuilder import NameBuilder
+from ..Core.settings import Setting
+from ..Nodes.node import Node
+from ..Builders.builderState import BuilderState
+from .rigBuilder import RigBuilder
 
 
 class BlendBuilder(RigBuilder):
 
     _kBlendName = "blendName"
 
-    def __init__(self,  name: str | NameBuilder, sources: List[RigBuilder]):
+    def __init__(self, name: Optional[str | NameBuilder] = NameBuilder(),
+                 sources: Optional[List[Node]]= []):
         super().__init__(name, sources)
 
         self._build_rig_group = False
@@ -62,24 +92,24 @@ class BlendBuilder(RigBuilder):
     
     def _build(self):
         super()._build()
-        self._build_sub_builders()
+        self._build_children()
         self._build_attribute()
         self._build_reverse_blend()
         self._build_constraint()
         self._connect_manipulators()
 
-    def _build_sub_builders(self):
-        for builder in self._sub_builders:
+    def _build_children(self):
+        for builder in self._children:
             builder.build()
             if not builder.state.value == BuilderState.kBuilt:
                 raise RuntimeError(f"Error on build {builder.name} !")
         
-        self.__hook_a = self._sub_builders[0]._output_blend
-        self.__hook_b = self._sub_builders[1]._output_blend
-        self.__manipulator_a = self._sub_builders[0]._manipulators
-        self.__manipulator_b = self._sub_builders[1]._manipulators
+        self.__hook_a = self._children[0]._output_blend
+        self.__hook_b = self._children[1]._output_blend
+        self.__manipulator_a = self._children[0]._manipulators
+        self.__manipulator_b = self._children[1]._manipulators
         if len(self.__hook_a) != len(self.__hook_b):
-            raise RuntimeError(f"Mismatch output node between {self._sub_builders[0].name} and {self._sub_builders[1].name}")
+            raise RuntimeError(f"Mismatch output node between {self._children[0].name} and {self._sub_builders[1].name}")
 
     def _build_attribute(self):
         manipulators = self.__manipulator_a + self.__manipulator_b
@@ -110,16 +140,9 @@ class BlendBuilder(RigBuilder):
             self.__manipulator.connect_to(self.__blend_name, f"{manipulator}.visibility")
         for manipulator in self.__manipulator_b:
             self.__reverse_blend.connect_to("outFloat", f"{manipulator}.visibility")
-     
-    def add_sub_builder(self, builder: RigBuilder):
-        if len(self._sub_builders) == 2:
+    
+    def add_children(self, builder: RigBuilder):
+        if len(self._children) == 2:
             raise RuntimeError("You already have to builder set !")
-        if builder in self._sub_builders:
-            raise RuntimeError(f"Builder {builder} already set !")
-        if builder.state.value == BuilderState.kBuilt:
-            raise RuntimeError(f"Builder {builder} already built !")
-
+        super().add_children(builder)
         builder._is_blended = True
-        builder._sources = self._sources
-
-        self._sub_builders.append(builder)
