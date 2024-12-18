@@ -105,6 +105,8 @@ kDataTypes = [kString, kMatrix, kDoubleArray, kFloatArray, kInt32Array,
 # Attributes
 kClassName = "className"
 kManipulators = "manipulators"
+kChildren = "children"
+kParent = "parent"
 kManipulatorType = "manipulatorType"
 kMessage = "message"
 kResetGroup = "resetGroup"

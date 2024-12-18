@@ -110,11 +110,14 @@ class Node:
             raise RuntimeError(f"Attirbute {attr_name} does not exists on {self}.")
 
         node_attr = f"{self}.{attr_name}"
-        attr_type = cmds.attributeQuery(attr_name, node=self, attributeType=True)
-        if attr_type in constants.kAttributeTypes:
-            cmds.setAttr(node_attr, value)
+        if isinstance(value, str):
+            cmds.setAttr(node_attr, value, type=constants.kString)
+        elif isinstance(value, (list, tuple)) and len(value) == 16:
+            cmds.setAttr(node_attr, value, type=constants.kMatrix)
+        elif isinstance(value, (OpenMaya.MMatrix, OpenMaya.MFloatMatrix)):
+            cmds.setAttr(node_attr, value, type=constants.kMatrix)
         else:
-            cmds.setAttr(node_attr, value, type=attr_type)
+            cmds.setAttr(node_attr, value)
     
     def connect_to(self, src_attr: str, dst_attr: str):
         if not attribute.exists(self, src_attr):

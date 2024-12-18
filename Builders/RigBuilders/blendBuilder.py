@@ -9,15 +9,15 @@ from HodoRig.Nodes.node import Node
 sources = Node.selected(node_type="joint")
 
 # Ik
-ik_builder = IKBuilder(name="Hodor", sources=sources)
+ik_builder = IKBuilder(name="L_0_GrootFK", sources=sources)
 # Fk
-fk_builder = FKBuilder("L_0_Groot", sources)
+fk_builder = FKBuilder("L_0_GrootIK", sources)
 fk_builder._settings.set("shapeScale", 1.0)
 # Blend
-blend_builder = BlendBuilder("L_0_Groot_BLENDER", sources)
+blend_builder = BlendBuilder("L_0_GrootBLENDER", sources)
 blend_builder.add_sub_builder(ik_builder)
 blend_builder.add_sub_builder(fk_builder)
-blend_builder._settings.set("blendAttrName", "ikFkBlend")
+blend_builder._settings.set("blendName", "ikFkBlend")
 blend_builder.build()
 """
 

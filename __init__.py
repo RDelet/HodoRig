@@ -72,7 +72,7 @@ except Exception as exp:
 
 
 try:
-    plugins = ["quatNodes", "lookDevKit"]
+    plugins = ["quatNodes", "lookdevKit"]
     for plugin in plugins:
         if not cmds.pluginInfo(plugin, query=True, loaded=True):
             log.debug(f"Load plugin {plugin}")
