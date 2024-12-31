@@ -10,7 +10,7 @@ except:
     from PySide6 import QtCore, QtWidgets
 
 from ..Core import constants, file
-from ..Builders.RigBuilders.manipulatorBuilder import ManipulatorBuilder
+from ..Rig.manipulatorBuilder import ManipulatorBuilder
 from ..Nodes.node import Node
 from ..Nodes.shape import Shape
 from ..Ui import utils
