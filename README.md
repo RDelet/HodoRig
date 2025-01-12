@@ -16,7 +16,7 @@ cd C:\Users\User\Documents\maya\scripts
 
 And clone repo
 ```
-git clone https://github.com/RDelet/HoldTheRig.git
+git clone https://github.com/RDelet/HodoRig.git
 ```
 
 ## Without Git
