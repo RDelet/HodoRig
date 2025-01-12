@@ -49,8 +49,7 @@ def get_scripts() -> dict:
 def _retrieve_scripts():
     _scripts.clear()
     for mod in allScripts:
-        module_name = Path(mod.__file__).with_suffix("").name
-        _scripts[module_name] = mod
+        _scripts[mod.kScriptName] = mod
 
 def retrieve():
     _scripts.clear()

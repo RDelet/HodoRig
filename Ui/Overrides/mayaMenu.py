@@ -4,10 +4,12 @@ import uuid
 from maya import cmds
 
 from ...Core.logger import log
+from ...Core import constants
 from ...Helpers import quickScripts
 
 
 kMainWindow = "MayaWindow"
+_sub_menu = {}
 
 
 class MenuItem(object):
@@ -87,8 +89,6 @@ class Item(MenuItem):
             item.create()
 
 
-_sub_menu = {}
-
 def __build_sub_menu(menu_name: str, parent: MenuItem = None):
     if not menu_name:
         return
@@ -106,13 +106,13 @@ def __build_sub_menu(menu_name: str, parent: MenuItem = None):
 
 
 def build_hodorig_menu():
-    main_menu = MenuItem("HodoRig", annotation="HodoRig Tools")
+    main_menu = MenuItem(constants.kModuleName, annotation=f"{constants.kModuleName} Tools")
     scripts = quickScripts.get_scripts()
     for name, mod in scripts.items():
         if not mod.kMayaMenu:
             continue
         sub_menu = __build_sub_menu(mod.kCategory, parent=main_menu)
         item = Item(name, annotation=mod.kAnnotation, image=mod.kImage,
-                    command=f"from {mod.__name__} import main as hodorMain; hodorMain()")
+                    command=f"from {mod.__name__} import main as ScriptMain; ScriptMain()")
         sub_menu.add_item(item) if sub_menu else main_menu.add_item(item)
     main_menu.create()

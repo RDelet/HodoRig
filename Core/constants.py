@@ -12,14 +12,15 @@ from maya.api import OpenMaya
 T = TypeVar("T")
 
 
-kModuleDir = Path(__file__).parent
+kModuleDir = Path(__file__).parent.parent
+kModuleName = kModuleDir.name
 
 kSkinExtension = "skin"
 
-kTemplateDir = kModuleDir.parent / "Templates"
+kTemplateDir = kModuleDir / "Templates"
 kTemplateExtension = "hrt"
 
-kShapeDir = kModuleDir.parent / "Shapes"
+kShapeDir = kModuleDir / "Shapes"
 kShapeExtension = "json"
 kIconExtension = "png"
 
@@ -114,7 +115,7 @@ kResetGroup = "resetGroup"
 kString = "string"
 
 # Icons
-kIconsDir = kModuleDir.parent / "Icons"
+kIconsDir = kModuleDir / "Icons"
 kCloseIcon = QtGui.QIcon(str(kIconsDir / "close.svg"))
 kPythonIcon = QtGui.QIcon(str(kIconsDir / "python.svg"))
 kTrashIcon = QtGui.QIcon(str(kIconsDir / "trash.svg"))

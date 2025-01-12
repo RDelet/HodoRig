@@ -1,6 +1,44 @@
 # HodoRig
 Auto rig for maya
 
+# How to install
+
+## With Git
+Download and install [git](https://git-scm.com/downloads)
+
+In a windows command.
+go to the folder to download the repository
+
+for Exemple
+```
+cd C:\Users\User\Documents\maya\scripts
+```
+
+And clone repo
+```
+git clone https://github.com/RDelet/HoldTheRig.git
+```
+
+## Without Git
+Download the zip, unzip it where you want and rename it like you want.
+
+## UserSetup file
+create "userSetup.py" file in C:\Users\User\Documents\maya\scripts and past this code
+
+## if you download the repository in maya scripts directory
+```python
+import HodoRig  # or the name of directory if you change the directory name
+```
+
+## if you have another directory like D:\Maya\Tools
+```python
+import sys
+
+sys.path.insert(r"D:\Maya\Tools")
+
+import HodoRig  # or the name of directory if you change the directory name
+```
+
 # Build Exemple
 
 ## Create Module
