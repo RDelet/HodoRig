@@ -209,8 +209,8 @@ class UVDeformer:
     
     def install_cbs(self):
         self.remove_cbs()
-        self._cbs.append(om.MNodeMessage.addNodeDirtyCallback(get_object("joint1"), self.do))
-        self._cbs.append(om.MNodeMessage.addNodeDirtyCallback(get_object("joint2"), self.do))
+        self._cbs.append(om.MDagMessage.addMatrixModifiedCallback(get_path("joint1"), self.do))
+        self._cbs.append(om.MDagMessage.addMatrixModifiedCallback(get_path("joint2"), self.do))
 
     def remove_cbs(self):
         if self._cbs:
