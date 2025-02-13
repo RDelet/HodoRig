@@ -16,7 +16,6 @@ from typing import List
 from ..Core import constants as cst
 from ..Core.nameBuilder import NameBuilder
 from ..Builders.builder import Builder
-from ..Builders.builderState import BuilderState
 from ..Nodes.node import Node
 from .rigBuilder import RigBuilder
 

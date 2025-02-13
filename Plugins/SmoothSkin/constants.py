@@ -1,0 +1,2 @@
+kToolNameCtx = "SmoothWeightsContext"
+kToolNameCmd = "SmoothWeightsCmd"
