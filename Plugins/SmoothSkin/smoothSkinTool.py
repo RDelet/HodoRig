@@ -20,7 +20,7 @@ class SmoothWeights(omui.MPxContext):
 
     def __init__(self):
         super().__init__()
-        log.warning(f"{self.__class__.__name__}.__init__")
+        log.debug(f"{self.__class__.__name__}.__init__")
         
     def toolOnSetup(self,event):
         self.reset_context()
@@ -28,100 +28,111 @@ class SmoothWeights(omui.MPxContext):
     def toolOffCleanup(self):
         self.reset_context()
 
-    def doPress(self, event: om.MEvent, drawMgr, context):
-        log.warning(f"{self.__class__.__name__}.doPress")
+    def doPress(self, event: om.MEvent, draw_mgt: omr.MUIDrawManager, context: omr.MFrameContext):
+        log.debug(f"{self.__class__.__name__}.doPress")
     
     def doPressLegacy(self, event: om.MEvent):
-        log.warning(f"{self.__class__.__name__}.doPressLegacy")
+        log.debug(f"{self.__class__.__name__}.doPressLegacy")
     
     def doEnterRegion(self, event: om.MEvent):
-        log.warning(f"{self.__class__.__name__}.doEnterRegion")
+        log.debug(f"{self.__class__.__name__}.doEnterRegion")
     
-    def doHold(self, event: om.MEvent, drawMgr, context):
-        log.warning(f"{self.__class__.__name__}.doHold")
+    def doHold(self, event: om.MEvent, draw_mgt: omr.MUIDrawManager, context: omr.MFrameContext):
+        log.debug(f"{self.__class__.__name__}.doHold")
     
     def doHoldLegacy(self, event: om.MEvent):
-        log.warning(f"{self.__class__.__name__}.doHoldLegacy")
+        log.debug(f"{self.__class__.__name__}.doHoldLegacy")
 
-    def doDrag(self, event: om.MEvent, drawMgr, context):
-        log.warning(f"{self.__class__.__name__}.doDrag")
+    def doDrag(self, event: om.MEvent, draw_mgt: omr.MUIDrawManager, context: omr.MFrameContext):
+        log.debug(f"{self.__class__.__name__}.doDrag")
     
     def doDragLegacy(self, event: om.MEvent):
-        log.warning(f"{self.__class__.__name__}.doDragLegacy")
+        log.debug(f"{self.__class__.__name__}.doDragLegacy")
     
     def dragMarquee(self, event: om.MEvent):
-        log.warning(f"{self.__class__.__name__}.dragMarquee")
+        log.debug(f"{self.__class__.__name__}.dragMarquee")
     
-    def doPtrMoved(self, event: om.MEvent, drawMgr, context):
+    def doPtrMoved(self, event: om.MEvent, draw_mgt: omr.MUIDrawManager, context: omr.MFrameContext):
         pass
         # log.debug(f"{self.__class__.__name__}.doPtrMoved")
     
     def doPtrMovedLegacy(self, event: om.MEvent):
-        log.warning(f"{self.__class__.__name__}.doPtrMovedLegacy")
+        log.debug(f"{self.__class__.__name__}.doPtrMovedLegacy")
 
-    def doRelease(self, event: om.MEvent, drawMgr, context):
-        log.warning(f"{self.__class__.__name__}.doRelease")
+    def doRelease(self, event: om.MEvent, draw_mgt: omr.MUIDrawManager, context: omr.MFrameContext):
+        log.debug(f"{self.__class__.__name__}.doRelease")
     
     def doReleaseLegacy(self, event: om.MEvent):
-        log.warning(f"{self.__class__.__name__}.doReleaseLegacy")
+        log.debug(f"{self.__class__.__name__}.doReleaseLegacy")
     
     def releaseMarquee(self, event: om.MEvent):
-        log.warning(f"{self.__class__.__name__}.releaseMarquee")
+        log.debug(f"{self.__class__.__name__}.releaseMarquee")
     
-    def doPressCommon(self, event: om.MEvent, drawMgr, context):
-        log.warning(f"{self.__class__.__name__}.doPressCommon")
+    def doPressCommon(self, event: om.MEvent, draw_mgt: omr.MUIDrawManager, context: omr.MFrameContext):
+        log.debug(f"{self.__class__.__name__}.doPressCommon")
 
-    def doDragCommon(self, event: om.MEvent, drawMgr, context):
-        log.warning(f"{self.__class__.__name__}.doDragCommon")
+    def doDragCommon(self, event: om.MEvent, draw_mgt: omr.MUIDrawManager, context: omr.MFrameContext):
+        log.debug(f"{self.__class__.__name__}.doDragCommon")
 
-    def doReleaseCommon(self, event: om.MEvent, drawMgr, context):
-        log.warning(f"{self.__class__.__name__}.doReleaseCommon")
+    def doReleaseCommon(self, event: om.MEvent, draw_mgt: omr.MUIDrawManager, context: omr.MFrameContext):
+        log.debug(f"{self.__class__.__name__}.doReleaseCommon")
           
     def completeAction(self):
-        log.warning(f"{self.__class__.__name__}.completeAction")
+        log.debug(f"{self.__class__.__name__}.completeAction")
         
     def deleteAction(self):
-        log.warning(f"{self.__class__.__name__}.deleteAction")
+        log.debug(f"{self.__class__.__name__}.deleteAction")
         
     def abortAction(self):
-        log.warning(f"{self.__class__.__name__}.abortAction")
+        log.debug(f"{self.__class__.__name__}.abortAction")
 
     def reset_context(self):
-        log.warning(f"{self.__class__.__name__}.reset_context")
+        log.debug(f"{self.__class__.__name__}.reset_context")
     
-    def drawFeedback(self, draw_manager: omui.MUIDrawManager, frame_context: omr.MFrameContext):
-        pass
-        # log.debug(f"{self.__class__.__name__}.drawFeedback")
+    def drawFeedback(self, draw_mgt: omr.MUIDrawManager, context: omr.MFrameContext):
+        world_point, world_vector = self.get_3d_position_from_cursor()
+        draw_mgt.circle(world_point, om.MVector(0, 1, 0), 1.0, 30, True)
+        log.debug(f"{self.__class__.__name__}.drawFeedback")
     
     def feedbackNumericalInput(self):
-        log.warning(f"{self.__class__.__name__}.feedbackNumericalInput")
+        log.debug(f"{self.__class__.__name__}.feedbackNumericalInput")
+    
+    def get_3d_position_from_cursor(self):
+        view = omui.M3dView.active3dView()
+        cursor_pos = view.getScreenPosition()
+        print(cursor_pos)
+        world_point = om.MPoint()
+        world_vector = om.MVector()
+        view.viewToWorld(cursor_pos[0], cursor_pos[1], world_point, world_vector)
+
+        return world_point, world_vector
 
 
 class SmoothWeightsContextCmd(omui.MPxContextCommand):
     
     def __init__(self):
         super().__init__()
-        log.warning(f"{self.__class__.__name__}.__init__")
+        log.debug(f"{self.__class__.__name__}.__init__")
         # self._flag = None
         
     def makeObj(self) -> SmoothWeights:
-        log.warning(f"Make object {self.__class__.__name__}")
+        log.debug(f"Make object {self.__class__.__name__}")
         return SmoothWeights() 
     
     @classmethod
     def creator(cls) -> SmoothWeightsContextCmd:
-        log.warning(f"Create {cls.__name__}")
+        log.debug(f"Create {cls.__name__}")
         return cls()
 
     def appendSyntax(self):
-        log.warning(f"{self.__class__.__name__}.appendSyntax")
+        log.debug(f"{self.__class__.__name__}.appendSyntax")
         """
         syntax = self.syntax()
         syntax.addFlag(kFlag, kLongFlag, om.MSyntax.kDouble)
         """
 
     def doEditFlags(self):
-        log.warning(f"{self.__class__.__name__}.doEditFlags")
+        log.debug(f"{self.__class__.__name__}.doEditFlags")
         """
         argParser = self.parser()
         if argParser.isFlagSet(kFlag):
@@ -131,7 +142,7 @@ class SmoothWeightsContextCmd(omui.MPxContextCommand):
         """
 
     def doQueryFlags(self):
-        log.warning(f"{self.__class__.__name__}.doQueryFlags")
+        log.debug(f"{self.__class__.__name__}.doQueryFlags")
         """
         argParser = self.parser()
         if argParser.isFlagSet(kFlag):
