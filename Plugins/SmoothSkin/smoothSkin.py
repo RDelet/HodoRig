@@ -25,7 +25,7 @@ def get_object(node: str) -> om.MObject:
         _msl.clear()
         return obj
     except Exception as e:
-        raise RuntimeError("Hodor")
+        raise RuntimeError(f"Object {node} does not exists !")
 
 
 def get_path(node: str | om.MObject) -> om.MDagPath:
@@ -99,6 +99,9 @@ class Mesh(Node):
         if not self.object.hasFn(om.MFn.kMesh):
             raise TypeError(f"Obj must be a shape not {self.object.apiTypeStr}")
         self._fn = om.MFnMesh(self.object)
+    
+    def update_surface(self):
+        self._fn.updateSurface()
     
     @property
     def path(self) -> om.MDagPath:
@@ -196,6 +199,10 @@ class Skin(Node):
         self._input_shape = Mesh(self._get_input_shape())
 
         self._update_weights()
+    
+    @property
+    def output_shape(self) -> Mesh:
+        return self._output_shape
         
     def _update_weights(self):
         weights = self._fn.getWeights(self._output_shape.path, self._output_shape.get_components(), self.influence_ids)
@@ -219,6 +226,46 @@ class Skin(Node):
         if len(shapes) == 0:
             raise RuntimeError(f"No input geometry found on {self.object}!")
         return shapes[0]
+
+    @classmethod
+    def find(cls, obj: str | om.MObject) -> Optional[Skin]:
+        if isinstance(obj, str):
+            obj = get_object(obj)
+        if obj.hasFn(om.MFn.kDagNode) is False:
+            raise Exception("Argument must be a DagNode.")
+
+        nodes = om.MObjectArray()
+        if obj.hasFn(om.MFn.kTransform):
+            mfn = om.MFnTransform(obj)
+            for i in range(mfn.childCount()):
+                child = mfn.child(i)
+                if child.hasFn(om.MFn.kShape):
+                    nodes = cls._harvest(child, om.MFn.kSkinClusterFilter)
+                    if len(nodes) > 0:
+                        break
+        else:
+            nodes = cls._harvest(obj, om.MFn.kSkinClusterFilter)
+
+        count = len(nodes)
+        if count == 0:
+            return
+        elif count == 1:
+            return Skin(nodes[0])
+        else:
+            raise Exception("Multiple node found.")
+    
+    @staticmethod
+    def _harvest(mo, mfn_type: om.MFn) -> om.MObjectArray:
+        iterator = om.MItDependencyGraph(mo, mfn_type,
+                                        om.MItDependencyGraph.kUpstream,
+                                        om.MItDependencyGraph.kDepthFirst,
+                                        om.MItDependencyGraph.kNodeLevel)
+        output = om.MObjectArray()
+        while iterator.isDone() is False:
+            output.append(iterator.currentNode())
+            iterator.next()
+
+        return output
     
     @property
     def influence_count(self) -> int:
@@ -243,16 +290,18 @@ class Skin(Node):
 
         return weights / row_sums
 
-    def _get_mask(self) -> np.array:
-        vertex_ids = self._output_shape.get_selected_vertices() or list(range(self._output_shape.num_vertices))
+    def _get_mask(self, vertex_ids: Optional[np.array] = None) -> np.array:
+        if vertex_ids is None:
+            vertex_ids = self._output_shape.get_selected_vertices() or list(range(self._output_shape.num_vertices))
         mask = np.zeros(self._output_shape.num_vertices, dtype=bool)
         mask[vertex_ids] = True
 
         return mask
 
     def smooth(self, smooth_method: Enum, relax_factor: float = 1.0,
-               iterations: int = 10, dt: float = 0.1, epsilon: float = 1e-6):
-        mask = self._get_mask()
+               iterations: int = 10, dt: float = 0.1, epsilon: float = 1e-6,
+               vertex_ids: Optional[np.array] = None):
+        mask = self._get_mask(vertex_ids)
         if smooth_method == SmoothMethod.RELAX:
             self._relax(mask, relax_factor=relax_factor)
         elif smooth_method == SmoothMethod.DISTANCE_WEIGHTED:
@@ -346,11 +395,12 @@ class Skin(Node):
         self._set_weights(new_weights.reshape(self.influence_count * self._output_shape.num_vertices), vertex_ids=indices)
     
 
-skin = Skin("skinCluster2")
-f = time()
-# skin.smooth(SmoothMethod.RELAX, relax_factor=1.0)
-skin.smooth(SmoothMethod.DISTANCE_WEIGHTED, relax_factor=1.0, epsilon=1e-6)
-# skin.smooth(SmoothMethod.HEAT_DIFFUSION, dt=1.0, iterations=15)
-# skin.smooth(SmoothMethod.BARYCENTRIC, relax_factor=1.0,)
-print(f"HODOR: {time() - f}")
+def main():
+    skin = Skin("skinCluster2")
+    f = time()
+    # skin.smooth(SmoothMethod.RELAX, relax_factor=1.0)
+    skin.smooth(SmoothMethod.DISTANCE_WEIGHTED, relax_factor=1.0, epsilon=1e-6)
+    # skin.smooth(SmoothMethod.HEAT_DIFFUSION, dt=1.0, iterations=15)
+    # skin.smooth(SmoothMethod.BARYCENTRIC, relax_factor=1.0,)
+    print(f"HODOR: {time() - f}")
 

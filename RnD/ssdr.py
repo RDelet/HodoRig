@@ -1,18 +1,206 @@
 from __future__ import annotations
+from contextlib import contextmanager
+import logging
+import time
+from typing import Optional
 
 import numpy as np
-from scipy.optimize import minimize
-from numpy.linalg import svd, norm
+from scipy.optimize import nnls
 
 import maya.cmds as cmds
-import maya.api.OpenMaya as om
+from maya.api import OpenMaya as om, OpenMayaAnim as oma
+
+
+log = logging.getLogger("SSDR")
+log.setLevel(logging.DEBUG)
 
 
 # ----------------------------------------------------------------
-# API Utils
+# Utils
 # ----------------------------------------------------------------
 
 _msl = om.MSelectionList()
+kIdentityMatrix = np.array([1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]).reshape(4, 4)
+
+
+class Node:
+
+    def __init__(self, obj: str | om.MObject):
+        if isinstance(obj, str):
+            obj = get_object(obj)
+        self._handle = om.MObjectHandle(obj)
+        self._fn = om.MFnDependencyNode(obj)
+    
+    @property
+    def object(self) -> om.MObject:
+        return self._handle.object()
+
+
+class Mesh(Node):
+
+    def __init__(self, obj: str | om.MObject):
+        super().__init__(obj)
+        if not self.object.hasFn(om.MFn.kMesh):
+            raise TypeError(f"Obj must be a shape not {self.object.apiTypeStr}")
+        self._fn = om.MFnMesh(self.object)
+    
+    @property
+    def path(self) -> om.MDagPath:
+        return get_path(self.object)
+    
+    def get_components(self, vertex_ids: Optional[np.array] = None) -> om.MObject:
+        mfn = om.MFnSingleIndexedComponent()
+        obj = mfn.create(om.MFn.kMeshVertComponent)
+        if vertex_ids is not None:
+            mfn.addElements(vertex_ids)
+        else:
+            mfn.addElements(list(range(self._fn.numVertices)))
+
+        return obj
+    
+    @property
+    def num_vertices(self) -> int:
+        return self._fn.numVertices
+    
+    def get_vertex_positions(self, world: bool = False) -> np.array:
+        fn = self._fn if not world else om.MFnMesh(get_path(self.object))
+        points = fn.getPoints(om.MSpace.kObject if not world else om.MSpace.kWorld)
+
+        return np.array(om.MVectorArray(points))
+
+
+class Skin(Node):
+
+    def __init__(self, skin_obj: str | om.MObject):
+        if isinstance(skin_obj, str):
+            skin_obj = get_object(skin_obj)
+
+        self._fn = oma.MFnSkinCluster(skin_obj)
+        self._influences_path = self._fn.influenceObjects()
+        self._weights = None
+        self._output_shape = Mesh(self._get_output_shape())  # ToDo: Factory for other shape
+        self._input_shape = Mesh(self._get_input_shape())
+
+        self._update_weights()
+        
+    def _update_weights(self):
+        weights = self._fn.getWeights(self._output_shape.path, self._output_shape.get_components(), self.influence_ids)
+        self._weights = np.array(weights).reshape(self._output_shape.num_vertices, self.influence_count)
+    
+    def set_weights(self, weights: np.array | om.MDoubleArray, vertex_ids: Optional[np.array | list | tuple] = None,
+                     normalize: bool = False, return_old: bool = True) -> om.MDoubleArray:
+        if not isinstance(weights, om.MDoubleArray):
+            weights = om.MDoubleArray(weights)
+        return self._fn.setWeights(self._output_shape.path, self._output_shape.get_components(vertex_ids),
+                                   self.influence_ids, weights, normalize=normalize, returnOldWeights=return_old)
+    
+    def _get_output_shape(self) -> om.MObject:
+        shapes = self._fn.getOutputGeometry()
+        if len(shapes) == 0:
+            raise RuntimeError(f"No output geometry found on {self.object}!")
+        return shapes[0]
+    
+    def _get_input_shape(self) -> om.MObject:
+        shapes = self._fn.getInputGeometry()
+        if len(shapes) == 0:
+            raise RuntimeError(f"No input geometry found on {self.object}!")
+        return shapes[0]
+
+    @classmethod
+    def find(cls, obj: str | om.MObject) -> Optional[Skin]:
+        if isinstance(obj, str):
+            obj = get_object(obj)
+        if obj.hasFn(om.MFn.kDagNode) is False:
+            raise Exception("Argument must be a DagNode.")
+
+        nodes = om.MObjectArray()
+        if obj.hasFn(om.MFn.kTransform):
+            mfn = om.MFnTransform(obj)
+            for i in range(mfn.childCount()):
+                child = mfn.child(i)
+                if child.hasFn(om.MFn.kShape):
+                    nodes = harvest(child, om.MFn.kSkinClusterFilter)
+                    if len(nodes) > 0:
+                        break
+        else:
+            nodes = harvest(obj, om.MFn.kSkinClusterFilter)
+
+        count = len(nodes)
+        if count == 0:
+            return
+        elif count == 1:
+            return Skin(nodes[0])
+        else:
+            raise Exception("Multiple node found.")
+    
+    @property
+    def weights(self) -> np.array:
+        return self._weights
+    
+    @property
+    def max_influences(self) -> int:
+        return cmds.getAttr(f"{self._fn.name()}.maxInfluences")
+
+    @property
+    def influence_count(self) -> int:
+        return len(self._influences_path)
+    
+    @property
+    def influence_ids(self) -> om.MIntArray:
+        # ToDo: Use api to get real ids
+        return om.MIntArray(list(range(len(self._influences_path))))
+
+    @property
+    def influence_names(self) -> np.array:
+        return [x.fullPathName() for x in self._influences_path]
+    
+    def get_joint_matrices(self) -> np.array:
+        matrices = []
+        for i in range(self.influence_count):
+            marix = self._influences_path[i].inclusiveMatrix()
+            matrices.append(np.array(marix).reshape(4, 4))
+        
+        return np.array(matrices)
+
+
+@contextmanager
+def GiveTime(msg: str):
+    current_time = time.time()
+    try:
+        yield
+    finally:
+        log.info(f"{msg}: {time.time() - current_time}")
+
+
+@contextmanager
+def KeepTime():
+    current_time = cmds.currentTime(query=True)
+    try:
+        yield
+    finally:
+        cmds.currentTime(current_time)
+
+
+@contextmanager
+def SuspendRefresh():
+    cmds.refresh(suspend=True)
+    try:
+        yield
+    finally:
+        cmds.refresh(suspend=False)
+
+
+def harvest(mo, mfn_type: om.MFn) -> om.MObjectArray:
+    iterator = om.MItDependencyGraph(mo, mfn_type,
+                                     om.MItDependencyGraph.kUpstream,
+                                     om.MItDependencyGraph.kDepthFirst,
+                                     om.MItDependencyGraph.kNodeLevel)
+    output = om.MObjectArray()
+    while iterator.isDone() is False:
+        output.append(iterator.currentNode())
+        iterator.next()
+
+    return output
 
 
 def get_object(node: str) -> om.MObject:
@@ -66,40 +254,14 @@ def get_points(obj: str | om.MDagPath | om.MObject):
     return points
 
 
-def simple_kmeans(X, n_clusters, n_iter=100):
-    """
-    Implémentation simple du K-means avec NumPy.
-    Paramètres:
-        X : ndarray, shape (N, d)
-            Données à regrouper.
-        n_clusters : int
-            Nombre de clusters.
-        n_iter : int
-            Nombre maximum d'itérations.
-    Renvoie:
-        labels : ndarray, shape (N,)
-            Les indices de cluster pour chaque point.
-    """
-    N, d = X.shape
-    # Initialisation : choisir n_clusters points aléatoirement dans X
-    indices = np.random.choice(N, n_clusters, replace=False)
-    centers = X[indices]
-    
-    for it in range(n_iter):
-        # Calcul des distances (N x n_clusters)
-        distances = np.linalg.norm(X[:, None] - centers[None, :], axis=2)
-        labels = np.argmin(distances, axis=1)
-        new_centers = np.zeros_like(centers)
-        for j in range(n_clusters):
-            pts = X[labels == j]
-            if pts.shape[0] > 0:
-                new_centers[j] = pts.mean(axis=0)
-            else:
-                new_centers[j] = centers[j]
-        if np.allclose(centers, new_centers, atol=1e-6):
-            break
-        centers = new_centers
-    return labels
+def solve_nnls(A, b):
+    x, _ = nnls(A, b)
+    x[x < 1e-4] = 0
+    s = np.sum(x)
+    if s > 1e-8:
+        x /= s
+
+    return x
 
 
 # ----------------------------------------------------------------
@@ -108,246 +270,172 @@ def simple_kmeans(X, n_clusters, n_iter=100):
 
 class SSDR:
 
-    def __init__(self, P, V_list, num_bones, K, max_iter=50, tol=1e-4, reinit_threshold=1e-6):
-        """
-        Initialisation du modèle SSDR.
-        
-        Parameters:
-            P : ndarray, shape (V, 3)
-                Pose de repos (rest pose)
-            V_list : list of ndarray, each shape (V, 3)
-                Liste des poses exemples (T poses)
-            num_bones : int
-                Nombre d'os (|B|)
-            K : int
-                Nombre maximum d'os influents par vertex (ex. 4)
-            max_iter : int
-                Nombre maximum d'itérations de la descente par blocs
-            tol : float
-                Tolérance de convergence (relative sur l'erreur)
-            reinit_threshold : float
-                Seuil pour considérer qu'un os est insignifiant (pour réinitialisation)
-        """
-        self.P = P                          # Rest pose (V x 3)
-        self.V_list = V_list                # Liste des T poses exemples (chacune V x 3)
-        self.T = len(V_list)                # Nombre de poses exemples
-        self.V_count = P.shape[0]           # Nombre de vertices
-        self.num_bones = num_bones          # Nombre d'os
-        self.K = K                          # Contrainte de sparsité (max non-zéros par vertex)
-        self.max_iter = max_iter
-        self.tol = tol
-        self.reinit_threshold = reinit_threshold
-        
-        # Initialisation de la matrice de poids W (V x num_bones)
-        self.W = np.zeros((self.V_count, self.num_bones))
-        # Initialisation des transformations des os pour chaque pose:
-        # Pour chaque pose t et chaque os j, self.R[t,j] est une rotation (3x3)
-        # et self.Tt[t,j] une translation (3,)
-        self.R = np.zeros((self.T, self.num_bones, 3, 3))
-        self.Tt = np.zeros((self.T, self.num_bones, 3))
-        
-        self.initialize_bones()
-        
-    def initialize_bones(self):
-        """
-        Initialisation des poids et des transformations des os.
-        On commence par assigner chaque vertex à un os via K-means (initialisation simple),
-        puis on calcule, pour chaque pose, la transformation rigide par l'algorithme de Kabsch.
-        """
-        # Clustering initial des vertices en num_bones groupes avec simple_kmeans
-        labels = simple_kmeans(self.P, self.num_bones, n_iter=100)
-        
-        # Initialisation des poids : chaque vertex est entièrement influencé par l'os du cluster associé
-        for i in range(self.V_count):
-            self.W[i, labels[i]] = 1.0
-        
-        # Initialisation des transformations os pour chaque pose par Kabsch sur chaque cluster
-        for t in range(self.T):
-            for j in range(self.num_bones):
-                indices = np.where(labels == j)[0]
-                if len(indices) < 3:
-                    # Si le cluster est trop petit, on utilise l'identité
-                    self.R[t, j] = np.eye(3)
-                    self.Tt[t, j] = np.zeros(3)
-                    continue
-                P_subset = self.P[indices]
-                V_subset = self.V_list[t][indices]
-                R_opt, T_opt = self.kabsch(P_subset, V_subset)
-                self.R[t, j] = R_opt
-                self.Tt[t, j] = T_opt
+    def __init__(self, src_mesh: str, dst_mesh: str, start_frame: Optional[int] = None, end_frame: Optional[int] = None,
+                 max_itererations: int = 30, tolerence: float = 1e-4, reinit_threshold: float = 1e-6):
+        self._src_mesh = src_mesh
+        self._dst_mesh = dst_mesh
+        self._dst_skin = Skin.find(self._dst_mesh)
+        if not self._dst_skin:
+            raise RuntimeError("No skin cluster found on destination mesh.")
 
-    def kabsch(self, P, Q):
-        """
-        Algorithme de Kabsch pour trouver la rotation R et la translation T
-        qui alignent P vers Q (P et Q de taille N x 3).
-        """
-        p_centroid = P.mean(axis=0)
-        q_centroid = Q.mean(axis=0)
-        P_centered = P - p_centroid
-        Q_centered = Q - q_centroid
-        C = P_centered.T @ Q_centered
-        U, _, Vt = svd(C)
-        R = Vt.T @ U.T
-        if np.linalg.det(R) < 0:
-            Vt[-1, :] *= -1
-            R = Vt.T @ U.T
-        T = q_centroid - R @ p_centroid
-        return R, T
+        self._start_frame = start_frame
+        self._end_frame = end_frame
+        self._rest_pose = []
+        self._poses = []
+        self._num_pose = 0
+        self._num_vertices = 0
+        self._num_bones = 0
+        self._max_influences = 0
+        self._max_itererations = max_itererations
+        self._tolerence = tolerence
+        self.reinit_threshold = reinit_threshold
+        self._weights = None
+        self._transforms = None
+        self._pose_transforms = None
+        self._rest_transforms = None
+
+        self._init_data()
+    
+    def _init_data(self):
+        self._get_time()
+        self._get_data()
+    
+    def _get_time(self):
+        if self._start_frame is None:
+            self._start_frame = cmds.playbackOptions(query=True, min=True)
+        if self._end_frame is None:
+            self._end_frame = cmds.playbackOptions(query=True, max=True)
+        self._num_pose = int(self._end_frame - self._start_frame)
+
+    def _get_data(self):
+        cmds.currentTime(self._start_frame)
+        joint_matrices = np.array(self._dst_skin.get_joint_matrices())
+
+        poses = []
+        with SuspendRefresh():
+            with KeepTime():
+                for t in range(0, self._num_pose):
+                    cmds.currentTime(t)
+                    poses.append(get_points(self._src_mesh))
+
+        self._poses = np.array(poses)
+        self._rest_pose = self._poses[0].copy()
+        self._num_vertices = len(self._rest_pose)
+        self._num_bones = self._dst_skin.influence_count
+        self._max_influences = self._dst_skin.max_influences
+        self._transforms = np.repeat(np.expand_dims(joint_matrices, axis=0), self._num_pose, axis=0)
+        self._rest_transforms = [np.linalg.inv(x) for x in joint_matrices.copy()]
+        self._weights = np.zeros((self._num_vertices, self._num_bones))
 
     def update_weights(self):
-        """
-        Mise à jour de la carte d'influences W.
-        Pour chaque vertex i, on résout le problème de moindres carrés sous contraintes :
-          min_{w} || A_i * w - b_i ||^2
-          avec w >= 0, sum(w) = 1.
-        A_i et b_i concatènent, pour chaque pose, la transformation (R et Tt) appliquée à P[i]
-        et la position observée dans la pose exemple.
-        Puis on impose la contrainte de sparsité en ne gardant que les K plus grandes valeurs.
-        """
-        for i in range(self.V_count):
-            B = self.num_bones
-            T = self.T
-            A = np.zeros((3 * T, B))
-            b = np.zeros(3 * T)
-            for t in range(T):
-                for j in range(B):
-                    transformed = self.R[t, j] @ self.P[i] + self.Tt[t, j]
-                    A[3*t:3*t+3, j] = transformed
-                b[3*t:3*t+3] = self.V_list[t][i]
-            def obj(w):
-                return norm(A.dot(w) - b)**2
-            cons = {'type': 'eq', 'fun': lambda w: np.sum(w) - 1}
-            bounds = [(0, 1) for _ in range(B)]
-            w0 = np.ones(B) / B
-            res = minimize(obj, w0, method='SLSQP', bounds=bounds, constraints=cons)
-            w_sol = res.x
-            if self.K < B:
-                idx = np.argsort(w_sol)[::-1]
-                mask = np.zeros(B, dtype=bool)
-                mask[idx[:self.K]] = True
-                w_sol[~mask] = 0
-                s = np.sum(w_sol)
-                if s > 1e-8:
-                    w_sol /= s
-            self.W[i] = w_sol
+        for v in range(self._num_vertices):
+            A = []
+            for t in range(self._num_pose):
+                point = self._rest_pose[v]
+                joint_transformations = [self._rest_transforms[i] @ j for i, j in enumerate(self._transforms[t])]
+                A.append(np.array([point @ joint for joint in joint_transformations]).T)
+
+            A = np.vstack(A)
+            b = np.hstack(self._poses[:, v])
+            weights = solve_nnls(A, b)
+            # ToDo: Clamp with max influences
+            self._weights[v] = weights
 
     def update_bones(self):
-        """
-        Mise à jour des transformations des os pour chaque pose.
-        Pour chaque pose t et chaque os j, on résout le problème de Weighted Absolute Orientation :
-          min_{R, T} sum_{i} w[i,j] * || V_list[t][i] - (R @ P[i] + T) ||^2
-        La solution est obtenue en calculant d'abord les centroïdes pondérés, puis
-        en effectuant une décomposition SVD sur la matrice de covariance pondérée.
-        Si la somme des poids est trop faible, on considère l'os comme insignifiant et on le réinitialise.
-        """
-        T = self.T
-        B = self.num_bones
-        for t in range(T):
-            for j in range(B):
-                w = self.W[:, j]
-                if np.sum(w**2) < self.reinit_threshold:
+        for t in range(self._num_pose):
+            for j in range(self._num_bones):
+                weights = self._weights[:, j]
+                if np.sum(weights**2) < self.reinit_threshold:
                     self.reinitialize_bone(t, j)
                     continue
-                w_sum = np.sum(w)
-                p_centroid = np.sum(w[:, None] * self.P, axis=0) / w_sum
-                v_centroid = np.sum(w[:, None] * self.V_list[t], axis=0) / w_sum
-                P_centered = self.P - p_centroid
-                V_centered = self.V_list[t] - v_centroid
-                C = (w[:, None] * P_centered).T @ V_centered
-                U, S, Vt = svd(C)
+                weights_sum = np.sum(weights)
+                p_centroid = np.sum(weights[:, None] * self._rest_pose, axis=0) / weights_sum
+                v_centroid = np.sum(weights[:, None] * self._poses[t], axis=0) / weights_sum
+                p_centered = self._rest_pose - p_centroid
+                v_centered = self._poses[t] - v_centroid
+                C = (weights[:, None] * p_centered).T @ v_centered
+                U, S, Vt = np.linalg.svd(C)
                 R_opt = Vt.T @ U.T
                 if np.linalg.det(R_opt) < 0:
                     Vt[-1, :] *= -1
                     R_opt = Vt.T @ U.T
                 T_opt = v_centroid - R_opt @ p_centroid
-                self.R[t, j] = R_opt
-                self.Tt[t, j] = T_opt
+
+                transformation_matrix = np.eye(4)
+                transformation_matrix[:3, :3] = R_opt[:3, :3]
+                transformation_matrix[3, :3] = T_opt[:3]
+                self._transforms[t, j] = transformation_matrix
 
     def reinitialize_bone(self, t, j, neighbor_count=20):
-        """
-        Réinitialise la transformation de l'os j pour la pose t si cet os est insignifiant.
-        Ici, la réinitialisation consiste simplement à réaffecter une transformation identité.
-        (Une implémentation plus complète rechercherait le vertex avec la plus grande erreur
-         et réinitialiserait l'os à partir de ses voisins en appliquant Kabsch.)
-        """
-        print(f"Réinitialisation de l'os {j} pour la pose {t} (influence trop faible).")
-        self.R[t, j] = np.eye(3)
-        self.Tt[t, j] = np.zeros(3)
-        
-    def correct_rest_pose(self):
-        """
-        Correction de la pose de repos P par une méthode des moindres carrés afin de réduire
-        la déviation globale entre les poses reconstruites et les poses exemples.
-        Ici, on résout : min_P sum_{t} || V_list[t] - sum_{j} W[i,j]*(R[t,j]*P + Tt[t,j]) ||^2
-        et met à jour P. Pour simplifier, cette étape est ici laissée comme une fonction factice.
-        """
-        # Exemple : corriger P en moyennant les prédictions sur toutes les poses
-        pass
+        self._transforms[t, j] = kIdentityMatrix.copy()
 
     def compute_error(self):
-        """
-        Calcule l'erreur totale de reconstruction :
-          E = sum_{t,i} || V_list[t][i] - sum_{j} W[i,j]*(R[t,j]*P[i] + Tt[t,j]) ||^2
-        """
         err = 0.0
-        T = self.T
-        B = self.num_bones
-        for t in range(T):
-            for i in range(self.V_count):
+        for t in range(self._num_pose):
+            for v in range(self._num_vertices):
+                # Solve
                 pred = np.zeros(3)
-                for j in range(B):
-                    pred += self.W[i, j] * (self.R[t, j] @ self.P[i] + self.Tt[t, j])
-                err += norm(self.V_list[t][i] - pred)**2
+                for j in range(self._num_bones):
+                    # Transform matrix
+                    matrix = self._transforms[t, j].reshape(4, 4)
+                    rotation = matrix[:3, :3]
+                    translation = matrix[:, 3][:3]
+                    pred += self._weights[v, j] * (rotation @ self._rest_pose[v][:3] + translation)
+                err += np.linalg.norm(self._poses[t][v][:3] - pred)**2
+
         return err
 
     def run(self):
-        """
-        Exécute l'algorithme SSDR complet par descente par blocs jusqu'à convergence
-        ou jusqu'au nombre maximum d'itérations. À chaque itération, on met à jour
-        d'abord la carte d'influences, puis les transformations des os, et on surveille
-        l'erreur de reconstruction.
-        """
         prev_err = np.inf
-        for it in range(self.max_iter):
-            print(f"Itération {it}...")
+        for it in range(self._max_itererations):
+            log.debug(f"Itération {it}...")
+            log.debug("Compute Weights...")
             self.update_weights()
+            log.debug("Compute Transforms...")
             self.update_bones()
+            log.debug("Compute Errors...")
             err = self.compute_error()
-            print(f"Erreur de reconstruction : {err:.6f}")
-            if abs(prev_err - err) / (prev_err + 1e-8) < self.tol:
-                print("Convergence atteinte.")
+            log.debug(f"Reconstruction Error : {err:.6f}")
+            if abs(prev_err - err) / (prev_err + 1e-8) < self._tolerence:
                 break
             prev_err = err
-        self.correct_rest_pose()
-        print("Algorithme terminé.")
+        log.debug("SDDR completed.")
+    
+    def set_skin_weights(self):
+        with GiveTime("Set skin weights"):
+            self._dst_skin.set_weights(self._weights.reshape(self._num_vertices * self._num_bones))
+
+    def set_joint_transforms(self):
+        with GiveTime("Set joint transforms"):
+            with KeepTime():
+                for t in range(self._num_pose):
+                    cmds.currentTime(t)
+                    for j in range(self._num_bones):
+                        jnt = self._dst_skin._influences_path[j].fullPathName()
+                        cmds.xform(jnt, matrix=self._transforms[t, j].reshape(16), worldSpace=True)
+                        cmds.setKeyframe(jnt)
+    
+    def apply(self):
+        self.set_skin_weights()
+        self.set_joint_transforms()
 
 
 # ----------------------------------------------------------------
-# Exemple d'utilisation
+# Excecute
 # ----------------------------------------------------------------
 
-src_mesh = "outputCloth1"
-dst_mesh = "dst_planeShape"
-rest_points = np.array(om.MVectorArray(get_points(dst_mesh)))
+def main(src_node: str, dst_node: str):
+    ssdr = SSDR(src_node, dst_node)
+    with GiveTime("SSDR Take"):
+        ssdr.run()
+    with GiveTime("Apply SSDR Take"):
+        ssdr.apply()
 
-min_time = 0
-max_time = 100
-pose_number = max_time - min_time
-joint_number = 20
-max_influences = 3
-# Get Pose
-poses = []
-cmds.refresh(suspend=True)
-current_time = cmds.currentTime(query=True)
-try:    
-    for t in range(0, pose_number):
-        cmds.currentTime(t)
-        poses.append(om.MVectorArray(get_points(src_mesh)))
-finally:
-    cmds.currentTime(current_time)
-    cmds.refresh(suspend=False)
-poses = np.array(poses)
-# Init SSDR
-ssd = SSDR(rest_points, poses, num_bones=joint_number, K=max_influences, max_iter=30, tol=1e-4)
-ssd.run()
 
+"""
+import imp
+from HodoRig.RnD import ssdr
+imp.reload(ssdr)
+
+ssdr.main("truthShape", "approximationShape")
+"""

@@ -51,7 +51,7 @@ class Slider(QtWidgets.QSlider):
         super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):
-        if self.__current_value is not None:
+        if self.__current_value is not None and self.undo_stack is not None:
             undo = self.__Undo(self, self.__current_value, self.value())
             self.undo_stack.push(undo)
             self.__current_value = None

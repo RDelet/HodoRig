@@ -2,6 +2,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from functools import partial
 from typing import Tuple
+from time import time
 import traceback
 
 import maya.cmds as cmds
@@ -10,6 +11,44 @@ import numpy as np
 
 
 _msl = om.MSelectionList()
+
+
+# ----------------------------------------------------------------
+# Utils
+# ----------------------------------------------------------------
+
+class Context:
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __str__(self):
+        return self.__repr__()
+
+    def __repr__(self):
+        return f"class: {self.__class__.__name__}"
+
+    def __enter__(self, *args, **kwargs):
+        raise NotImplementedError('{0}.__enter__ need to be reimplemented !'.format(self.__class__.__name__))
+
+    def __exit__(self, *args, **kwargs):
+        raise NotImplementedError('{0}.__exit__ need to be reimplemented !'.format(self.__class__.__name__))
+
+
+class TimerContext(Context):
+
+    def __init__(self, print: bool = False):
+        super().__init__()
+        self._current_time = 0.0
+        self._print = print
+
+    def __enter__(self):
+        if self._print:
+            self._current_time = time()
+
+    def __exit__(self, *args, **kwargs):
+        if self._print:
+            print(f"{self.__class__.__name__}: {time() - self._current_time}")
 
 
 # ----------------------------------------------------------------
@@ -199,18 +238,89 @@ class UVDeformer:
         new_uv[0] = base_uv[0]
 
         set_uvs(self._orig_path, new_uv.T)
-    
+
+    def global_uv_minimization(self, deformed_points, fixed_index=0) -> np.array:
+        """
+        Résout globalement le problème de reconstruction UV.
+        
+        Parameters:
+        - deformed_points : np.array de shape (n, 3) avec les positions déformées 3D.
+        - fixed_index : l'indice du vertex à fixer (pour éliminer la liberté de translation).
+        
+        Returns:
+        - new_uv : np.array de shape (n,2) avec les nouvelles UV.
+        """
+        orig_uv = self._orig_uv.copy()
+        n = orig_uv.shape[0]
+        T = self._triangles.shape[0]
+        
+        # Chaque triangle fournit 2 équations (pour les edges i->j et i->k)
+        num_eq = 2 * T
+        A = np.zeros((num_eq, n))
+        b_u = np.zeros(num_eq)
+        b_v = np.zeros(num_eq)
+        
+        eq = 0
+        for t in range(T):
+            tri = self._triangles[t]  # [i, j, k]
+            local_uv, uv_area = self.triangle_deformation_uv(tri, deformed_points, orig_uv)
+            # On peut choisir de pondérer chaque équation par sqrt(uv_area) pour plus de stabilité
+            weight = np.sqrt(uv_area) if uv_area > 0 else 1.0
+            
+            i, j, k = tri
+            # Equation pour l'edge i->j: U[j] - U[i] = local_uv[1]
+            A[eq, j] = weight
+            A[eq, i] = -weight
+            b_u[eq] = weight * local_uv[1, 0]
+            b_v[eq] = weight * local_uv[1, 1]
+            eq += 1
+            
+            # Equation pour l'edge i->k: U[k] - U[i] = local_uv[2]
+            A[eq, k] = weight
+            A[eq, i] = -weight
+            b_u[eq] = weight * local_uv[2, 0]
+            b_v[eq] = weight * local_uv[2, 1]
+            eq += 1
+
+        # Ajouter une contrainte pour fixer le vertex fixed_index.
+        A_fix = np.zeros((1, n))
+        A_fix[0, fixed_index] = 1
+        b_u_fix = np.array([orig_uv[fixed_index, 0]])
+        b_v_fix = np.array([orig_uv[fixed_index, 1]])
+        
+        A_total = np.vstack([A, A_fix])
+        b_u_total = np.concatenate([b_u, b_u_fix])
+        b_v_total = np.concatenate([b_v, b_v_fix])
+        
+        # Ajouter un terme de régularisation pour améliorer la robustesse (lambda)
+        lambda_reg = 1e-3
+        LHS = A_total.T @ A_total + lambda_reg * np.eye(n)
+        rhs_u = A_total.T @ b_u_total
+        rhs_v = A_total.T @ b_v_total
+        
+        sol_u = np.linalg.solve(LHS, rhs_u)
+        sol_v = np.linalg.solve(LHS, rhs_v)
+        
+        new_uv = np.stack([sol_u, sol_v], axis=-1)
+        return new_uv
+
+    def _do_global(self):
+        deformed_points = np.array(om.MVectorArray(get_points(self._shape_path)))
+        new_uv = self.global_uv_minimization(deformed_points)
+        set_uvs(self._orig_path, new_uv.T)
+ 
     def do(self, *args, **kwargs):
         try:
-            self._do()
+            with TimerContext(print=False):
+                self._do()
         except Exception as e:
             print(e)
             print(traceback.format_exc())
     
     def install_cbs(self):
         self.remove_cbs()
-        self._cbs.append(om.MDagMessage.addMatrixModifiedCallback(get_path("joint1"), self.do))
-        self._cbs.append(om.MDagMessage.addMatrixModifiedCallback(get_path("joint2"), self.do))
+        for jnt in cmds.ls(type="joint", long=True):
+            self._cbs.append(om.MDagMessage.addMatrixModifiedCallback(get_path(jnt), self.do))
 
     def remove_cbs(self):
         if self._cbs:

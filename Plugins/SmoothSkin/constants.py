@@ -1,2 +1,6 @@
+import logging
+
 kToolNameCtx = "SmoothWeightsContext"
-kToolNameCmd = "SmoothWeightsCmd"
+
+log = logging.getLogger(kToolNameCtx)
+log.setLevel(logging.INFO)
