@@ -1,82 +1,14 @@
 from __future__ import annotations
 from typing import Optional, Tuple
-from enum import Enum
 from time import time
 
 import numpy as np
 
 from maya.api import OpenMaya as om, OpenMayaAnim as oma
 
-
-_msl = om.MSelectionList()
-
-
-class SmoothMethod(Enum):
-    RELAX = 0
-    DISTANCE_WEIGHTED = 1
-    HEAT_DIFFUSION = 2
-    BARYCENTRIC = 3
-
-
-def get_object(node: str) -> om.MObject:
-    try:
-        _msl.add(node)
-        obj = _msl.getDependNode(0)
-        _msl.clear()
-        return obj
-    except Exception as e:
-        raise RuntimeError(f"Object {node} does not exists !")
-
-
-def get_path(node: str | om.MObject) -> om.MDagPath:
-    if isinstance(node, om.MObject):
-        if not node.hasFn(om.MFn.kDagNode):
-            raise RuntimeError(f"Node {name(node)} is not a dagNode !")
-        return om.MDagPath.getAPathTo(node)
-    
-    try:
-        _msl.clear()
-        _msl.add(node)
-        return _msl.getDagPath(0)
-    except RuntimeError:
-        raise RuntimeError(f"Node {node} does not exist !")
-
-
-def name(obj: str | om.MObject | om.MPlug,
-         full: bool = True, namespace: bool = True) -> str:
-    if isinstance(obj, om.MDagPath):
-        name = obj.fullPathName()
-    elif isinstance(obj, om.MPlug):
-        node_name = name(obj.node())
-        attr_name = om.MFnAttribute(obj.attribute()).name()
-        name = f"{node_name}.{attr_name}"
-    if isinstance(obj, om.MObject):
-        if not obj.hasFn(om.MFn.kDagNode):
-            name = om.MFnDependencyNode(obj).name()
-        else:
-            name = om.MFnDagNode(obj).fullPathName()
-    else:
-        raise TypeError(f"Argument must be a MObject not {type(obj)}")
-    
-    if not full:
-        name = name.split('|')[-1]
-    if not namespace:
-        name = name.split(':')[-1]
-    
-    return name
-
-
-def area_triangle(pa: np.array, pb: np.array, pc: np.array):
-    return 0.5 * np.linalg.norm(np.cross(pb - pa, pc - pa))
-
-
-def barycentric_coordinate(point, a, b, c):
-    abc = area_triangle(a, b, c)
-    pbc = area_triangle(point, b, c)
-    apc = area_triangle(a, point, c)
-    abp = area_triangle(a, b, point)
-
-    return round(pbc / abc, 3), round(apc / abc, 3), round(abp / abc, 3)
+from .constants import SmoothMethod
+from ...Helpers.utils import get_object, get_path
+from ...Core.math import barycentric_coordinate
 
 
 class Node:
@@ -298,7 +230,7 @@ class Skin(Node):
 
         return mask
 
-    def smooth(self, smooth_method: Enum, relax_factor: float = 1.0,
+    def smooth(self, smooth_method: SmoothMethod, relax_factor: float = 1.0,
                iterations: int = 10, dt: float = 0.1, epsilon: float = 1e-6,
                vertex_ids: Optional[np.array] = None):
         mask = self._get_mask(vertex_ids)

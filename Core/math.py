@@ -1,6 +1,20 @@
 from typing import Union
+import numpy as np
 
 from maya.api import OpenMaya
+
+
+def area_triangle(pa: np.array, pb: np.array, pc: np.array):
+    return 0.5 * np.linalg.norm(np.cross(pb - pa, pc - pa))
+
+
+def barycentric_coordinate(point, a, b, c):
+    abc = area_triangle(a, b, c)
+    pbc = area_triangle(point, b, c)
+    apc = area_triangle(a, point, c)
+    abp = area_triangle(a, b, point)
+
+    return round(pbc / abc, 3), round(apc / abc, 3), round(abp / abc, 3)
 
 
 def centroid(points: Union[OpenMaya.MVectorArray, OpenMaya.MPointArray]) -> OpenMaya.MVector:
