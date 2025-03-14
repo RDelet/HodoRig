@@ -1,3 +1,5 @@
+# https://github.com/dalton-omens/SSDR/blob/master/SSDR.py
+
 from __future__ import annotations
 from contextlib import contextmanager
 import logging
@@ -417,7 +419,7 @@ class SSDR:
     
     def apply(self):
         self.set_skin_weights()
-        self.set_joint_transforms()
+        # self.set_joint_transforms()
 
 
 # ----------------------------------------------------------------
@@ -437,5 +439,5 @@ import imp
 from HodoRig.RnD import ssdr
 imp.reload(ssdr)
 
-ssdr.main("truthShape", "approximationShape")
+ssdr.main("ClothPlaneShape", "SkinPlaneShape")
 """
