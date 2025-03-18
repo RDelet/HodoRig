@@ -28,14 +28,16 @@ class NameBuilder:
     kMirror = {'L': 'R', 'M': 'M', 'R': 'L'}
     kSeparator = "_"
     kTemplateFull = [kType, kSide, kIndex, kPrefix, kCore, kSuffix]
-    kTemplate = [kType, kSide, kIndex, kCore]
+    kTemplate = [kType, kCore, kSide]
     kUntypedTemplate = [kSide, kIndex, kCore]
     kSimple = [kCore, kSide]
     kTemplates = [kTemplateFull, kTemplate, kUntypedTemplate, kSimple]
 
+    kBuildTemplate = kTemplate
+
     def __str__(self) -> str:
         d = self.to_dict()
-        v = [str(d[x]) for x in self.kTemplate if d[x] is not None]
+        v = [str(d[x]) for x in self.kBuildTemplate if d[x] is not None]
         return self.kSeparator.join(v)
 
     def clone(self, **kwargs):

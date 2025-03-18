@@ -16,11 +16,11 @@ class RigBuilder(Builder):
 
         self._name.type = self.__class__.__name__
 
+        self._parent_grp = None
         self._object = None
         self._sources = sources
         self._is_blended = False
 
-        self._parent = utils._nullObj
         self._manipulators = []
         self._output_blend = []
 
@@ -31,10 +31,10 @@ class RigBuilder(Builder):
         if not self._sources:
             raise RuntimeError("No sources setted !")
 
-    def _pre_build(self, parent: Optional[str | Node] = utils._nullObj):
-        super()._pre_build()
+    def _pre_build(self, *args, parent: Optional[str | Node] = None, **kwargs):
+        super()._pre_build(*args, **kwargs)
 
-        self._parent = parent
+        self._parent_grp = parent
         self._manipulators = []
         self._output_blend = []
 
@@ -49,7 +49,7 @@ class RigBuilder(Builder):
         self._connect_builders()
     
     def _build_nodes(self):
-        self._object = Node.create("network", self._name)
+        self._object = Node.create(cst.kNetwork, self._name)
 
     def _build_attributes(self):
         self._object.add_attribute(cst.kManipulators, cst.kMessage, multi=True)
@@ -68,6 +68,9 @@ class RigBuilder(Builder):
         super().add_children(builder)
         builder._sources = self._sources
         builder.name = self.name.clone(type=builder.__class__.__name__)
+
+    def set_sources(self, sources: List[Node]):
+        self._sources = sources
 
     @property
     def is_blended(self) -> bool:

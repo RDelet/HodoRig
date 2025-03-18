@@ -1,9 +1,11 @@
 """!@Brief FK builder.
            Select joints and launch this code
 
+from HodoRig.Core import constants as cst
 from HodoRig.Rig.module import Module
 from HodoRig.Rig.fkBuilder import FKBuilder
 from HodoRig.Nodes.node import Node
+
 
 # ------------------------------------------
 # Without Module
@@ -20,10 +22,11 @@ fk_builder.build()
 # Create Module
 sources = Node.selected(node_type="joint")
 module = Module("L_0_Hodor", sources)
+module._name
 
 # Create Fk
 fk_builder = FKBuilder()
-fk_builder._settings.set("shapeScale", 1.0)
+fk_builder._settings.set(cst.kShapeScale, 300.0)
 module.add_builder(fk_builder)
 
 # Build Module
@@ -56,16 +59,17 @@ class FKBuilder(RigBuilder):
         self.__shape_scale = None
 
     def _init_settings(self):
-        self._settings.add(Setting(cst.kShapeDir, 0))
+        self._settings.add(Setting(cst.kShapeDirection, 0))
         self._settings.add(Setting(cst.kShapeScale, 10.0))
 
     def _get_settings(self):
-        self.__shape_dir = self._settings.value(cst.kShapeDir)
+        self.__shape_dir = self._settings.value(cst.kShapeDirection)
         self.__shape_scale = self._settings.value(cst.kShapeScale)
 
-    def _build(self, parent: OpenMaya.MObject = utils._nullObj):
-        super()._build()
-        
+    def _build(self, *args, **kwargs):
+        super()._build(*args, **kwargs)
+
+        parent = self._parent_grp
         for i, jnt in enumerate(self._sources):
             builder = ManipulatorBuilder(jnt.short_name)
             color = Color.from_name(jnt.short_name)

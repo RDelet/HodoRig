@@ -89,17 +89,17 @@ class BlendBuilder(RigBuilder):
     def _get_settings(self):
         self.__blend_name = self._settings.value(cst.kBlendName)
     
-    def _build(self):
-        super()._build()
-        self._build_children()
+    def _build(self, *args, **kwargs):
+        super()._build(*args, **kwargs)
+        self._build_children(*args, **kwargs)
         self._build_attribute()
         self._build_reverse_blend()
         self._build_constraint()
         self._connect_manipulators()
 
-    def _build_children(self):
+    def _build_children(self, *args, **kwargs):
         for builder in self._children:
-            builder.build()
+            builder.build(*args, **kwargs)
             if not builder.state.value == BuilderState.kBuilt:
                 raise RuntimeError(f"Error on build {builder.name} !")
         

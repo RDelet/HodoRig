@@ -38,6 +38,8 @@ class Transform(DAGNode):
         return OpenMaya.MPoint(pos)
 
     def set_position(self, value: list | OpenMaya.MPoint | OpenMaya.MVector, world: bool = True):
+        if isinstance(value, (OpenMaya.MPoint, OpenMaya.MVector)):
+            value = [value.x, value.y, value.z]
         cmds.xform(self.name, translation=value, objectSpace=not world, worldSpace=world)
     
     def rotation(self, world: bool = True) -> OpenMaya.MEulerRotation:

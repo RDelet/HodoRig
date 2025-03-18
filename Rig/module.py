@@ -22,6 +22,8 @@ from .rigBuilder import RigBuilder
 
 class Module(Builder):
 
+    _kModulePrefix = "MOD"
+
     def __init__(self, name: str | NameBuilder, sources: List[str]):
         super().__init__(name)
 
@@ -29,7 +31,17 @@ class Module(Builder):
         self._children = []
 
         self._object = None
+        self._group = None
+
         self._sources = sources
+
+    @property
+    def object(self) -> Node:
+        return self._object
+    
+    @property
+    def group(self) -> Node:
+        return self._group
 
     def _pre_build(self, *args, **kwargs):
         super()._pre_build(*args, **kwargs)
@@ -42,7 +54,7 @@ class Module(Builder):
         super()._build(*args, **kwargs)
 
         for builder in self._builders:
-            builder.build()
+            builder.build(parent=self._group)
     
     def _post_build(self, *args, **kwargs):
         super()._post_build(*args, **kwargs)
@@ -51,7 +63,8 @@ class Module(Builder):
             child.build()
     
     def _build_nodes(self):
-        self._object = Node.create("network", self._name)
+        self._object = Node.create(cst.kNetwork, self._name)
+        self._group = Node.create(cst.kTransform, f"{self._kModulePrefix}_{self._name}")
 
     def _build_attributes(self):
         self._object.add_attribute(cst.kBuilders, cst.kMessage, multi=True)
@@ -68,7 +81,7 @@ class Module(Builder):
             raise RuntimeError(f"Builder {builder.name} already in module !")
         
         self._builders.append(builder)
-        builder._sources = self._sources
+        builder.set_sources(self._sources)
         builder.name = self.name.clone(type=builder.__class__.__name__)
 
     def check_validity(self):

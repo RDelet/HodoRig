@@ -43,6 +43,11 @@ kWorld = OpenMaya.MSpace.kWorld
 kObject = OpenMaya.MSpace.kObject
 
 
+# Nodes
+kTransform = "transform"
+kNetwork = "network"
+
+
 # Mesh
 kNumVertices = "numVertices"
 kNumPolygons = "numPolygons"
@@ -135,14 +140,11 @@ kSelectionOffIcon = QtGui.QIcon(str(kIconsDir / "cbSelectionOff.svg"))
 
 
 # Builders
-
 kShapeScale = "shapeScale"
-kShapeDir = "shapeDir"
-
+kShapeDirection = "shapeDir"
 ## IK
 kSolver = "solver"
 kSnapRotation = "snapRotation"
 kPvDistance = "pvDistance"
-
 ## Blend
 kBlendName = "blendName"

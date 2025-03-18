@@ -38,6 +38,7 @@ from maya.api import OpenMaya
 from ..Core import constants as cst
 from ..Core.nameBuilder import NameBuilder
 from ..Core.settings import Setting
+from ..Helpers import utils
 from ..Helpers.color import Color
 from .rigBuilder import RigBuilder
 from ..Nodes.node import Node
@@ -76,8 +77,8 @@ class IKBuilder(RigBuilder):
         if len(self._sources) < 2:
             raise RuntimeError("IK builder need to have 2 sources minimum !")
 
-    def _build(self):
-        super()._build()
+    def _build(self, *args, **kwargs):
+        super()._build(*args, **kwargs)
 
         self._duplicate_sources()
         self._create_handle()
@@ -91,13 +92,13 @@ class IKBuilder(RigBuilder):
     def _build_effecteur(self, shape_scale: float):
         builder_eff = ManipulatorBuilder(f"{self._sources[-1]}Ik")
         color = Color.from_name(self._name)
-        builder_eff.build(self._parent, shape="rounded_square", shape_dir=0, scale=shape_scale, color=color)
-        eff_manipulator = builder_eff.node
+        builder_eff.build(self._parent_grp, shape="rounded_square", shape_dir=0, scale=shape_scale, color=color)
         if self.__snap_rotation:
-            eff_manipulator.snap(self._sources[-1])
+            builder_eff.reset.snap(self._sources[-1])
         else:
-            eff_manipulator.set_position(self._sources[-1].position)
+            builder_eff.reset.set_position(self._sources[-1].position())
         
+        eff_manipulator = builder_eff.node
         self._ikh.parent = eff_manipulator
         cmds.orientConstraint(eff_manipulator, self._output_blend[-1], maintainOffset=True)
         self._manipulators.append(eff_manipulator) 
@@ -105,15 +106,15 @@ class IKBuilder(RigBuilder):
     def _build_pole_vector(self, shape_scale: float):
         builder_pv = ManipulatorBuilder(f"{self._sources[-1]}Pv")
         color = Color.from_name(self._name)
-        builder_pv.build(self._parent, shape="ball", shape_dir=0, scale=shape_scale, color=color)
-        pv_manipulator = builder_pv.node
-        pv_manipulator.set_position(self._compute_aim())
+        builder_pv.build(self._parent_grp, shape="ball", shape_dir=0, scale=shape_scale, color=color)
+        builder_pv.reset.set_position(self._compute_aim())
 
+        pv_manipulator = builder_pv.node
         cmds.poleVectorConstraint(pv_manipulator, self._ikh)
         self._manipulators.append(pv_manipulator)
 
     def _duplicate_sources(self):
-        parent = self._parent if not self._parent.isNull() else None
+        parent = self._parent_grp
         for i, src in enumerate(self._sources):
             name = NameBuilder.from_name(src.short_name)
             name.type = "IK"
@@ -129,9 +130,9 @@ class IKBuilder(RigBuilder):
 
     def _create_handle(self):
         ikh, eff = cmds.ikHandle(startJoint=self._output_blend[0], endEffector=self._output_blend[-1], solver=self.__solver)
+        self._eff = Transform.get(eff)
         self._ikh = Transform.get(ikh)
         self._ikh.set_attribute("visibility", False)
-        self._eff = Transform.get(eff)
     
     def _compute_aim(self) -> OpenMaya.MVector:
         root_pos, mid_pos, effector_pos = [node.position() for node in self._sources]
