@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from typing import Any, Optional
 from dataclasses import dataclass, asdict
 
@@ -7,6 +9,8 @@ from dataclasses import dataclass, asdict
 @dataclass
 class NameBuilder:
     
+    rgx_clean_path = re.compile(r'[^|:\/\\]+$')
+
     type: Optional[str] = None
     side: Optional[str] = None
     index: Optional[int] = None
@@ -26,7 +30,8 @@ class NameBuilder:
     kTemplateFull = [kType, kSide, kIndex, kPrefix, kCore, kSuffix]
     kTemplate = [kType, kSide, kIndex, kCore]
     kUntypedTemplate = [kSide, kIndex, kCore]
-    kTemplates = [kTemplateFull, kTemplate, kUntypedTemplate]
+    kSimple = [kCore, kSide]
+    kTemplates = [kTemplateFull, kTemplate, kUntypedTemplate, kSimple]
 
     def __str__(self) -> str:
         d = self.to_dict()
@@ -40,30 +45,25 @@ class NameBuilder:
 
     @classmethod
     def from_name(cls, name: str) -> NameBuilder:
-        # Split path or extension / attribute
-        name = name.split("|")[-1].split(":")[-1].split("/")[-1].split("\\")[-1].split(".")[0]
+        match  = cls.rgx_clean_path.search(name)
+        name = match.group(0) if match else name
         
         split = name.split(cls.kSeparator)
         split_count = len(split)
 
-        template = None
-        count = 0
         for t in cls.kTemplates:
-            tc = len(t)
-            if split_count == tc:
-                template = t
-                count = tc
-                break
+            if split_count != len(t):
+                continue
 
-        if not template:
-            return cls(core=name)
-        
-        new_cls = cls()
-        new_cls.__dict__.update({template[i]: split[i] for i in range(count)})
-        if new_cls.index is not None:
-            new_cls.index = int(new_cls.index)
-        
-        return new_cls
+            if cls.kIndex in t:
+                index_id = t.index(cls.kIndex)
+                if not split_count[index_id].isnumeric():
+                    continue
+                split_count[index_id] = int(split_count[index_id])
+
+            return cls(**{t[i]: split[i] for i in range(len(t))})
+
+        return cls(core=name)
     
     def mirror(self) -> NameBuilder:
         if self.side and self.side in self.kMirror:

@@ -1,6 +1,7 @@
 """!@Brief Blend builder.
            Select joints and launch this code
 
+from HodoRig.Core import constants as cst
 from HodoRig.Rig.module import Module
 from HodoRig.Rig.fkBuilder import FKBuilder
 from HodoRig.Rig.ikBuilder import IKBuilder
@@ -22,7 +23,7 @@ fk_builder._settings.set("shapeScale", 1.0)
 # Create blender
 sources = Node.selected(node_type="joint")
 blend_builder = BlendBuilder("L_0_Hodor", sources)
-blend_builder._settings.set("blendName", "ikFkBlend")
+blend_builder._settings.set(cst.kBlendName, "ikFkBlend")
 blend_builder.add_children(ik_builder)
 blend_builder.add_children(fk_builder)
 blend_builder.build()
@@ -37,7 +38,7 @@ module = Module("L_0_Hodor", sources)
 
 # Create blender
 blend_builder = BlendBuilder()
-blend_builder._settings.set("blendName", "ikFkBlend")
+blend_builder._settings.set(cst.kBlendName, "ikFkBlend")
 module.add_builder(blend_builder)
 
 # Create Ik
@@ -46,7 +47,7 @@ blend_builder.add_children(ik_builder)
 
 # Create Fk
 fk_builder = FKBuilder()
-fk_builder._settings.set("shapeScale", 1.0)
+fk_builder._settings.set(cst.kShapeScale, 1.0)
 blend_builder.add_children(fk_builder)
 
 # Build Module
@@ -58,7 +59,7 @@ from typing import Optional, List
 
 from maya import cmds
 
-from ..Core import constants
+from ..Core import constants as cst
 from ..Core.nameBuilder import NameBuilder
 from ..Core.settings import Setting
 from ..Nodes.node import Node
@@ -67,8 +68,6 @@ from .rigBuilder import RigBuilder
 
 
 class BlendBuilder(RigBuilder):
-
-    _kBlendName = "blendName"
 
     def __init__(self, name: Optional[str | NameBuilder] = NameBuilder(),
                  sources: Optional[List[Node]]= []):
@@ -85,10 +84,10 @@ class BlendBuilder(RigBuilder):
         self.__manipulator_b = None
     
     def _init_settings(self):
-        self._settings.add(Setting(self._kBlendName, "blender"))
+        self._settings.add(Setting(cst.kBlendName, "blender"))
 
     def _get_settings(self):
-        self.__blend_name = self._settings.value(self._kBlendName)
+        self.__blend_name = self._settings.value(cst.kBlendName)
     
     def _build(self):
         super()._build()
@@ -115,11 +114,11 @@ class BlendBuilder(RigBuilder):
         manipulators = self.__manipulator_a + self.__manipulator_b
         self.__manipulator = manipulators[0]
         self.__manipulator.add_settings_attribute("blenderSettings")
-        self.__manipulator.add_attribute(self.__blend_name, constants.kFloat, keyable=True, min=0.0, max=1.0)
+        self.__manipulator.add_attribute(self.__blend_name, cst.kFloat, keyable=True, min=0.0, max=1.0)
         proxy_attr = f"{manipulators[0]}.{self.__blend_name}"
         for manipulator in manipulators[1:]:
             manipulator.add_settings_attribute("blenderSettings")
-            manipulator.add_attribute(self.__blend_name, constants.kFloat,
+            manipulator.add_attribute(self.__blend_name, cst.kFloat,
                                             keyable=True, min=0.0, max=1.0, proxy=proxy_attr)
     
     def _build_reverse_blend(self):

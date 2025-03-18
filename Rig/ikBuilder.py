@@ -35,9 +35,10 @@ from typing import Optional, List
 from maya import cmds
 from maya.api import OpenMaya
 
-from ..Helpers.color import Color
+from ..Core import constants as cst
 from ..Core.nameBuilder import NameBuilder
 from ..Core.settings import Setting
+from ..Helpers.color import Color
 from .rigBuilder import RigBuilder
 from ..Nodes.node import Node
 from ..Nodes.transform import Transform
@@ -45,11 +46,6 @@ from .manipulatorBuilder import ManipulatorBuilder
 
 
 class IKBuilder(RigBuilder):
-
-    _kSolver = "solver"
-    _kSnapRotation = "snapRotation"
-    _kPvDistance = "pvDistance"
-    _kShapeScale = "shapeScale"
 
     def __init__(self, name: Optional[str | NameBuilder] = NameBuilder(),
                  sources: Optional[List[Node]]= []):
@@ -64,16 +60,16 @@ class IKBuilder(RigBuilder):
         self.__shape_scale = None
     
     def _init_settings(self):
-        self._settings.add(Setting(self._kSolver, "ikRPsolver"))
-        self._settings.add(Setting(self._kSnapRotation, True))
-        self._settings.add(Setting(self._kPvDistance, 20))
-        self._settings.add(Setting(self._kShapeScale, 10.0))
+        self._settings.add(Setting(cst.kSolver, "ikRPsolver"))
+        self._settings.add(Setting(cst.kSnapRotation, True))
+        self._settings.add(Setting(cst.kPvDistance, 20))
+        self._settings.add(Setting(cst.kShapeScale, 10.0))
 
     def _get_settings(self):
-        self.__solver = self._settings.value(self._kSolver)
-        self.__snap_rotation = self._settings.value(self._kSnapRotation)
-        self.__pv_distance = self._settings.value(self._kPvDistance)
-        self.__shape_scale = self._settings.value(self._kShapeScale)
+        self.__solver = self._settings.value(cst.kSolver)
+        self.__snap_rotation = self._settings.value(cst.kSnapRotation)
+        self.__pv_distance = self._settings.value(cst.kPvDistance)
+        self.__shape_scale = self._settings.value(cst.kShapeScale)
 
     def _check_validity(self):
         super()._check_validity()
@@ -82,6 +78,7 @@ class IKBuilder(RigBuilder):
 
     def _build(self):
         super()._build()
+
         self._duplicate_sources()
         self._create_handle()
         self._build_manipulator()
@@ -94,7 +91,7 @@ class IKBuilder(RigBuilder):
     def _build_effecteur(self, shape_scale: float):
         builder_eff = ManipulatorBuilder(f"{self._sources[-1]}Ik")
         color = Color.from_name(self._name)
-        builder_eff.build(self._rig_group, shape="rounded_square", shape_dir=0, scale=shape_scale, color=color)
+        builder_eff.build(self._parent, shape="rounded_square", shape_dir=0, scale=shape_scale, color=color)
         eff_manipulator = builder_eff.node
         if self.__snap_rotation:
             eff_manipulator.snap(self._sources[-1])
@@ -108,7 +105,7 @@ class IKBuilder(RigBuilder):
     def _build_pole_vector(self, shape_scale: float):
         builder_pv = ManipulatorBuilder(f"{self._sources[-1]}Pv")
         color = Color.from_name(self._name)
-        builder_pv.build(self._rig_group, shape="ball", shape_dir=0, scale=shape_scale, color=color)
+        builder_pv.build(self._parent, shape="ball", shape_dir=0, scale=shape_scale, color=color)
         pv_manipulator = builder_pv.node
         pv_manipulator.set_position(self._compute_aim())
 
@@ -116,7 +113,7 @@ class IKBuilder(RigBuilder):
         self._manipulators.append(pv_manipulator)
 
     def _duplicate_sources(self):
-        parent = self._rig_group
+        parent = self._parent if not self._parent.isNull() else None
         for i, src in enumerate(self._sources):
             name = NameBuilder.from_name(src.short_name)
             name.type = "IK"

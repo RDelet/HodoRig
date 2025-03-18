@@ -20,8 +20,7 @@ class RigBuilder(Builder):
         self._sources = sources
         self._is_blended = False
 
-        self._rig_group = None
-        self._build_rig_group = True
+        self._parent = utils._nullObj
         self._manipulators = []
         self._output_blend = []
 
@@ -35,6 +34,7 @@ class RigBuilder(Builder):
     def _pre_build(self, parent: Optional[str | Node] = utils._nullObj):
         super()._pre_build()
 
+        self._parent = parent
         self._manipulators = []
         self._output_blend = []
 
@@ -42,7 +42,6 @@ class RigBuilder(Builder):
         self.check_validity()
         self._build_nodes()
         self._build_attributes()
-        self._build_group(parent)
 
     def _post_build(self, *args, **kwargs):
         super()._post_build(*args, **kwargs)
@@ -56,10 +55,6 @@ class RigBuilder(Builder):
         self._object.add_attribute(cst.kManipulators, cst.kMessage, multi=True)
         self._object.add_attribute(cst.kBuilders, cst.kMessage, multi=True)
         self._object.add_attribute(cst.kParent, cst.kMessage)
-
-    def _build_group(self, parent: Optional[str | Node] = utils._nullObj):
-        if self._build_rig_group:
-            self._rig_group = Node.create("transform", name=f"RIG_{self.name}", parent=parent)
 
     def _connect_manipulators(self):
         for i, manipulator in enumerate(self._manipulators):

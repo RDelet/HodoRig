@@ -24,6 +24,7 @@ kShapeDir = kModuleDir / "Shapes"
 kShapeExtension = "json"
 kIconExtension = "png"
 
+
 # Generic
 kMesh = "mesh"
 kMeshApi = OpenMaya.MFn.kMesh
@@ -41,6 +42,7 @@ kRational = "rational"
 kWorld = OpenMaya.MSpace.kWorld
 kObject = OpenMaya.MSpace.kObject
 
+
 # Mesh
 kNumVertices = "numVertices"
 kNumPolygons = "numPolygons"
@@ -48,11 +50,13 @@ kPolygonCounts = "polygonCounts"
 kPolygonConnects = "polygonConnects"
 kUv = "uv"
 
+
 # Curve
 kKnots = "knots"
 kForm = "form"
 kDegrees = "degrees"
 k2D = "curve2D"
+
 
 # Surface
 kKnotsU = "knotsU"
@@ -62,8 +66,10 @@ kFormV = "formV"
 kDegreeU = "degreeU"
 kDegreeV = "degreeV"
 
+
 # Manip types
 kFk = "FK"
+
 
 # Attributes Type
 kBool = "bool"
@@ -85,6 +91,7 @@ kAttributeTypes = [kBool, kByte, kChar, kCompound, kDouble, kDoubleAngle,
                    kDoubleLinear, kEnum, kFloat, kFloatAngle, kFloatLinear,
                    kLong, kMessage, kShort, kTime]
 
+
 # Attributes DataType
 kString = "string"
 kMatrix = "matrix"
@@ -103,6 +110,7 @@ kDataTypes = [kString, kMatrix, kDoubleArray, kFloatArray, kInt32Array,
               kVectorArray, kNurbsCurve, kNurbsSurface, kMesh, kLattice,
               kPointArray, kSpectrumRGB, kComponentList]
 
+
 # Attributes
 kClassName = "className"
 kManipulators = "manipulators"
@@ -114,6 +122,7 @@ kMessage = "message"
 kResetGroup = "resetGroup"
 kString = "string"
 
+
 # Icons
 kIconsDir = kModuleDir / "Icons"
 kCloseIcon = QtGui.QIcon(str(kIconsDir / "close.svg"))
@@ -123,3 +132,17 @@ kLockCloseIcon = QtGui.QIcon(str(kIconsDir / "lockClose.svg"))
 klockOpenIcon = QtGui.QIcon(str(kIconsDir / "lockOpen.svg"))
 kSelectionOnIcon = QtGui.QIcon(str(kIconsDir / "cbSelectionOn.svg"))
 kSelectionOffIcon = QtGui.QIcon(str(kIconsDir / "cbSelectionOff.svg"))
+
+
+# Builders
+
+kShapeScale = "shapeScale"
+kShapeDir = "shapeDir"
+
+## IK
+kSolver = "solver"
+kSnapRotation = "snapRotation"
+kPvDistance = "pvDistance"
+
+## Blend
+kBlendName = "blendName"

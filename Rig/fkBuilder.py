@@ -36,6 +36,7 @@ from typing import Optional, List
 from maya import cmds
 from maya.api import OpenMaya
 
+from ..Core import constants as cst
 from ..Core.nameBuilder import NameBuilder
 from ..Core.settings import Setting
 from ..Helpers import utils
@@ -47,9 +48,6 @@ from .manipulatorBuilder import ManipulatorBuilder
 
 class FKBuilder(RigBuilder):
 
-    _kShapeDir = "shapeDir"
-    _kShapeScale = "shapeScale"
-
     def __init__(self, name: Optional[str | NameBuilder] = NameBuilder(),
                  sources: Optional[List[Node]]= []):
         super().__init__(name, sources)
@@ -58,17 +56,16 @@ class FKBuilder(RigBuilder):
         self.__shape_scale = None
 
     def _init_settings(self):
-        self._settings.add(Setting(self._kShapeDir, 0))
-        self._settings.add(Setting(self._kShapeScale, 10.0))
+        self._settings.add(Setting(cst.kShapeDir, 0))
+        self._settings.add(Setting(cst.kShapeScale, 10.0))
 
     def _get_settings(self):
-        self.__shape_dir = self._settings.value(self._kShapeDir)
-        self.__shape_scale = self._settings.value(self._kShapeScale)
+        self.__shape_dir = self._settings.value(cst.kShapeDir)
+        self.__shape_scale = self._settings.value(cst.kShapeScale)
 
     def _build(self, parent: OpenMaya.MObject = utils._nullObj):
         super()._build()
         
-        parent = self._rig_group
         for i, jnt in enumerate(self._sources):
             builder = ManipulatorBuilder(jnt.short_name)
             color = Color.from_name(jnt.short_name)

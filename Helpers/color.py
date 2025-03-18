@@ -5,6 +5,8 @@ from ..Core.nameBuilder import NameBuilder
 
 class Color:
     
+    kSideColor = {"L": "Red", "R": "Blue", "M": "Yellow"}
+
     def __init__(self, name, rgb, maya_index):
         self.name = name
         self.rgb = rgb
@@ -21,13 +23,10 @@ class Color:
         if isinstance(name, str):
             name = NameBuilder.from_name(name)
         
-        if name.side == "L":
-            return kAll["Red"]
-        elif name.side == "R":
-            return kAll["Blue"]
-        else:
+        if name.side is None:
             return kAll["Yellow"]
 
+        return kAll[cls.kSideColor.get(name.side.upper(), "Yellow")]
 
 
 kAll = {"Black": Color("Black", (0, 0, 0), 1),
