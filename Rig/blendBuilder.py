@@ -75,19 +75,19 @@ class BlendBuilder(RigBuilder):
 
         self._build_rig_group = False
 
-        self.__manipulator = None
-        self.__reverse_blend = None
-        self.__blend_name = None
-        self.__hook_a = None
-        self.__hook_b = None
-        self.__manipulator_a = None
-        self.__manipulator_b = None
+        self._manipulator = None
+        self._reverse_blend = None
+        self._blend_name = None
+        self._hook_a = None
+        self._hook_b = None
+        self._manipulator_a = None
+        self._manipulator_b = None
     
     def _init_settings(self):
         self._settings.add(Setting(cst.kBlendName, "blender"))
 
     def _get_settings(self):
-        self.__blend_name = self._settings.value(cst.kBlendName)
+        self._blend_name = self._settings.value(cst.kBlendName)
     
     def _build(self, *args, **kwargs):
         super()._build(*args, **kwargs)
@@ -103,42 +103,42 @@ class BlendBuilder(RigBuilder):
             if not builder.state.value == BuilderState.kBuilt:
                 raise RuntimeError(f"Error on build {builder.name} !")
         
-        self.__hook_a = self._children[0]._output_blend
-        self.__hook_b = self._children[1]._output_blend
-        self.__manipulator_a = self._children[0]._manipulators
-        self.__manipulator_b = self._children[1]._manipulators
-        if len(self.__hook_a) != len(self.__hook_b):
+        self._hook_a = self._children[0]._output_blend
+        self._hook_b = self._children[1]._output_blend
+        self._manipulator_a = self._children[0]._manipulators
+        self._manipulator_b = self._children[1]._manipulators
+        if len(self._hook_a) != len(self._hook_b):
             raise RuntimeError(f"Mismatch output node between {self._children[0].name} and {self._sub_builders[1].name}")
 
     def _build_attribute(self):
-        manipulators = self.__manipulator_a + self.__manipulator_b
-        self.__manipulator = manipulators[0]
-        self.__manipulator.add_settings_attribute("blenderSettings")
-        self.__manipulator.add_attribute(self.__blend_name, cst.kFloat, keyable=True, min=0.0, max=1.0)
-        proxy_attr = f"{manipulators[0]}.{self.__blend_name}"
+        manipulators = self._manipulator_a + self._manipulator_b
+        self._manipulator = manipulators[0]
+        self._manipulator.add_settings_attribute("blenderSettings")
+        self._manipulator.add_attribute(self._blend_name, cst.kFloat, keyable=True, min=0.0, max=1.0)
+        proxy_attr = f"{manipulators[0]}.{self._blend_name}"
         for manipulator in manipulators[1:]:
             manipulator.add_settings_attribute("blenderSettings")
-            manipulator.add_attribute(self.__blend_name, cst.kFloat,
+            manipulator.add_attribute(self._blend_name, cst.kFloat,
                                             keyable=True, min=0.0, max=1.0, proxy=proxy_attr)
     
     def _build_reverse_blend(self):
-        self.__reverse_blend = Node.create("floatMath")
-        self.__manipulator.connect_to(self.__blend_name, f"{self.__reverse_blend}.floatB")
-        self.__reverse_blend.set_attribute("operation", 1)
+        self._reverse_blend = Node.create("floatMath")
+        self._manipulator.connect_to(self._blend_name, f"{self._reverse_blend}.floatB")
+        self._reverse_blend.set_attribute("operation", 1)
     
     def _build_constraint(self):
-        for hook_a, hook_b, src in zip(self.__hook_a, self.__hook_b, self._sources):
+        for hook_a, hook_b, src in zip(self._hook_a, self._hook_b, self._sources):
             cst = Node.get(cmds.parentConstraint(hook_a, hook_b, src, maintainOffset=True)[0])
             cst_attrs = cmds.parentConstraint(cst, query=True, weightAliasList=True)
             cst.set_attribute("interpType", 2)
-            self.__manipulator.connect_to(self.__blend_name, f"{cst}.{cst_attrs[0]}")
-            self.__reverse_blend.connect_to("outFloat", f"{cst}.{cst_attrs[1]}")
+            self._manipulator.connect_to(self._blend_name, f"{cst}.{cst_attrs[0]}")
+            self._reverse_blend.connect_to("outFloat", f"{cst}.{cst_attrs[1]}")
 
     def _connect_manipulators(self):
-        for manipulator in self.__manipulator_a:
-            self.__manipulator.connect_to(self.__blend_name, f"{manipulator}.visibility")
-        for manipulator in self.__manipulator_b:
-            self.__reverse_blend.connect_to("outFloat", f"{manipulator}.visibility")
+        for manipulator in self._manipulator_a:
+            self._manipulator.connect_to(self._blend_name, f"{manipulator}.visibility")
+        for manipulator in self._manipulator_b:
+            self._reverse_blend.connect_to("outFloat", f"{manipulator}.visibility")
     
     def add_children(self, builder: RigBuilder):
         if len(self._children) == 2:

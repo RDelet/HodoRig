@@ -18,14 +18,14 @@ class Node:
     def __init__(self, node: Optional[str | OpenMaya.MObject] = None):
         if isinstance(node, Node):
             node = node.object
-        self._object = utils.check_object(node) if node else None
+        self._handle = utils.get_handle(node) if node else None
         self._mfn = None
         self._modifier = None
-        if self._object:
+        if self._handle:
             self._post_init()
     
     def _post_init(self):
-        self._mfn = OpenMaya.MFnDependencyNode(self._object)
+        self._mfn = OpenMaya.MFnDependencyNode(self.object)
         self._modifier = OpenMaya.MDGModifier()
 
     def __str__(self) -> str:
@@ -48,15 +48,15 @@ class Node:
 
     @property
     def name(self):
-        return utils.name(self._object)
+        return utils.name(self.object)
 
     @property
     def object(self) -> OpenMaya.MObject:
-        return self._object
+        return self._handle.object() if self._handle else None
     
     @property
     def short_name(self):
-        return utils.name(self._object, False, False)
+        return utils.name(self.object, False, False)
     
     @property
     def type(self) -> str:
@@ -64,7 +64,7 @@ class Node:
     
     @classmethod
     def create(cls, node_type: str, name: str = None,
-                parent: OpenMaya.MObject | Node = utils._nullObj) -> Node:
+                parent: OpenMaya.MObject | Node = None) -> Node:
         if isinstance(parent, Node):
             parent = parent.object
         new_node = utils.create(node_type, name, parent=parent)
@@ -73,6 +73,9 @@ class Node:
     @classmethod
     def get(cls, node: str | OpenMaya.MObject):
         return _factory.create(node)
+    
+    def rename(self, new_name: str, force: bool = False):
+        utils.rename(self.object, new_name, force)
     
     @classmethod
     def selected(cls, node_type: Optional[str | list | tuple] = None):
@@ -122,18 +125,27 @@ class Node:
         elif isinstance(value, (OpenMaya.MMatrix, OpenMaya.MFloatMatrix)):
             cmds.setAttr(node_attr, value, type=constants.kMatrix)
         else:
-            cmds.setAttr(node_attr, value)
+            if isinstance(value, list):
+                is_array = cmds.attributeQuery(attr_name, node=self, multi=True)
+                children = cmds.attributeQuery(attr_name, node=self, listChildren=True)
+                if is_array:
+                    for i, v in enumerate(value):
+                        cmds.setAttr(f"{node_attr}[{i}]", v)
+                elif children:
+                    for i, child in enumerate(children):
+                        cmds.setAttr(f"{node_attr}.{child}", value[i])
+                elif is_array and children:
+                    raise RuntimeError("Set counpound array not implemented yet !")
+            else:
+                cmds.setAttr(node_attr, value)
     
     def connect_to(self, src_attr: str, dst_attr: str):
         if not attribute.exists(self, src_attr):
             raise RuntimeError(f"Attirbute {src_attr} does not exists on {self}.")
-
         cmds.connectAttr(f"{self}.{src_attr}", dst_attr, force=True)
 
     def has_fn(self, fn: OpenMaya.MFn) -> bool:
-        return self._object.hasFn(fn)
+        return self.object.hasFn(fn)
     
     def is_valid(self) -> bool:
-        if not self._object:
-            return False
-        return utils.is_valid(self._object)
+        return utils.is_valid(self.object) if self._handle else False

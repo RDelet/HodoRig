@@ -61,7 +61,7 @@ class IKBuilder(RigBuilder):
         self.__shape_scale = None
     
     def _init_settings(self):
-        self._settings.add(Setting(cst.kSolver, "ikRPsolver"))
+        self._settings.add(Setting(cst.kSolver, cst.kIkRPsolver))
         self._settings.add(Setting(cst.kSnapRotation, True))
         self._settings.add(Setting(cst.kPvDistance, 20))
         self._settings.add(Setting(cst.kShapeScale, 10.0))
@@ -121,7 +121,7 @@ class IKBuilder(RigBuilder):
             new_node = src.duplicate(name=name, parent=parent)
             new_node.freeze_rotation()
             if i == 0:
-                new_node.set_attribute("visibility", False)
+                new_node.set_attribute(cst.kVisibility, False)
                 parent_jnt = src.parent
                 if parent_jnt:
                     cmds.parentConstraint(parent_jnt, new_node, maintainOffset=True)
@@ -132,7 +132,7 @@ class IKBuilder(RigBuilder):
         ikh, eff = cmds.ikHandle(startJoint=self._output_blend[0], endEffector=self._output_blend[-1], solver=self.__solver)
         self._eff = Transform.get(eff)
         self._ikh = Transform.get(ikh)
-        self._ikh.set_attribute("visibility", False)
+        self._ikh.set_attribute(cst.kVisibility, False)
     
     def _compute_aim(self) -> OpenMaya.MVector:
         root_pos, mid_pos, effector_pos = [node.position() for node in self._sources]

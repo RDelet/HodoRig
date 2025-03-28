@@ -15,8 +15,7 @@ class Surface(Shape):
     kApiType = OpenMaya.MFn.kNurbsSurface
 
     def _post_init(self):
-        path = utils.get_path(self._object)
-        self._mfn = OpenMaya.MFnNurbsCurve(path)
+        self._mfn = OpenMaya.MFnNurbsCurve(self._path)
         self._modifier = OpenMaya.MDagModifier()
     
     def points(self, world: bool = True, normalize: bool = False) -> OpenMaya.MPointArray:
@@ -89,8 +88,12 @@ class Surface(Shape):
                                                   data.get(constants.kFormV, 1),
                                                   data.get(constants.kRational, False),
                                                   parent)
+        
+        new_node = _factory.create(shape)
+        if parent is not None:
+            new_node.rename(f"{utils.name(parent, False, False)}Shape")
 
-        return _factory.create(shape)
+        return new_node
     
     def update(self):
         self._mfn.updateSurface()

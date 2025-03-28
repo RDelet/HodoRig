@@ -37,12 +37,10 @@ from __future__ import annotations
 from typing import Optional, List
 
 from maya import cmds
-from maya.api import OpenMaya
 
 from ..Core import constants as cst
 from ..Core.nameBuilder import NameBuilder
 from ..Core.settings import Setting
-from ..Helpers import utils
 from ..Helpers.color import Color
 from ..Nodes.node import Node
 from .rigBuilder import RigBuilder

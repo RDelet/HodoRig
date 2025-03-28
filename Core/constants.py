@@ -8,6 +8,8 @@ except:
 
 from maya.api import OpenMaya
 
+from ..Helpers.color import Color
+
 
 T = TypeVar("T")
 
@@ -45,7 +47,14 @@ kObject = OpenMaya.MSpace.kObject
 
 # Nodes
 kTransform = "transform"
+kJoint = "joint"
+kPointOnCurveInfo = "pointOnCurveInfo"
 kNetwork = "network"
+kIkRPsolver = "ikRPsolver"
+kIkSplineSolver = "ikSplineSolver"
+kDistanceBetween = "distanceBetween"
+kBlendTwoAttr = "blendTwoAttr"
+kMultiplyDivide = "multiplyDivide"
 
 
 # Mesh
@@ -117,6 +126,23 @@ kDataTypes = [kString, kMatrix, kDoubleArray, kFloatArray, kInt32Array,
 
 
 # Attributes
+kTranslate = "translate"
+kTranslateX = "translateX"
+kTranslateY = "translateY"
+kTranslateZ = "translateZ"
+kRotate = "rotate"
+kRotateX = "rotateX"
+kRotateY = "rotateY"
+kRotateZ = "rotateZ"
+kScale = "scale"
+kScaleX = "scaleX"
+kScaleY = "scaleY"
+kScaleZ = "scaleZ"
+kShear = "shear"
+kShearXY = "shearXY"
+kShearXZ = "shearXZ"
+kShearYZ = "shearYZ"
+kVisibility = "visibility"
 kClassName = "className"
 kManipulators = "manipulators"
 kChildren = "children"
@@ -126,6 +152,68 @@ kManipulatorType = "manipulatorType"
 kMessage = "message"
 kResetGroup = "resetGroup"
 kString = "string"
+kInheritsTransform = "inheritsTransform"
+kStretch = "stretch"
+kParameter = "parameter"
+kTurnOnPercentage = "turnOnPercentage"
+kLocal = "local"
+kInputCurve = "inputCurve"
+kWorldMatrix = "worldMatrix"
+kDTwistControlEnable = "dTwistControlEnable"
+kDWorldUpType = "dWorldUpType"
+kDForwardAxis = "dForwardAxis"
+kDWorldUpAxis = "dWorldUpAxis"
+kDWorldUpVector = "dWorldUpVector"
+kDWorldUpVectorEnd = "dWorldUpVectorEnd"
+kDWorldUpMatrix = "dWorldUpMatrix"
+kDWorldUpMatrixEnd = "dWorldUpMatrixEnd"
+kInput = "input"
+kInput1 = "input1"
+kInput1X = "input1X"
+kInput1Y = "input1Y"
+kInput1Z = "input1Z"
+kInput2 = "input2"
+kInput2X = "input2X"
+kInput2Y = "input2Y"
+kInput2Z = "input2Z"
+kOutput = "output"
+kOutputX = "outputX"
+kOutputY = "outputY"
+kOutputZ = "outputZ"
+kPoint1 = "point1"
+kPoint1X = "point1X"
+kPoint1Y = "point1Y"
+kPoint1Z = "point1Z"
+kPoint2 = "point2"
+kPoint2X = "point2X"
+kPoint2Y = "point2Y"
+kPoint2Z = "point2Z"
+kDistance = "distance"
+kPosition = "position"
+kPositionX = "positionX"
+kPositionY = "positionY"
+kPositionZ = "positionZ"
+kAttributesBlender = "attributesBlender"
+
+# Colors
+kBlaack = Color.get("black")
+kLightBlue = Color.get("lightBlue")
+kBlue = Color.get("blue")
+kDarkBlue = Color.get("darkBlue")
+kLightBrown = Color.get("lightBrown")
+kBrown = Color.get("brown")
+kMidBrown = Color.get("midBrown")
+kDarkBrown = Color.get("darkBrown")
+kGreen = Color.get("green")
+kDarkGreen = Color.get("darkGreen")
+kLightPink = Color.get("lightPink")
+kPurple = Color.get("purple")
+kDarkPurple = Color.get("darkPurple")
+kRed = Color.get("red")
+kDarkRed = Color.get("darkRed")
+kWhite = Color.get("white")
+kLightYellow = Color.get("lightYellow")
+kYellow = Color.get("yellow")
 
 
 # Icons

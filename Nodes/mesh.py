@@ -34,10 +34,9 @@ class Mesh(Shape):
     kApiType = OpenMaya.MFn.kMesh
 
     def _post_init(self):
-        path = utils.get_path(self._object)
-        self._mfn = OpenMaya.MFnMesh(path)
-        self._mit_vtx = OpenMaya.MItMeshVertex(path)
-        self._mit_poly = OpenMaya.MItMeshPolygon(path)
+        self._mfn = OpenMaya.MFnMesh(self._path)
+        self._mit_vtx = OpenMaya.MItMeshVertex(self._path)
+        self._mit_poly = OpenMaya.MItMeshPolygon(self._path)
         self._modifier = OpenMaya.MDagModifier()
     
     def points(self, world: bool = True, normalize: bool = False,
@@ -146,6 +145,8 @@ class Mesh(Shape):
                                           parent)
 
         new_node = _factory.create(shape)
+        if parent is not None:
+            new_node.rename(f"{utils.name(parent, False, False)}Shape")
 
         uv_data = data.get(constants.kUv)
         if uv_data:

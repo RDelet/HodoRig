@@ -30,7 +30,7 @@ class ManipulatorBuilder(Builder):
     def reset(self):
         return self._reset
     
-    def _build(self, parent: OpenMaya.MObject = utils._nullObj,
+    def _build(self, parent: OpenMaya.MObject = None,
                shape: str = "circle", shape_dir: int = None,
                scale: Optional[float] = None, color: Optional[Color] = None):
         super()._build()

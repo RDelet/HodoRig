@@ -16,8 +16,12 @@ class DAGNode(Node):
 
     kApiType = OpenMaya.MFn.kDagNode
 
+    def __init__(self, node: Optional[str | OpenMaya.MObject] = None):
+        self._path = utils.get_path(node)
+        super().__init__(node)
+
     def _post_init(self):
-        self._mfn = OpenMaya.MFnDagNode(utils.get_path(self._object))
+        self._mfn = OpenMaya.MFnDagNode(self._path)
         self._modifier = OpenMaya.MDagModifier()
 
     def duplicate(self, name: Optional[str] = None, parent: Optional[str | DAGNode] = None) -> DAGNode:
@@ -32,10 +36,10 @@ class DAGNode(Node):
     
     @property
     def path(self):
-        return utils.get_path(self._object)
+        return self._path
 
     @property
-    def parent(self) -> Optional[OpenMaya.MObject]:
+    def parent(self) -> Optional[Node]:
         parent = self._mfn.parent(0)
         return None if parent.hasFn(OpenMaya.MFn.kWorld) else self.get(parent)
 

@@ -10,7 +10,6 @@ from ..Core.component import SoftVertex
 _dagMod = OpenMaya.MDagModifier()
 _dgMod = OpenMaya.MDGModifier()
 _msl = OpenMaya.MSelectionList()
-_nullObj = OpenMaya.MObject.kNullObj
 
 kDagNodeType = cmds.nodeType('dagNode', derived=True, isTypeName=True)
 
@@ -18,20 +17,20 @@ node_caches: list = []
 
 
 def create(node_type: str, name: str = None, restriction: int = 0,
-           parent: str | OpenMaya.MObject = _nullObj) -> OpenMaya.MObject:
+           parent: str | OpenMaya.MObject = None) -> OpenMaya.MObject:
     
     if isinstance(parent, str):
         parent = get_object(parent)
 
     is_dag = node_type in kDagNodeType
-    if parent != _nullObj and not is_valid(parent):
+    if parent and not is_valid(parent):
         raise RuntimeError("Invalid parent given !")
 
     modifier = _dagMod if node_type in kDagNodeType else _dgMod
     if node_type == "objectSet":
         new_node = OpenMaya.MFnSet().create(OpenMaya.MSelectionList(), restriction)
     else:
-        if is_dag:
+        if is_dag and parent is not None:
             new_node = modifier.createNode(node_type, parent)
         else:
             new_node = modifier.createNode(node_type)
@@ -89,6 +88,8 @@ def get_handle(node: str | OpenMaya.MObject) -> OpenMaya.MObjectHandle:
     """!@Brief Get MObjectHandle of current node."""
     if isinstance(node, str):
         node = get_object(node)
+    if not is_valid(node):
+        raise RuntimeError(f"Node {name(node)} is not valid !")
 
     return OpenMaya.MObjectHandle(node)
 
@@ -142,10 +143,10 @@ def rename(node: str | OpenMaya.MObject, new_name: str, force: bool = False):
     mfn.isLocked = locked
 
 
-def is_valid(obj: OpenMaya.MObject |OpenMaya.MObjectHandle) -> bool:
+def is_valid(obj: OpenMaya.MObject | OpenMaya.MObjectHandle) -> bool:
     if isinstance(obj, OpenMaya.MObject):
         node = obj
-        handle = get_handle(obj)
+        handle = OpenMaya.MObjectHandle(obj)
     else:
         handle = obj
         node = handle.object()

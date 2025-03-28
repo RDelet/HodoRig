@@ -27,6 +27,10 @@ class Color:
             return kAll["Yellow"]
 
         return kAll[cls.kSideColor.get(name.side.upper(), "Yellow")]
+    
+    @classmethod
+    def get(cls, name: str):
+        return kAll.get(name, kAll["Yellow"])
 
 
 kAll = {"Black": Color("Black", (0, 0, 0), 1),

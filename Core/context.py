@@ -1,3 +1,7 @@
+from contextlib import contextmanager
+
+from maya import cmds
+
 from ..Helpers import utils
 from ..Core.cache import NodeCache
 
@@ -36,3 +40,12 @@ class NodeCacheContext(Context):
     def __exit__(self, *args, **kwargs):
         self._cache.enable = False
         del utils.node_caches[utils.node_caches.index(self._cache)]
+
+
+@contextmanager
+def KeepSelection():
+    selection = cmds.ls(selection=True, long=True)
+    try:
+        yield selection
+    finally:
+        cmds.select(selection)
