@@ -90,15 +90,7 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter):
                     index = match.capturedStart()
                     length = match.capturedLength()
                     self.setFormat(index, length, rule.format)
-            """
-            while index >= 0:
-                match_length = rule.pattern.matchedLength()
-                self.setFormat(index, match_length, rule.format)
-                if MAYA_VERSION < "2025":
-                    index = rule.pattern.indexIn(text, index + match_length)
-                else:
-                    pass
-            """
+
             self.setCurrentBlockState(0)
 
 
@@ -144,16 +136,7 @@ def _get_rules() -> list:
     with open(RULES_FILE_PATH, "r") as f:
         data = json.load(f)
 
-    # Ordre spécifique : line_number doit être traité après windows_path
-    priority_order = ["info", "debug", "warning", "error", "critical", "failure", 
-                     "windows_path", "line_number", "highlight"]
-    
-    rules = []
-    for key in priority_order:
-        if key in data:
-            rules.append(SyntaxRule.from_dict(data[key]))
-    
-    return rules
+    return [SyntaxRule.from_dict(d) for k, d in data.items()]
 
 
 # Je sépare en deux fonction pour niquer le evaldeffered qui ne fonctionne pas comme il faut...
