@@ -26,14 +26,14 @@
         "color": "#2a2a2a",
         "background_color": "#f08080"
     },
-    "file_path": {
-        "pattern": "(?i)(file:?\\s.+?\\sline\\s\\d+)",
-        "color": "deeppink",
+    "windows_path": {
+        "pattern": "[A-Za-z]:[/\\\\][^\\s:*?\"<>|]+\\.[a-zA-Z0-9]+(?=\\s|$)",
+        "color": "#00bfff",
         "underline": true
     },
-    "windows_path": {
-        "pattern": "[A-Za-z]:[/\\\\][^\\s:*?\"<>|]+\\.[a-zA-Z0-9]+",
-        "color": "#00bfff",
+    "line_number": {
+        "pattern": "line\\s+\\d+",
+        "color": "deeppink",
         "underline": true
     },
     "highlight": {

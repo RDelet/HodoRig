@@ -2,7 +2,11 @@ from functools import partial
 from pathlib import Path
 import traceback
 
-from PySide2 import QtCore
+try:
+    from PySide2 import QtCore
+except:
+    from PySide6 import QtCore
+
 
 from maya import cmds
 

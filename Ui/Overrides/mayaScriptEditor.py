@@ -4,25 +4,33 @@ import json
 from pathlib import Path
 import re
 
-from PySide2 import QtCore, QtGui
+try:
+    from PySide2 import QtCore, QtGui
+    from PySide2.QtCore import QRegExp
+except:
+    from PySide6 import QtCore, QtGui
+    from PySide6.QtCore import QRegularExpression as QRegExp
+
+from maya import cmds
 
 from ...Core import file
 from ...Core.logger import log
 from .. import utils as uiUtils
 
 
+MAYA_VERSION = cmds.about(version=True)
 DEFAULT_COLOR = "white"
 DEFAULT_FONT_FAMILY = "Courier New"
 RULES_FILE_PATH = Path(__file__).parent.parent / "Configs" / "syntaxRules.json"
-FILE_PATH_PATTERN = r"(?P<file_name>(?<=(f|F)ile ).*)(?P<line_number>( |, )line \d*)"
 WINDOWS_PATH_PATTERN = r"(?P<drive>[A-Za-z]:)[/\\](?P<path>[^:*?\"<>|\s]+\.[\w]+)"
+LINE_NUMBER_PATTERN = r"(?i)line\s(?P<line_number>\d+)"
 
 
 class SyntaxRule:
 
     def __init__(self, pattern: str, color: str = None, background_color: str = None,
                  font_family: str = None, italic: bool = False, underline: bool = False):
-        self.pattern = QtCore.QRegExp(pattern)
+        self.pattern = QRegExp(pattern)
         self.color = color
         self.background_color = background_color
         self.font_family = font_family or DEFAULT_FONT_FAMILY
@@ -69,11 +77,28 @@ class SyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
     def highlightBlock(self, text):
         for rule in self.rules:
-            index = rule.pattern.indexIn(text)
+            if MAYA_VERSION < "2025":
+                index = rule.pattern.indexIn(text)
+                while index >= 0:
+                    length = rule.pattern.matchedLength()
+                    self.setFormat(index, length, rule.format)
+                    index = rule.pattern.indexIn(text, index + length)
+            else:
+                iterator = rule.pattern.globalMatch(text)
+                while iterator.hasNext():
+                    match = iterator.next()
+                    index = match.capturedStart()
+                    length = match.capturedLength()
+                    self.setFormat(index, length, rule.format)
+            """
             while index >= 0:
                 match_length = rule.pattern.matchedLength()
                 self.setFormat(index, match_length, rule.format)
-                index = rule.pattern.indexIn(text, index + match_length)
+                if MAYA_VERSION < "2025":
+                    index = rule.pattern.indexIn(text, index + match_length)
+                else:
+                    pass
+            """
             self.setCurrentBlockState(0)
 
 
@@ -88,15 +113,12 @@ class LinkFilter(QtCore.QObject):
     def get_file_path_and_line_number(text):
         file_path, line_number = None, None
 
-        match = re.search(FILE_PATH_PATTERN, text)
+        match = re.search(WINDOWS_PATH_PATTERN, text)
         if match:
-            file_path = match["file_name"].replace(",", "").replace('"', "")
-            line_number = match["line_number"].split()[-1]
-        else:
-            match = re.search(WINDOWS_PATH_PATTERN, text)
-            if match:
-                file_path = match.group(0)
-                line_number = None 
+            file_path = match.group(0)
+            line_match = re.search(LINE_NUMBER_PATTERN, text)
+            if line_match:
+                line_number = line_match.group("line_number")
 
         return file_path, line_number
 
@@ -122,7 +144,16 @@ def _get_rules() -> list:
     with open(RULES_FILE_PATH, "r") as f:
         data = json.load(f)
 
-    return [SyntaxRule.from_dict(data[key]) for key in sorted(data.keys())]
+    # Ordre spécifique : line_number doit être traité après windows_path
+    priority_order = ["info", "debug", "warning", "error", "critical", "failure", 
+                     "windows_path", "line_number", "highlight"]
+    
+    rules = []
+    for key in priority_order:
+        if key in data:
+            rules.append(SyntaxRule.from_dict(data[key]))
+    
+    return rules
 
 
 # Je sépare en deux fonction pour niquer le evaldeffered qui ne fonctionne pas comme il faut...
