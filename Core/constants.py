@@ -6,13 +6,21 @@ try:
 except:
     from PySide6 import QtGui
 
-from maya.api import OpenMaya
+from maya import cmds
+from maya.api import OpenMaya as om
 
 from ..Helpers.color import Color
 
+MAYA_VERSION = cmds.about(version=True)
+IS_OLD_MAYA = MAYA_VERSION < "2025"
 
 T = TypeVar("T")
 
+vscode_exe = r"C:\Users\arl\AppData\Local\Programs\Microsoft VS Code\Code.exe"
+vscode_cmd = f"{vscode_exe} --goto {{file_path}}:{{line_number}}"
+pycharm_exe = r"C:\Program Files\JetBrains\PyCharm 2023.2.1\bin\pycharm64.exe"
+pycharm_cmd = f"{pycharm_exe} --line {{line_number}} {{file_path}}"
+ide_cmd = pycharm_cmd
 
 kModuleDir = Path(__file__).parent.parent
 kModuleName = kModuleDir.name
@@ -22,18 +30,18 @@ kSkinExtension = "skin"
 kTemplateDir = kModuleDir / "Templates"
 kTemplateExtension = "hrt"
 
-kShapeDir = kModuleDir / "Shapes"
+kShapeDirectory = kModuleDir / "Shapes"
 kShapeExtension = "json"
 kIconExtension = "png"
 
 
 # Generic
 kMesh = "mesh"
-kMeshApi = OpenMaya.MFn.kMesh
+kMeshApi = om.MFn.kMesh
 kCurve = "nurbsCurve"
-kCurveApi = OpenMaya.MFn.kNurbsCurve
+kCurveApi = om.MFn.kNurbsCurve
 kSurface = "nurbsSurface"
-kSurfaceApi = OpenMaya.MFn.kNurbsSurface
+kSurfaceApi = om.MFn.kNurbsSurface
 
 kTypeToApi = {kMesh: kMeshApi, kCurve: kCurveApi, kSurface: kSurfaceApi}
 kApiToType = {kMeshApi: kMesh, kCurveApi: kCurve, kSurfaceApi: kSurface}
@@ -41,8 +49,8 @@ kApiToType = {kMeshApi: kMesh, kCurveApi: kCurve, kSurfaceApi: kSurface}
 kType = "type"
 kPoints = "points"
 kRational = "rational"
-kWorld = OpenMaya.MSpace.kWorld
-kObject = OpenMaya.MSpace.kObject
+kWorld = om.MSpace.kWorld
+kObject = om.MSpace.kObject
 
 
 # Nodes

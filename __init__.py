@@ -84,12 +84,15 @@ def _install_linker(timer: QtCore.QTimer):
 try:
     if not batch_mode and cmds.about(version=True) < "2025":
         from .Ui.Overrides import mayaScriptEditor
+        cmds.evalDeferred(lambda: cmds.evalDeferred(mayaScriptEditor.install, lowestPriority=True))
         # Pour niquer le evaldeffered qui ne fonctionne pas...
+        """
         ttimer = QtCore.QTimer()
         ttimer.timeout.connect(partial(_install_linker, ttimer))
         timer = QtCore.QTimer()
         timer.timeout.connect(partial(_install_highlighter, timer, ttimer))
         cmds.evalDeferred(partial(timer.start, 200))
+        """
 except Exception:
     log.debug(traceback.format_exc())
     log.error("Error on create highlither !")
