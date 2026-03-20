@@ -3,18 +3,20 @@ from pathlib import Path
 import traceback
 
 try:
-    from PySide2 import QtWidgets
+    from PySide2 import QtCore
 except:
-    from PySide6 import QtWidgets
+    from PySide6 import QtCore
+
 
 from maya import cmds
 
 from .Core.logger import log
+from . import Components  # Initialise all components for node class
 
 
 _current_dir = Path(__file__).parent
-
 batch_mode = cmds.about(batch=True)
+
 
 """
 try:
@@ -31,17 +33,6 @@ try:
 except Exception:
     log.debug(traceback.format_exc())
     log.error("Error on install apiUndo !")   
-
-
-try:
-    if not batch_mode and cmds.about(version=True) < "2025":
-        from .Ui.Overrides.mayaSyntaxHighLigther import MayaSyntaxHighLigther
-        app = QtWidgets.QApplication.instance()
-        app.focusChanged.connect(MayaSyntaxHighLigther.focus_changed_cb)
-        MayaSyntaxHighLigther.add_on_all_control()
-except Exception:
-    log.debug(traceback.format_exc())
-    log.error("Error on create high lither syntax !")
 
 
 try:
@@ -62,10 +53,8 @@ except Exception:
 
 try:
     from .Helpers.hotKey import Hotkey
-
     file_path = _current_dir / "Settings" / "hotKeys.json"
-    func = partial(Hotkey.from_file, file_path)
-    cmds.evalDeferred(func)
+    cmds.evalDeferred(partial(Hotkey.from_file, file_path))
 except Exception as exp:
     log.debug(traceback.format_exc())
     log.error("Error on install HodoRig HotKey !")
@@ -80,3 +69,30 @@ try:
 except Exception as exp:
     log.debug(traceback.format_exc())
     log.error("Error on load plugin !")       
+
+
+def _install_highlighter(timer: QtCore.QTimer, next_timer: QtCore.QTimer):
+    if mayaScriptEditor.install_highlighter():
+        timer.stop()
+        cmds.evalDeferred(partial(next_timer.start, 200))
+
+def _install_linker(timer: QtCore.QTimer):
+    if mayaScriptEditor.install_linker():
+        timer.stop()
+        
+
+try:
+    if not batch_mode and cmds.about(version=True) < "2025":
+        from .Ui.Overrides import mayaScriptEditor
+        cmds.evalDeferred(lambda: cmds.evalDeferred(mayaScriptEditor.install, lowestPriority=True))
+        # Pour niquer le evaldeffered qui ne fonctionne pas...
+        """
+        ttimer = QtCore.QTimer()
+        ttimer.timeout.connect(partial(_install_linker, ttimer))
+        timer = QtCore.QTimer()
+        timer.timeout.connect(partial(_install_highlighter, timer, ttimer))
+        cmds.evalDeferred(partial(timer.start, 200))
+        """
+except Exception:
+    log.debug(traceback.format_exc())
+    log.error("Error on create highlither !")
